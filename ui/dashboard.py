@@ -46,16 +46,93 @@ class StatusPanel(Static):
 
 
 class SignalPanel(Static):
-    """Vertical signal sidebar grouped by timeframe."""
+    """Vertical signal sidebar — toggles between signals and rule evaluation."""
 
     def __init__(self, engine: Engine, **kw) -> None:
         super().__init__(**kw)
         self._engine = engine
+        self._show_rules = False  # toggle: False=signals, True=rules
+
+    def toggle_view(self) -> str:
+        """Toggle between signal view and rule detail view. Returns label."""
+        self._show_rules = not self._show_rules
+        return "Rules" if self._show_rules else "Signals"
 
     def compose(self) -> ComposeResult:
         yield Label("[dim]Waiting for signals...[/]", id="signal-text")
 
     def refresh_content(self) -> None:
+        if self._show_rules:
+            self._render_rules()
+        else:
+            self._render_signals()
+
+    def _render_rules(self) -> None:
+        label = self.query_one("#signal-text", Label)
+        signals = self._engine.latest_signals
+
+        if not signals:
+            label.update("[dim]Waiting for signals...[/]")
+            return
+
+        from rules.expression import ExpressionRule
+
+        lines: list[str] = ["[bold cyan]══ Rule Evaluation (d=toggle) ══[/]"]
+        for rule in self._engine.trade_initiator.rules:
+            if not isinstance(rule, ExpressionRule):
+                continue
+
+            buy_conds = rule._buy_conditions
+            sell_conds = rule._sell_conditions
+            buy_ok = buy_conds and all(c.evaluate(signals) for c in buy_conds)
+            sell_ok = sell_conds and all(c.evaluate(signals) for c in sell_conds)
+
+            if buy_ok:
+                tag = "[bold green]▲ BUY[/]"
+            elif sell_ok:
+                tag = "[bold red]▼ SELL[/]"
+            else:
+                tag = "[dim]—[/]"
+
+            sl = getattr(rule, '_sl_dollars', None)
+            rr = getattr(rule, '_reward_ratio', None)
+            risk = f" ${sl:.0f}/{rr}R" if sl else ""
+            lines.append(f"")
+            lines.append(f"[bold]{rule.name}[/] {tag}{risk}")
+
+            # Count passing conditions for summary
+            buy_pass = sum(1 for c in buy_conds if c.evaluate(signals)) if buy_conds else 0
+            sell_pass = sum(1 for c in sell_conds if c.evaluate(signals)) if sell_conds else 0
+            buy_total = len(buy_conds) if buy_conds else 0
+            sell_total = len(sell_conds) if sell_conds else 0
+
+            # Show the side that's closer to firing
+            if sell_pass > buy_pass:
+                show_conds = sell_conds
+                side = "SELL"
+            else:
+                show_conds = buy_conds
+                side = "BUY"
+
+            pass_count = sell_pass if side == "SELL" else buy_pass
+            total = sell_total if side == "SELL" else buy_total
+            lines.append(f"  [dim]{side}: {pass_count}/{total}[/]")
+
+            if show_conds:
+                for c in show_conds:
+                    ok = c.evaluate(signals)
+                    sig = signals.get(c.signal)
+                    actual = sig.metadata.get(c.field, "?").strip() if sig else "n/a"
+                    icon = "[green]✓[/]" if ok else "[red]✗[/]"
+                    # Compact: just field + actual
+                    short_sig = c.signal.split("_", 1)
+                    name_part = f"{short_sig[0]}_{short_sig[1]}" if len(short_sig) > 1 else c.signal
+                    lines.append(f"  {icon} {c.field} {c.operator} {c.value}")
+                    lines.append(f"    [dim]{name_part}={actual}[/]")
+
+        label.update("\n".join(lines))
+
+    def _render_signals(self) -> None:
         label = self.query_one("#signal-text", Label)
         signals = self._engine.latest_signals
 
@@ -346,58 +423,16 @@ class RulesPanel(Static):
 
 
 class RuleDetailPanel(Static):
-    """Per-condition evaluation details for expression rules."""
+    """Placeholder — rule detail now lives in sidebar toggle."""
 
     def __init__(self, engine: Engine, **kw) -> None:
         super().__init__(**kw)
-        self._engine = engine
 
     def compose(self) -> ComposeResult:
-        yield Label("[dim]Waiting for signals...[/]", id="rule-detail-text")
+        yield Label("[dim]Press d to view rule details in sidebar[/]", id="rule-detail-text")
 
     def refresh_content(self) -> None:
-        label = self.query_one("#rule-detail-text", Label)
-        signals = self._engine.latest_signals
-
-        if not signals:
-            label.update("[dim]Waiting for signals...[/]")
-            return
-
-        from rules.expression import ExpressionRule
-
-        lines: list[str] = []
-        for rule in self._engine.trade_initiator.rules:
-            if not isinstance(rule, ExpressionRule):
-                continue
-
-            # Evaluate buy side
-            buy_conds = rule._buy_conditions
-            sell_conds = rule._sell_conditions
-            buy_ok = buy_conds and all(c.evaluate(signals) for c in buy_conds)
-            sell_ok = sell_conds and all(c.evaluate(signals) for c in sell_conds)
-
-            if buy_ok:
-                tag = "[bold green]▲ BUY[/]"
-            elif sell_ok:
-                tag = "[bold red]▼ SELL[/]"
-            else:
-                tag = "[dim]—[/]"
-
-            sl = getattr(rule, '_sl_dollars', None)
-            rr = getattr(rule, '_reward_ratio', None)
-            risk_info = f" SL=${sl:.0f} {rr}R" if sl else ""
-            lines.append(f"[bold]{rule.name}[/] {tag}{risk_info}")
-
-            # Show buy conditions
-            if buy_conds:
-                for c in buy_conds:
-                    ok = c.evaluate(signals)
-                    sig = signals.get(c.signal)
-                    actual = sig.metadata.get(c.field, "?").strip() if sig else "[no data]"
-                    icon = "[green]✓[/]" if ok else "[red]✗[/]"
-                    lines.append(f"  {icon} {c.signal}.{c.field} {c.operator} {c.value} [dim]({actual})[/]")
-
-        label.update("\n".join(lines) if lines else "[dim]No expression rules[/]")
+        pass  # detail is now in the sidebar
 
 
 class EventLogPanel(Static):
@@ -459,8 +494,8 @@ Screen {
 }
 
 #signal-panel {
-    width: 36;
-    min-width: 30;
+    width: 40;
+    min-width: 34;
     border: solid $secondary;
     padding: 0 1;
     overflow-y: auto;
@@ -491,10 +526,9 @@ Screen {
 }
 
 #rule-detail-panel {
-    height: 1fr;
+    height: 3;
     border: solid $accent-darken-2;
     padding: 0 1;
-    overflow-y: auto;
 }
 
 #trade-log-panel {
@@ -529,6 +563,7 @@ class TradingDashboard(App):
         Binding("s", "manual_sell", "Manual Sell"),
         Binding("t", "toggle_trading", "Toggle Trading"),
         Binding("c", "close_position", "Close Position"),
+        Binding("d", "toggle_sidebar", "Toggle Sidebar"),
         Binding("r", "reconnect_mt5", "Reconnect MT5"),
         Binding("q", "quit_app", "Quit"),
     ]
@@ -607,3 +642,8 @@ class TradingDashboard(App):
             self.notify("Manual SELL placed", severity="information")
         else:
             self.notify("Cannot place SELL — position open or MT5 error", severity="warning")
+
+    def action_toggle_sidebar(self) -> None:
+        panel = self.query_one("#signal-panel", SignalPanel)
+        view = panel.toggle_view()
+        self.notify(f"Sidebar: {view}", severity="information")

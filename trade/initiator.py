@@ -25,6 +25,9 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+# Max age (seconds) for signal server_time to be considered "fresh"
+_WARMUP_MAX_AGE_S = 30
+
 
 class TradeInitiator:
     """Evaluates trigger rules against latest signals and initiates trades.
@@ -49,7 +52,25 @@ class TradeInitiator:
         self._rules: list[BaseRule] = []
         self._last_trigger_key: str | None = None  # dedup
         self._events = EventLog.get()
-        self._warmed_up = False  # skip first poll cycle (stale CSV data)
+        self._warmed_up = False  # smart warmup: check signal freshness
+
+    @staticmethod
+    def _signals_are_fresh(signals: dict[str, Signal]) -> bool:
+        """Check if any signal's server_time is within the last 30 seconds."""
+        now = datetime.now()
+        for sig in signals.values():
+            st = sig.metadata.get("server_time", "")
+            if not st:
+                continue
+            try:
+                # Format: "2026.06.07 07:30:30"
+                sig_time = datetime.strptime(st, "%Y.%m.%d %H:%M:%S")
+                age = (now - sig_time).total_seconds()
+                if age <= _WARMUP_MAX_AGE_S:
+                    return True
+            except (ValueError, TypeError):
+                continue
+        return False
 
     def set_rules(self, rules: list[BaseRule]) -> None:
         self._rules = rules
@@ -63,10 +84,15 @@ class TradeInitiator:
         """Called by the engine with ALL latest signals each poll cycle."""
         with self._lock:
             if not self._warmed_up:
-                self._warmed_up = True
-                log.info("Warmup cycle — skipping stale signals")
-                self._events.info("Warmup — baseline read, skipping stale signals")
-                return
+                if self._signals_are_fresh(signals):
+                    self._warmed_up = True
+                    log.info("Signals are fresh — skipping warmup, ready to trade")
+                    self._events.info("Signals fresh — ready to trade immediately")
+                else:
+                    self._warmed_up = True
+                    log.info("Warmup — signals are stale (>%ds old), skipping first cycle", _WARMUP_MAX_AGE_S)
+                    self._events.info("Warmup — stale signals skipped, waiting for fresh data")
+                    return
 
             if self._manager.has_open_position:
                 return
