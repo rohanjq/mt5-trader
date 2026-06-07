@@ -345,6 +345,61 @@ class RulesPanel(Static):
         label.update("  │  ".join(parts) if parts else "[dim]No rules loaded[/]")
 
 
+class RuleDetailPanel(Static):
+    """Per-condition evaluation details for expression rules."""
+
+    def __init__(self, engine: Engine, **kw) -> None:
+        super().__init__(**kw)
+        self._engine = engine
+
+    def compose(self) -> ComposeResult:
+        yield Label("[dim]Waiting for signals...[/]", id="rule-detail-text")
+
+    def refresh_content(self) -> None:
+        label = self.query_one("#rule-detail-text", Label)
+        signals = self._engine.latest_signals
+
+        if not signals:
+            label.update("[dim]Waiting for signals...[/]")
+            return
+
+        from rules.expression import ExpressionRule
+
+        lines: list[str] = []
+        for rule in self._engine.trade_initiator.rules:
+            if not isinstance(rule, ExpressionRule):
+                continue
+
+            # Evaluate buy side
+            buy_conds = rule._buy_conditions
+            sell_conds = rule._sell_conditions
+            buy_ok = buy_conds and all(c.evaluate(signals) for c in buy_conds)
+            sell_ok = sell_conds and all(c.evaluate(signals) for c in sell_conds)
+
+            if buy_ok:
+                tag = "[bold green]▲ BUY[/]"
+            elif sell_ok:
+                tag = "[bold red]▼ SELL[/]"
+            else:
+                tag = "[dim]—[/]"
+
+            sl = getattr(rule, '_sl_dollars', None)
+            rr = getattr(rule, '_reward_ratio', None)
+            risk_info = f" SL=${sl:.0f} {rr}R" if sl else ""
+            lines.append(f"[bold]{rule.name}[/] {tag}{risk_info}")
+
+            # Show buy conditions
+            if buy_conds:
+                for c in buy_conds:
+                    ok = c.evaluate(signals)
+                    sig = signals.get(c.signal)
+                    actual = sig.metadata.get(c.field, "?").strip() if sig else "[no data]"
+                    icon = "[green]✓[/]" if ok else "[red]✗[/]"
+                    lines.append(f"  {icon} {c.signal}.{c.field} {c.operator} {c.value} [dim]({actual})[/]")
+
+        label.update("\n".join(lines) if lines else "[dim]No expression rules[/]")
+
+
 class EventLogPanel(Static):
     """Live event stream — rule triggers, filter blocks, trade opens/closes."""
 
@@ -435,6 +490,13 @@ Screen {
     padding: 0 1;
 }
 
+#rule-detail-panel {
+    height: 1fr;
+    border: solid $accent-darken-2;
+    padding: 0 1;
+    overflow-y: auto;
+}
+
 #trade-log-panel {
     height: 1fr;
     border: solid $primary-darken-2;
@@ -484,6 +546,7 @@ class TradingDashboard(App):
                 yield SummaryPanel(self._engine, id="summary-panel")
                 yield FilterPanel(self._engine, id="filter-panel")
                 yield RulesPanel(self._engine, id="rules-panel")
+                yield RuleDetailPanel(self._engine, id="rule-detail-panel")
                 yield EventLogPanel(id="event-log-panel")
                 yield TradeLogPanel(self._engine, id="trade-log-panel")
             yield SignalPanel(self._engine, id="signal-panel")
@@ -500,6 +563,7 @@ class TradingDashboard(App):
             self.query_one("#summary-panel", SummaryPanel).refresh_content()
             self.query_one("#filter-panel", FilterPanel).refresh_content()
             self.query_one("#rules-panel", RulesPanel).refresh_content()
+            self.query_one("#rule-detail-panel", RuleDetailPanel).refresh_content()
             self.query_one("#event-log-panel", EventLogPanel).refresh_content()
             self.query_one("#trade-log-panel", TradeLogPanel).refresh_content()
         except Exception:
