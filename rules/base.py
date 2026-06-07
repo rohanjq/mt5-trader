@@ -102,12 +102,13 @@ class BaseRule(abc.ABC):
 
 
 def discover_rules(config: Config) -> list[BaseRule]:
-    """Auto-discover all BaseRule subclasses in the ``rules`` package."""
+    """Auto-discover all BaseRule subclasses in the ``rules`` package,
+    plus load expression-based rules from config YAML."""
     import rules as pkg
 
     plugins: list[BaseRule] = []
     for importer, modname, ispkg in pkgutil.iter_modules(pkg.__path__):
-        if modname.startswith("_") or modname == "base":
+        if modname.startswith("_") or modname in ("base", "expression"):
             continue
         try:
             mod = importlib.import_module(f"rules.{modname}")
@@ -122,6 +123,11 @@ def discover_rules(config: Config) -> list[BaseRule]:
                     log.info("Loaded rule: %s (priority=%d)", instance.name, instance.priority)
                 except Exception:
                     log.exception("Failed to instantiate rule %s", _name)
+
+    # Load expression-based rules from YAML config
+    from rules.expression import load_expression_rules
+    expr_rules = load_expression_rules(config)
+    plugins.extend(expr_rules)
 
     plugins.sort(key=lambda r: r.priority)
     return plugins

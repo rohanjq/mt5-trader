@@ -1,7 +1,125 @@
 # How to Add a New Trigger Rule
 
-This guide explains the data model, available signal fields, and how to create
-a new trigger rule for the mt5-trader system.
+There are two ways to add rules:
+1. **Expression rules** (recommended) — define in YAML, no Python needed
+2. **Python rules** — full code control for complex logic
+
+---
+
+## Method 1: Expression Rules (YAML)
+
+Add rules directly in `config.yaml` under `rules.expressions`. No code changes needed.
+Just edit YAML, and the config hot-reloads (or restart the app).
+
+### Expression Format
+
+```
+signal_name.field_name OPERATOR value
+```
+
+All conditions in a `buy:` or `sell:` block are ANDed (all must be true).
+
+### Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `==` | Equals (case-insensitive) | `utbot_M1.closed_signal == BUY` |
+| `!=` | Not equals | `utbot_M1.closed_bias != NONE` |
+| `>` | Greater than (numeric) | `utbot_M45.consecutive_bull_bars > 3` |
+| `>=` | Greater or equal | `utbot_M45.consecutive_bull_bars >= 5` |
+| `<` | Less than | `utbot_M1.closed_atr < 50` |
+| `<=` | Less or equal | `dc_M15.channel_width <= 500` |
+| `in` | Value is one of (comma-separated) | `dc_M15.closed_price_zone in LOWER,LOWER_MID` |
+| `not_in` | Value is NOT one of | `dc_M15.closed_price_zone not_in MID` |
+| `is` | Alias for `== TRUE` | `dc_M15.closed_lower_wick_rej is TRUE` |
+| `is_not` | Alias for `!= TRUE` | `dc_M15.closed_upper_wick_rej is_not TRUE` |
+
+### Example Rules
+
+```yaml
+rules:
+  expressions:
+    # Simple: UT Bot 1m signal + 15m trend
+    - name: ut_trend_follow
+      enabled: true
+      priority: 140
+      description: "UT 1m signal + 15m trend"
+      buy:
+        - utbot_M1.closed_signal == BUY
+        - utbot_M15.closed_bias == BULLISH
+      sell:
+        - utbot_M1.closed_signal == SELL
+        - utbot_M15.closed_bias == BEARISH
+
+    # DC zone + UT Bot + trend strength
+    - name: dc_zone_entry
+      enabled: true
+      priority: 105
+      description: "DC zone + UT Bot signal + trend bars"
+      buy:
+        - dc_M15.closed_price_zone in LOWER,LOWER_MID
+        - utbot_M1.closed_signal == BUY
+        - utbot_M45.consecutive_bull_bars >= 5
+      sell:
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID
+        - utbot_M1.closed_signal == SELL
+        - utbot_M45.consecutive_bear_bars >= 5
+
+    # DC wick rejection (high quality)
+    - name: dc_wick
+      enabled: true
+      priority: 115
+      description: "DC wick rejection + UT Bot bias"
+      buy:
+        - dc_M15.closed_lower_wick_rej is TRUE
+        - utbot_M3.closed_bias == BULLISH
+      sell:
+        - dc_M15.closed_upper_wick_rej is TRUE
+        - utbot_M3.closed_bias == BEARISH
+
+    # Full alignment (highest conviction)
+    - name: full_align
+      enabled: true
+      priority: 90
+      description: "All TFs + DC zone"
+      buy:
+        - utbot_M1.closed_signal == BUY
+        - utbot_M15.closed_bias == BULLISH
+        - utbot_M45.closed_bias == BULLISH
+        - dc_M15.closed_price_zone in LOWER,LOWER_MID,MID
+      sell:
+        - utbot_M1.closed_signal == SELL
+        - utbot_M15.closed_bias == BEARISH
+        - utbot_M45.closed_bias == BEARISH
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID,MID
+
+    # ATR volatility filter
+    - name: ut_low_vol
+      enabled: false
+      priority: 160
+      description: "UT signal only in low volatility"
+      buy:
+        - utbot_M1.closed_signal == BUY
+        - utbot_M1.closed_atr < 40
+      sell:
+        - utbot_M1.closed_signal == SELL
+        - utbot_M1.closed_atr < 40
+```
+
+### How to Add a New Expression Rule
+
+1. Open `config.yaml`
+2. Add a new entry under `rules.expressions:`
+3. Set `name`, `enabled`, `priority`, `description`
+4. Add `buy:` conditions (all must be true to trigger BUY)
+5. Add `sell:` conditions (all must be true to trigger SELL)
+6. Save — the config hot-reloads (or restart)
+
+That's it. No Python code needed.
+
+---
+
+## Method 2: Python Rules (for complex logic)
 
 ## Signal Data Available to Rules
 
