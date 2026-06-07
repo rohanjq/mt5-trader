@@ -26,7 +26,7 @@ filters:
 
 exit_rules:
   signal_reversal_exit: true         # close when signal flips opposite
-  breakeven_trigger_dollars: 1.75    # move SL to entry when price moves $1.75
+  breakeven_trigger_dollars: 50.0     # move SL to entry when price moves $50
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
 logging:

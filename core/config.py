@@ -36,7 +36,7 @@ _DEFAULT_CONFIG: dict[str, Any] = {
     },
     "exit_rules": {
         "signal_reversal_exit": True,
-        "breakeven_trigger_dollars": 1.75,
+        "breakeven_trigger_dollars": 50.0,
         "trailing_stop_dollars": 0.0,
     },
     "logging": {
