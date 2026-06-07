@@ -36,23 +36,31 @@ class BaseSignal(abc.ABC):
 
     # helper for CSV-based signal sources
     def _read_csv(self, path: str | Path) -> dict[str, str]:
-        """Read a key,value CSV into a dict. Returns empty dict on error."""
+        """Read a key,value CSV into a dict. Returns empty dict on error.
+
+        Handles UTF-16 LE files (common from Wine/MetaEditor) by trying
+        utf-8 first, then utf-16, then latin-1 as fallback.
+        """
         p = Path(path)
         if not p.exists():
             log.warning("Signal CSV not found: %s", p)
             return {}
-        try:
-            with open(p, newline="") as f:
-                reader = csv.DictReader(f)
-                data: dict[str, str] = {}
-                for row in reader:
-                    k = row.get("key", "").strip()
-                    v = row.get("value", "").strip()
-                    if k:
-                        data[k] = v
-                return data
-        except Exception:
-            log.exception("Error reading CSV %s", p)
+        for encoding in ("utf-8-sig", "utf-16", "latin-1"):
+            try:
+                with open(p, newline="", encoding=encoding) as f:
+                    reader = csv.DictReader(f)
+                    data: dict[str, str] = {}
+                    for row in reader:
+                        k = row.get("key", "").strip()
+                        v = row.get("value", "").strip()
+                        if k:
+                            data[k] = v
+                    return data
+            except (UnicodeDecodeError, UnicodeError):
+                continue
+            except Exception:
+                log.exception("Error reading CSV %s", p)
+                return {}
             return {}
 
 
