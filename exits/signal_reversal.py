@@ -33,6 +33,9 @@ class SignalReversalExit(BaseExitRule):
 
         sig = signals.get(trade.signal_source)
         if sig is None:
+            # Expression rules set signal_source to the rule name (e.g. "ema_pullback"),
+            # not a signal key (e.g. "utbot_M1"), so lookup fails. This exit rule only
+            # works for Python rules that set signal_source to an actual signal key.
             return ExitResult(action=ExitAction.HOLD)
 
         if trade.direction == TradeDirection.BUY and sig.direction == SignalDirection.SELL:
