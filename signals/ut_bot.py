@@ -41,11 +41,12 @@ class UTBotSignal(BaseSignal):
         metadata = dict(data)
 
         bias = data.get("closed_bias", "").upper()
-        signal = data.get("closed_signal", "").upper()
 
-        if bias == "BULLISH" and signal == "BUY":
+        # Direction reflects persistent bias (BULLISH/BEARISH)
+        # Rules use closed_signal from metadata to trigger trades
+        if bias == "BULLISH":
             direction = SignalDirection.BUY
-        elif bias == "BEARISH" and signal == "SELL":
+        elif bias == "BEARISH":
             direction = SignalDirection.SELL
         else:
             direction = SignalDirection.NEUTRAL

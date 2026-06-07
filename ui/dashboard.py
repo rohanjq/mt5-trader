@@ -53,7 +53,7 @@ class SignalPanel(Static):
 
     def compose(self) -> ComposeResult:
         table = DataTable(id="signal-table")
-        table.add_columns("Source", "Direction", "Key Info", "Updated")
+        table.add_columns("Source", "Direction", "Bias/Zone", "Signal", "Detail", "Updated")
         yield table
 
     def refresh_content(self) -> None:
@@ -62,32 +62,49 @@ class SignalPanel(Static):
 
         signals = self._engine.latest_signals
         for name, sig in signals.items():
-            direction = sig.direction.value
             if sig.direction == SignalDirection.BUY:
-                direction = "[green]BUY[/]"
+                direction = "[green]▲ BUY[/]"
             elif sig.direction == SignalDirection.SELL:
-                direction = "[red]SELL[/]"
+                direction = "[red]▼ SELL[/]"
             else:
-                direction = "[yellow]NEUTRAL[/]"
+                direction = "[yellow]— NEUTRAL[/]"
 
             meta = sig.metadata
             ts = datetime.fromtimestamp(sig.timestamp).strftime("%H:%M:%S")
 
-            # Build key info string based on signal source
             if name.startswith("utbot_"):
-                info = f"Bias={meta.get('closed_bias', '—')} Sig={meta.get('closed_signal', '—')} ATR={meta.get('closed_atr', '—')}"
+                bias = meta.get('closed_bias', '—')
+                sig_val = meta.get('closed_signal', 'NONE')
+                if sig_val.upper() == "BUY":
+                    sig_col = f"[green]{sig_val}[/]"
+                elif sig_val.upper() == "SELL":
+                    sig_col = f"[red]{sig_val}[/]"
+                else:
+                    sig_col = f"[dim]{sig_val}[/]"
+                atr = meta.get('closed_atr', '—')
+                trail = meta.get('closed_trail_stop', '—')
+                bull = meta.get('consecutive_bull_bars', '—')
+                bear = meta.get('consecutive_bear_bars', '—')
+                detail = f"ATR={atr} Bull={bull} Bear={bear}"
+                table.add_row(name, direction, bias, sig_col, detail, ts)
             elif name.startswith("dc_"):
-                info = f"Zone={meta.get('closed_price_zone', '—')} U={meta.get('upper_band', '—')} L={meta.get('lower_band', '—')}"
-                uw = meta.get("closed_upper_wick_rej", "")
-                lw = meta.get("closed_lower_wick_rej", "")
-                if uw == "TRUE":
-                    info += " [red]↑WICK[/]"
-                if lw == "TRUE":
-                    info += " [green]↓WICK[/]"
+                zone = meta.get('closed_price_zone', '—')
+                uw = meta.get('closed_upper_wick_rej', 'FALSE')
+                lw = meta.get('closed_lower_wick_rej', 'FALSE')
+                wick = ""
+                if lw.upper() == "TRUE":
+                    wick = "[green]↓ Lower[/]"
+                elif uw.upper() == "TRUE":
+                    wick = "[red]↑ Upper[/]"
+                else:
+                    wick = "[dim]None[/]"
+                upper = meta.get('upper_band', '—')
+                lower = meta.get('lower_band', '—')
+                detail = f"U={upper} L={lower}"
+                table.add_row(name, direction, zone, wick, detail, ts)
             else:
                 info = " ".join(f"{k}={v}" for k, v in list(meta.items())[:3])
-
-            table.add_row(name, direction, info, ts)
+                table.add_row(name, direction, "—", "—", info, ts)
 
 
 class PositionPanel(Static):
@@ -254,7 +271,7 @@ Screen {
 
 #signal-panel {
     height: auto;
-    max-height: 8;
+    max-height: 12;
     border: solid $secondary;
     padding: 0 1;
 }

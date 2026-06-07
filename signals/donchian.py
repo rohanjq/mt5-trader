@@ -39,12 +39,13 @@ class DonchianSignal(BaseSignal):
 
         metadata = dict(data)
 
-        upper_wick = data.get("closed_upper_wick_rej", "").upper() == "TRUE"
-        lower_wick = data.get("closed_lower_wick_rej", "").upper() == "TRUE"
+        zone = data.get("closed_price_zone", "").upper()
 
-        if lower_wick:
+        # Direction reflects price zone position
+        # Rules use wick rejection + other fields from metadata
+        if zone in ("LOWER", "LOWER_MID"):
             direction = SignalDirection.BUY
-        elif upper_wick:
+        elif zone in ("UPPER", "UPPER_MID"):
             direction = SignalDirection.SELL
         else:
             direction = SignalDirection.NEUTRAL
