@@ -21,7 +21,7 @@ _DEFAULT_CONFIG: dict[str, Any] = {
         "magic": 100,
         "deviation": 20,
         "filling": "FOK",
-        "sl_dollars": 50.0,
+        "sl_dollars": 100.0,
         "reward_ratio": 1.25,
     },
     "signals": {

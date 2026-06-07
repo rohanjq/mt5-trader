@@ -11,8 +11,8 @@ trading:
   magic: 100
   deviation: 20
   filling: FOK
-  sl_dollars: 50.0     # SL = $50 from entry price (must exceed broker min stop level)
-  reward_ratio: 1.25   # TP = SL × ratio = $62.50 from entry
+  sl_dollars: 100.0    # SL = $100 from entry (e.g. 61600 → SL 61500)
+  reward_ratio: 1.25   # TP = SL × ratio = $125 from entry
 
 signals:
   poll_interval: 2.0   # seconds between signal reads
