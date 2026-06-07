@@ -219,3 +219,46 @@ class TradeInitiator:
         """Reset so the next signal of any direction will be acted on."""
         with self._lock:
             self._last_trigger_key = None
+
+    def manual_trade(self, direction: TradeDirection) -> bool:
+        """Execute a manual trade bypassing all filters.
+
+        SL/TP are auto-calculated from config, same as rule-triggered trades.
+        Returns True if the trade was placed.
+        """
+        with self._lock:
+            if self._manager.has_open_position:
+                self._events.warn("Manual trade rejected — position already open")
+                return False
+
+            symbol = self._config.get("trading.symbol", "BTCUSDT")
+            sl, tp, volume, sl_dollars = self._calculate_risk(direction)
+
+            source_signal = Signal(
+                source="manual",
+                direction=(
+                    SignalDirection.BUY if direction == TradeDirection.BUY
+                    else SignalDirection.SELL
+                ),
+                metadata={"reason": "Manual trade"},
+            )
+
+            request = TradeRequest(
+                direction=direction,
+                symbol=symbol,
+                volume=volume,
+                signal=source_signal,
+                sl=sl,
+                tp=tp,
+                risk_dollars=sl_dollars,
+            )
+            request.state = TradeState.FILTERS_PASSED
+            self._events.trade(
+                f"MANUAL {direction.value} — vol={volume} SL={sl:.2f} TP={tp:.2f}"
+            )
+            log.info(
+                "Manual trade %s: %s %s vol=%.4f SL=%.2f TP=%.2f",
+                request.id, direction.value, symbol, volume, sl, tp,
+            )
+            self._execute(request)
+            return True

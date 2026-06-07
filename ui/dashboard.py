@@ -400,6 +400,8 @@ class TradingDashboard(App):
     SUB_TITLE = "BTCUSDT"
 
     BINDINGS = [
+        Binding("b", "manual_buy", "Manual Buy"),
+        Binding("s", "manual_sell", "Manual Sell"),
         Binding("t", "toggle_trading", "Toggle Trading"),
         Binding("c", "close_position", "Close Position"),
         Binding("r", "reconnect_mt5", "Reconnect MT5"),
@@ -464,3 +466,17 @@ class TradingDashboard(App):
     def action_quit_app(self) -> None:
         self._engine.stop()
         self.exit()
+
+    def action_manual_buy(self) -> None:
+        from core.models import TradeDirection
+        if self._engine.trade_initiator.manual_trade(TradeDirection.BUY):
+            self.notify("Manual BUY placed", severity="information")
+        else:
+            self.notify("Cannot place BUY — position open or MT5 error", severity="warning")
+
+    def action_manual_sell(self) -> None:
+        from core.models import TradeDirection
+        if self._engine.trade_initiator.manual_trade(TradeDirection.SELL):
+            self.notify("Manual SELL placed", severity="information")
+        else:
+            self.notify("Cannot place SELL — position open or MT5 error", severity="warning")
