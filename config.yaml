@@ -12,7 +12,7 @@ trading:
   deviation: 20
   filling: FOK
   multi_position: true   # allow multiple simultaneous positions (one per rule)
-  sl_dollars: 175.0    # default SL = $175 from entry (overridable per strategy)
+  sl_dollars: 225.0    # default SL = $225 from entry (overridable per strategy)
   reward_ratio: 1.25   # default TP = SL × ratio
 
 signals:
@@ -58,16 +58,6 @@ exit_rules:
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
 rules:
-  # ── All Python rules disabled ──
-  utbot_simple:
-    enabled: false
-  dc_confluence:
-    enabled: false
-  dc_wick_rejection:
-    enabled: false
-  utbot_multi_tf:
-    enabled: false
-
   # ── Expression rules (YAML only) ──
   expressions:
     # ══════════════════════════════════════════════
