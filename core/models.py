@@ -66,6 +66,7 @@ class TradeRequest:
     sl: float = 0.0
     tp: float = 0.0
     risk_dollars: float = 0.0
+    breakeven_pct: float = 0.0
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     state: TradeState = TradeState.SIGNAL_RECEIVED
     rejection_reason: str = ""
@@ -84,6 +85,7 @@ class TradeRecord:
     sl: float = 0.0
     tp: float = 0.0
     risk_dollars: float = 0.0
+    breakeven_pct: float = 0.0
     exit_price: float = 0.0
     exit_time: datetime | None = None
     profit: float = 0.0

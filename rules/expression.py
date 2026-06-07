@@ -145,6 +145,7 @@ class ExpressionRule(BaseRule):
         sell_conditions: list[Condition],
         sl_dollars: float | None = None,
         reward_ratio: float | None = None,
+        breakeven_pct: float | None = None,
     ) -> None:
         super().__init__(config)
         self.name = rule_name
@@ -154,6 +155,7 @@ class ExpressionRule(BaseRule):
         self._sell_conditions = sell_conditions
         self._sl_dollars = sl_dollars
         self._reward_ratio = reward_ratio
+        self._breakeven_pct = breakeven_pct
 
     def evaluate(self, signals: dict[str, Signal]) -> TriggerResult:
         if not self.config.get(f"rules.{self.name}.enabled", True):
@@ -177,6 +179,7 @@ class ExpressionRule(BaseRule):
                 rule_name=self.name,
                 sl_dollars=self._sl_dollars,
                 reward_ratio=self._reward_ratio,
+                breakeven_pct=self._breakeven_pct,
             )
             return self._last_result
 
@@ -189,6 +192,7 @@ class ExpressionRule(BaseRule):
                 rule_name=self.name,
                 sl_dollars=self._sl_dollars,
                 reward_ratio=self._reward_ratio,
+                breakeven_pct=self._breakeven_pct,
             )
             return self._last_result
 
@@ -245,6 +249,7 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
 
         raw_sl = defn.get("sl_dollars")
         raw_rr = defn.get("reward_ratio")
+        raw_be = defn.get("breakeven_pct")
         rule = ExpressionRule(
             config=config,
             rule_name=name,
@@ -254,6 +259,7 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
             sell_conditions=sell_conds,
             sl_dollars=float(raw_sl) if raw_sl is not None else None,
             reward_ratio=float(raw_rr) if raw_rr is not None else None,
+            breakeven_pct=float(raw_be) if raw_be is not None else None,
         )
         expr_rules.append(rule)
         log.info(

@@ -128,6 +128,11 @@ class TradeInitiator:
         symbol = self._config.get("trading.symbol", "BTCUSDT")
         sl, tp, volume, sl_dollars = self._calculate_risk(trigger.direction, trigger)
 
+        # Per-rule breakeven % (fall back to global config)
+        breakeven_pct = trigger.breakeven_pct
+        if breakeven_pct is None:
+            breakeven_pct = float(self._config.get("exit_rules.breakeven_pct", 0.0))
+
         source_signal = Signal(
             source=trigger.rule_name,
             direction=(
@@ -145,6 +150,7 @@ class TradeInitiator:
             sl=sl,
             tp=tp,
             risk_dollars=sl_dollars,
+            breakeven_pct=breakeven_pct,
         )
         log.info(
             "Trade request %s: %s %s vol=%.4f SL=%.2f TP=%.2f (rule: %s)",
@@ -234,6 +240,7 @@ class TradeInitiator:
                 sl=request.sl,
                 tp=request.tp,
                 risk_dollars=request.risk_dollars,
+                breakeven_pct=request.breakeven_pct,
                 state=TradeState.EXECUTED,
             )
             self._manager.register_trade(record)

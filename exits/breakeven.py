@@ -11,14 +11,15 @@ log = logging.getLogger(__name__)
 
 
 class BreakevenExit(BaseExitRule):
-    """Move SL to entry price (breakeven) when price moves a fixed $ amount.
+    """Move SL to entry price (breakeven) when price moves a % of risk in our favor.
 
-    e.g. breakeven_trigger_dollars=1.75 means: when price is $1.75 above entry
-    (for BUY), move SL to entry price.
+    Uses per-trade ``breakeven_pct`` (set per strategy or global default).
+    e.g. breakeven_pct=65 with sl_dollars=$175 → breakeven triggers when price
+    moves $113.75 in our favor (65% of $175).
     """
 
     name = "breakeven"
-    description = "Move SL to entry at $ threshold"
+    description = "Move SL to entry at % of risk"
 
     def evaluate(
         self,
@@ -26,13 +27,19 @@ class BreakevenExit(BaseExitRule):
         signals: dict[str, Signal],
         tick: Any,
     ) -> ExitResult:
-        trigger = self.config.get("exit_rules.breakeven_trigger_dollars", 0.0)
-        if not trigger or float(trigger) <= 0:
+        # Per-trade pct takes priority, fall back to global config
+        be_pct = trade.breakeven_pct
+        if not be_pct or be_pct <= 0:
+            be_pct = float(self.config.get("exit_rules.breakeven_pct", 0.0))
+        if be_pct <= 0:
             return ExitResult(action=ExitAction.HOLD)
-        trigger = float(trigger)
 
-        if trade.sl == 0 or not tick:
+        # Need risk_dollars to calculate the trigger threshold
+        risk = trade.risk_dollars
+        if risk <= 0 or trade.sl == 0 or not tick:
             return ExitResult(action=ExitAction.HOLD)
+
+        trigger_dollars = risk * (be_pct / 100.0)
 
         # Already at or past breakeven — don't move SL backwards
         if trade.direction == TradeDirection.BUY and trade.sl >= trade.entry_price:
@@ -40,20 +47,25 @@ class BreakevenExit(BaseExitRule):
         if trade.direction == TradeDirection.SELL and trade.sl <= trade.entry_price:
             return ExitResult(action=ExitAction.HOLD)
 
-        # Check price movement from entry
+        # Check price movement from executed entry price
         if trade.direction == TradeDirection.BUY:
             price_move = tick.bid - trade.entry_price
         else:
             price_move = trade.entry_price - tick.ask
 
-        if price_move >= trigger:
+        if price_move >= trigger_dollars:
             log.info(
-                "Breakeven triggered: price moved $%.2f >= $%.2f threshold — moving SL to %.2f",
-                price_move, trigger, trade.entry_price,
+                "Breakeven triggered: price moved $%.2f >= $%.2f (%.0f%% of $%.0f risk) — SL to %.2f",
+                price_move, trigger_dollars, be_pct, risk, trade.entry_price,
+            )
+            from core.events import EventLog
+            EventLog.get().info(
+                f"Breakeven: moved ${price_move:.1f} >= ${trigger_dollars:.1f} "
+                f"({be_pct:.0f}% of ${risk:.0f}) — SL → entry"
             )
             return ExitResult(
                 action=ExitAction.MODIFY_SL,
-                reason=f"Price moved ${price_move:.2f} >= ${trigger:.2f} — SL to breakeven",
+                reason=f"Price moved ${price_move:.2f} >= ${trigger_dollars:.2f} ({be_pct:.0f}% risk) — SL to breakeven",
                 new_sl=trade.entry_price,
             )
 

@@ -23,20 +23,19 @@ class CooldownFilter(BaseFilter):
         if self._trade_manager is None:
             return FilterResult(verdict=FilterVerdict.ALLOW)
 
-        cooldown_minutes = self.config.get("filters.cooldown_minutes", 5)
+        cooldown_seconds = self.config.get("filters.cooldown_seconds", 300)
         last_loss_time = self._trade_manager.last_loss_time
 
         if last_loss_time is None:
             return FilterResult(verdict=FilterVerdict.ALLOW)
 
         elapsed = time.time() - last_loss_time
-        remaining = (cooldown_minutes * 60) - elapsed
+        remaining = cooldown_seconds - elapsed
 
         if remaining > 0:
-            mins = remaining / 60
             return FilterResult(
                 verdict=FilterVerdict.BLOCK,
-                reason=f"Cooldown active — {mins:.1f} min remaining after last loss",
+                reason=f"Cooldown active — {remaining:.0f}s remaining after last loss",
             )
 
         return FilterResult(verdict=FilterVerdict.ALLOW)

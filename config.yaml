@@ -7,12 +7,12 @@ mt5:
 
 trading:
   symbol: BTCUSDT
-  volume: 0.001        # fixed lot size (hot-reloadable)
+  volume: 0.75         # fixed lot size (hot-reloadable)
   magic: 100
   deviation: 20
   filling: FOK
-  sl_dollars: 100.0    # SL = $100 from entry (e.g. 61600 → SL 61500)
-  reward_ratio: 1.25   # TP = SL × ratio = $125 from entry
+  sl_dollars: 175.0    # default SL = $175 from entry (overridable per strategy)
+  reward_ratio: 1.25   # default TP = SL × ratio
 
 signals:
   poll_interval: 2.0   # seconds between signal reads
@@ -45,15 +45,15 @@ signals:
       timeframes: [M3]
 
 filters:
-  cooldown_minutes: 5
+  cooldown_seconds: 30               # cooldown after a loss (in seconds)
   max_consecutive_losses: 3
   pause_after_consecutive_minutes: 15
-  max_daily_loss: 500.0
-  reversal_cooldown_seconds: 60    # block reverse direction for 60s after close
+  max_daily_loss: -1                  # -1 = disabled
+  reversal_cooldown_seconds: 30      # block reverse direction for 30s after close
 
 exit_rules:
   signal_reversal_exit: false        # let TP/SL hit instead of closing on signal flip
-  breakeven_trigger_dollars: 50.0    # move SL to entry when price moves $50
+  breakeven_pct: 65.0               # move SL to entry when price moves 65% of risk in our favor
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
 rules:
@@ -79,8 +79,9 @@ rules:
     - name: "macd_stoch_reentry"
       enabled: true
       priority: 35
-      sl_dollars: 120.0
+      sl_dollars: 300.0
       reward_ratio: 1.5
+      breakeven_pct: 50.0
       description: "MACD-Stoch re-entry (M15 trend + M3 trigger)"
       buy:
         - ema200_M15.closed_price_vs_ema == ABOVE
@@ -103,7 +104,7 @@ rules:
     - name: "ema_pullback"
       enabled: true
       priority: 40
-      sl_dollars: 100.0
+      sl_dollars: 175.0
       reward_ratio: 1.5
       description: "EMA pullback continuation (M5 trend + M1 RSI trigger)"
       buy:
@@ -123,8 +124,9 @@ rules:
     - name: "bb_range_fade"
       enabled: true
       priority: 45
-      sl_dollars: 75.0
+      sl_dollars: 100.0
       reward_ratio: 1.0
+      breakeven_pct: 70.0
       description: "BB range fade (ADX ranging + BB re-entry)"
       buy:
         - adx_M5.closed_trend_strength == RANGING
@@ -139,8 +141,9 @@ rules:
     - name: "dc_vol_breakout"
       enabled: true
       priority: 50
-      sl_dollars: 150.0
+      sl_dollars: 300.0
       reward_ratio: 1.8
+      breakeven_pct: 50.0
       description: "DC volatility breakout (ADX trend + ATR expanding)"
       buy:
         - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
@@ -163,8 +166,9 @@ rules:
     - name: "lg_ut_confirm"
       enabled: true
       priority: 80
-      sl_dollars: 100.0
-      reward_ratio: 1.25
+      sl_dollars: 250.0
+      reward_ratio: 1.5
+      breakeven_pct: 55.0
       description: "LG M15 signal + UT 1m bias aligned"
       buy:
         - liqgrab_M15.liq_signal == BUY
@@ -177,8 +181,9 @@ rules:
     - name: "lg_composite"
       enabled: true
       priority: 85
-      sl_dollars: 100.0
-      reward_ratio: 1.25
+      sl_dollars: 250.0
+      reward_ratio: 1.5
+      breakeven_pct: 55.0
       description: "LG composite signal (rej+breakout+MA)"
       buy:
         - liqgrab_M15.liq_signal == BUY
@@ -189,8 +194,8 @@ rules:
     - name: "lg_fast_trend"
       enabled: true
       priority: 90
-      sl_dollars: 100.0
-      reward_ratio: 1.25
+      sl_dollars: 200.0
+      reward_ratio: 1.4
       description: "LG M5 fast + UT 15m trend"
       buy:
         - liqgrab_M5.liq_signal == BUY
@@ -203,8 +208,9 @@ rules:
     - name: "lg_dc_support"
       enabled: true
       priority: 95
-      sl_dollars: 100.0
-      reward_ratio: 1.25
+      sl_dollars: 250.0
+      reward_ratio: 1.5
+      breakeven_pct: 55.0
       description: "LG rejection at DC support/resistance"
       buy:
         - liqgrab_H1.rejection_up is TRUE

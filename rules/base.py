@@ -30,6 +30,7 @@ class TriggerResult:
     rule_name: str = ""
     sl_dollars: float | None = None
     reward_ratio: float | None = None
+    breakeven_pct: float | None = None
 
     @property
     def should_trade(self) -> bool:
