@@ -44,6 +44,10 @@ class BaseExitRule(abc.ABC):
 
     def __init__(self, config: Config) -> None:
         self.config = config
+        self._mt5: Any = None
+
+    def set_mt5_client(self, mt5_client: Any) -> None:
+        self._mt5 = mt5_client
 
     @abc.abstractmethod
     def evaluate(

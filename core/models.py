@@ -86,6 +86,7 @@ class TradeRecord:
     tp: float = 0.0
     risk_dollars: float = 0.0
     breakeven_pct: float = 0.0
+    partial_tp_done: bool = False
     exit_price: float = 0.0
     exit_time: datetime | None = None
     profit: float = 0.0

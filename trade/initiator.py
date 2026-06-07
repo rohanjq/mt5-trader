@@ -212,14 +212,17 @@ class TradeInitiator:
             return
 
         if request.direction == TradeDirection.BUY:
+            # When partial_tp is enabled, don't set server-side TP — our exit rule handles it
+            mt5_tp = 0.0 if self._config.get("exit_rules.partial_tp", False) else request.tp
             result = self._mt5.buy(
                 volume=request.volume, symbol=request.symbol,
-                sl=request.sl, tp=request.tp,
+                sl=request.sl, tp=mt5_tp,
             )
         else:
+            mt5_tp = 0.0 if self._config.get("exit_rules.partial_tp", False) else request.tp
             result = self._mt5.sell(
                 volume=request.volume, symbol=request.symbol,
-                sl=request.sl, tp=request.tp,
+                sl=request.sl, tp=mt5_tp,
             )
 
         if result and result.retcode == 10009:

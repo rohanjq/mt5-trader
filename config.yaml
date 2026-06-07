@@ -55,6 +55,8 @@ filters:
 exit_rules:
   signal_reversal_exit: false        # let TP/SL hit instead of closing on signal flip
   breakeven_pct: 65.0               # move SL to entry when price moves 65% of risk in our favor
+  partial_tp: true                  # at TP: close 80% of volume, let 20% run with SL at midpoint
+  tp_close_pct: 80.0               # % of volume to close when TP is reached
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
 rules:
