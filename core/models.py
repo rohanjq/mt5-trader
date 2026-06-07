@@ -87,9 +87,6 @@ class TradeRecord:
     tp: float = 0.0
     risk_dollars: float = 0.0
     breakeven_pct: float = 0.0
-    runner_ticket: int = 0          # 2nd order (no TP, let it run)
-    runner_volume: float = 0.0      # volume of runner order
-    main_tp_hit: bool = False       # True when broker closed the main (TP) portion
     exit_price: float = 0.0
     exit_time: datetime | None = None
     profit: float = 0.0

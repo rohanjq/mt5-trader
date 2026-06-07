@@ -66,7 +66,7 @@ class TradeManager:
 
     def has_position_for_rule(self, rule_name: str) -> bool:
         with self._lock:
-            return rule_name in self._open_trades
+            return rule_name in self._open_trades or f"{rule_name}_runner" in self._open_trades
 
     @property
     def trade_history(self) -> list[TradeRecord]:
@@ -110,23 +110,33 @@ class TradeManager:
     # ── trade lifecycle ────────────────────────────────────────────────────
 
     def adopt_existing_positions(self) -> None:
-        """Check MT5 for open positions and adopt them on startup."""
+        """Check MT5 for open positions and adopt them on startup.
+
+        Adopted trades are tracked for P&L display and close detection.
+        Breakeven is managed using SL distance as risk and global breakeven_pct.
+        """
         if not self._mt5.connected:
             return
 
         symbol = self._config.get("trading.symbol", "BTCUSDT")
         magic = self._config.get("trading.magic", 100)
         positions = self._mt5.get_positions(symbol)
+        breakeven_pct = float(self._config.get("exit_rules.breakeven_pct", 0.0))
 
         for pos in positions:
-            # Only adopt our own positions (matching magic number)
             if hasattr(pos, "magic") and pos.magic != magic:
                 continue
 
             direction = (
-                TradeDirection.BUY if pos.type == 0  # ORDER_TYPE_BUY
+                TradeDirection.BUY if pos.type == 0
                 else TradeDirection.SELL
             )
+
+            # Estimate risk from SL distance so breakeven can work
+            if pos.sl and pos.sl > 0:
+                risk_dollars = abs(pos.price_open - pos.sl)
+            else:
+                risk_dollars = 0.0
 
             record = TradeRecord(
                 id=f"adopted_{pos.ticket}",
@@ -135,19 +145,19 @@ class TradeManager:
                 volume=pos.volume,
                 entry_price=pos.price_open,
                 entry_time=datetime.now(),
-                signal_source="adopted",
+                signal_source=f"adopted_{pos.ticket}",
                 ticket=pos.ticket,
                 sl=pos.sl if pos.sl else 0.0,
                 tp=pos.tp if pos.tp else 0.0,
-                risk_dollars=0.0,
+                risk_dollars=risk_dollars,
+                breakeven_pct=breakeven_pct,
                 state=TradeState.MONITORING,
             )
             record.profit = pos.profit
 
             with self._lock:
-                key = f"adopted_{pos.ticket}"
+                key = record.signal_source
                 if key in self._open_trades:
-                    log.warning("Already tracking ticket=%s — skipping", pos.ticket)
                     continue
                 if not self.multi_position and self._open_trades:
                     log.warning("Single-position mode, already tracking — skipping ticket=%s", pos.ticket)
@@ -237,48 +247,28 @@ class TradeManager:
             log.error("MT5 not connected — cannot close position")
             return None
 
-        # Close main ticket (may already be gone if TP hit)
-        total_profit = 0.0
-        main_closed = trade.main_tp_hit  # already gone
-        if not main_closed:
-            result = self._mt5.close_position(
-                ticket=trade.ticket,
-                volume=trade.volume,
-                direction=trade.direction.value,
-                symbol=trade.symbol,
-            )
-            if result and result.retcode == 10009:
-                main_closed = True
+        result = self._mt5.close_position(
+            ticket=trade.ticket,
+            volume=trade.volume,
+            direction=trade.direction.value,
+            symbol=trade.symbol,
+        )
 
-        # Close runner ticket if it exists
-        if trade.runner_ticket:
-            runner_result = self._mt5.close_position(
-                ticket=trade.runner_ticket,
-                volume=trade.runner_volume,
-                direction=trade.direction.value,
-                symbol=trade.symbol,
-            )
-            if not runner_result or runner_result.retcode != 10009:
-                log.error("Failed to close runner ticket=%s", trade.runner_ticket)
-
-        if main_closed:
+        if result and result.retcode == 10009:
             tick = self._mt5.get_tick(trade.symbol)
             if tick:
+                exit_price = tick.bid if trade.direction == TradeDirection.BUY else tick.ask
                 if trade.direction == TradeDirection.BUY:
-                    exit_price = tick.bid
+                    profit = (exit_price - trade.entry_price) * trade.volume
                 else:
-                    exit_price = tick.ask
-                total_vol = trade.volume + trade.runner_volume
-                if trade.direction == TradeDirection.BUY:
-                    total_profit = (exit_price - trade.entry_price) * total_vol
-                else:
-                    total_profit = (trade.entry_price - exit_price) * total_vol
+                    profit = (trade.entry_price - exit_price) * trade.volume
             else:
                 exit_price = trade.entry_price
-            return self.close_trade(total_profit, exit_price, rule_name=rule_name)
+                profit = 0.0
+            return self.close_trade(profit, exit_price, rule_name=rule_name)
         else:
-            retcode = "N/A"
-            log.error("Failed to close main position: retcode=%s", retcode)
+            retcode = result.retcode if result else "N/A"
+            log.error("Failed to close position ticket=%s: retcode=%s", trade.ticket, retcode)
             return None
 
     def update_open_position(self) -> None:
@@ -299,15 +289,10 @@ class TradeManager:
             with self._lock:
                 if rule_name not in self._open_trades:
                     continue  # closed in the meantime
-                total_vol = trade.volume + (trade.runner_volume if not trade.main_tp_hit else 0)
-                if trade.main_tp_hit:
-                    total_vol = trade.runner_volume  # only runner left
-                else:
-                    total_vol = trade.volume + trade.runner_volume
                 if trade.direction == TradeDirection.BUY:
-                    self._open_trades[rule_name].profit = (tick.bid - trade.entry_price) * total_vol
+                    self._open_trades[rule_name].profit = (tick.bid - trade.entry_price) * trade.volume
                 else:
-                    self._open_trades[rule_name].profit = (trade.entry_price - tick.ask) * total_vol
+                    self._open_trades[rule_name].profit = (trade.entry_price - tick.ask) * trade.volume
 
             # Run exit rules per position
             self._evaluate_exit_rules(trade, tick)
@@ -315,8 +300,8 @@ class TradeManager:
     def sync_positions_from_mt5(self) -> None:
         """Detect if MT5 positions were closed externally.
 
-        Handles dual-order partial TP: if main ticket is gone but runner is
-        still alive, the main TP was hit — move runner SL to midpoint.
+        When a main trade (has TP) disappears and its runner counterpart is
+        still alive, the TP was hit — move runner SL to midpoint.
         """
         if not self._mt5.connected:
             return
@@ -326,100 +311,50 @@ class TradeManager:
 
         with self._lock:
             closed_rules: list[str] = []
-            main_tp_hit_rules: list[str] = []
-            runner_gone_rules: list[str] = []
-
             for rule_name, trade in self._open_trades.items():
-                main_gone = trade.ticket and trade.ticket not in tickets
-                runner_gone = trade.runner_ticket and trade.runner_ticket not in tickets
-
-                if not trade.main_tp_hit and main_gone and trade.runner_ticket and not runner_gone:
-                    # Main TP hit, runner still alive
-                    main_tp_hit_rules.append(rule_name)
-                elif trade.main_tp_hit and runner_gone:
-                    # Runner also gone (SL hit) — fully closed
-                    runner_gone_rules.append(rule_name)
-                elif main_gone and (not trade.runner_ticket or runner_gone):
-                    # Both gone or no runner — fully closed
+                if trade.ticket and trade.ticket not in tickets:
                     closed_rules.append(rule_name)
 
-        # Handle main TP hit — move runner SL to midpoint
-        for rule_name in main_tp_hit_rules:
-            with self._lock:
-                trade = self._open_trades.get(rule_name)
-                if not trade:
-                    continue
-                trade.main_tp_hit = True
-                # Profit from main portion (it hit TP exactly)
-                if trade.direction == TradeDirection.BUY:
-                    main_profit = (trade.tp - trade.entry_price) * trade.volume
-                else:
-                    main_profit = (trade.entry_price - trade.tp) * trade.volume
-                new_sl = (trade.entry_price + trade.tp) / 2.0
-
-            log.info(
-                "Main TP hit: ticket=%s (rule=%s) — profit $%.2f. Runner %s still open, SL → %.2f (midpoint)",
-                trade.ticket, rule_name, main_profit, trade.runner_ticket, new_sl,
-            )
-            self._events.trade(
-                f"TP hit: closed {trade.volume:.2f} lots (+${main_profit:.2f}). "
-                f"Runner {trade.runner_volume:.2f} lots — SL → {new_sl:.2f}"
-            )
-
-            # Move runner SL to midpoint
-            self._mt5.modify_position(
-                ticket=trade.runner_ticket, sl=new_sl, tp=0.0, symbol=trade.symbol,
-            )
-            with self._lock:
-                if rule_name in self._open_trades:
-                    self._open_trades[rule_name].sl = new_sl
-
-        # Handle runner gone (after main TP already hit)
-        for rule_name in runner_gone_rules:
-            with self._lock:
-                trade = self._open_trades.get(rule_name)
-                if not trade:
-                    continue
-            log.info(
-                "Runner ticket=%s (rule=%s) closed by SL — trade fully done",
-                trade.runner_ticket, rule_name,
-            )
-            tick = self._mt5.get_tick(trade.symbol)
-            if tick:
-                if trade.direction == TradeDirection.BUY:
-                    runner_exit = tick.bid
-                    runner_profit = (runner_exit - trade.entry_price) * trade.runner_volume
-                    main_profit = (trade.tp - trade.entry_price) * trade.volume
-                else:
-                    runner_exit = tick.ask
-                    runner_profit = (trade.entry_price - runner_exit) * trade.runner_volume
-                    main_profit = (trade.entry_price - trade.tp) * trade.volume
-                exit_price = runner_exit
-                total_profit = main_profit + runner_profit
-            else:
-                exit_price = trade.entry_price
-                total_profit = 0.0
-            self.close_trade(profit=total_profit, exit_price=exit_price, rule_name=rule_name)
-
-        # Handle fully closed (both gone at once, or no runner)
         for rule_name in closed_rules:
             with self._lock:
                 trade = self._open_trades.get(rule_name)
                 if not trade:
                     continue
+
+            # If this is a main trade, check for runner counterpart
+            if not rule_name.endswith("_runner") and trade.tp > 0:
+                runner_key = f"{rule_name}_runner"
+                with self._lock:
+                    runner_trade = self._open_trades.get(runner_key)
+                if runner_trade:
+                    midpoint = (trade.entry_price + trade.tp) / 2.0
+                    self._mt5.modify_position(
+                        ticket=runner_trade.ticket, sl=midpoint, tp=0.0,
+                        symbol=trade.symbol,
+                    )
+                    with self._lock:
+                        if runner_key in self._open_trades:
+                            self._open_trades[runner_key].sl = midpoint
+                    log.info(
+                        "Main TP hit (ticket=%s, rule=%s) — runner %s SL → %.2f",
+                        trade.ticket, rule_name, runner_trade.ticket, midpoint,
+                    )
+                    self._events.trade(
+                        f"TP hit ({trade.volume:.2f} lots). Runner SL → {midpoint:.2f}"
+                    )
+
             log.warning(
                 "Tracked position ticket=%s (rule=%s) no longer in MT5 — marking closed",
                 trade.ticket, rule_name,
             )
             tick = self._mt5.get_tick(trade.symbol)
             if tick:
-                total_vol = trade.volume + trade.runner_volume
                 if trade.direction == TradeDirection.BUY:
                     exit_price = tick.bid
-                    profit = (exit_price - trade.entry_price) * total_vol
+                    profit = (exit_price - trade.entry_price) * trade.volume
                 else:
                     exit_price = tick.ask
-                    profit = (trade.entry_price - exit_price) * total_vol
+                    profit = (trade.entry_price - exit_price) * trade.volume
             else:
                 exit_price = trade.entry_price
                 profit = 0.0
@@ -472,17 +407,9 @@ class TradeManager:
                         return
                     old_sl = self._open_trades[rule_name].sl
                     self._open_trades[rule_name].sl = result.new_sl
-                tp = trade.tp
-                # Modify main ticket (if still alive)
-                if not trade.main_tp_hit:
-                    self._mt5.modify_position(
-                        ticket=trade.ticket, sl=result.new_sl, tp=tp, symbol=trade.symbol,
-                    )
-                # Modify runner ticket too (if it exists)
-                if trade.runner_ticket and not trade.main_tp_hit:
-                    self._mt5.modify_position(
-                        ticket=trade.runner_ticket, sl=result.new_sl, tp=0.0, symbol=trade.symbol,
-                    )
+                self._mt5.modify_position(
+                    ticket=trade.ticket, sl=result.new_sl, tp=trade.tp, symbol=trade.symbol,
+                )
                 log.info(
                     "Exit rule %s: SL moved %.2f → %.2f — %s",
                     rule.name, old_sl, result.new_sl, result.reason,

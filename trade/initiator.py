@@ -254,10 +254,34 @@ class TradeInitiator:
 
         tick = self._mt5.get_tick(request.symbol)
         entry_price = tick.ask if request.direction == TradeDirection.BUY else tick.bid
-        main_ticket = result.order
 
-        # Place runner order (no TP) if partial_tp
-        runner_ticket = 0
+        # Register main trade
+        main_record = TradeRecord(
+            id=request.id,
+            direction=request.direction,
+            symbol=request.symbol,
+            volume=main_volume,
+            entry_price=entry_price,
+            entry_time=datetime.now(),
+            signal_source=request.signal.source,
+            ticket=result.order,
+            sl=request.sl,
+            tp=request.tp,
+            risk_dollars=request.risk_dollars,
+            breakeven_pct=request.breakeven_pct,
+            state=TradeState.EXECUTED,
+        )
+        self._manager.register_trade(main_record)
+        log.info(
+            "Trade %s EXECUTED: ticket=%s entry=%.2f SL=%.2f TP=%.2f vol=%.2f",
+            request.id, result.order, entry_price, request.sl, request.tp, main_volume,
+        )
+        self._events.trade(
+            f"{request.direction.value} OPENED @ {entry_price:.2f} "
+            f"SL={request.sl:.2f} TP={request.tp:.2f} vol={main_volume:.2f}"
+        )
+
+        # Place runner order (no TP) as a separate trade
         if partial_tp and runner_volume >= 0.01:
             if request.direction == TradeDirection.BUY:
                 runner_result = self._mt5.buy(
@@ -270,54 +294,33 @@ class TradeInitiator:
                     sl=request.sl, tp=0.0,
                 )
             if runner_result and runner_result.retcode == 10009:
-                runner_ticket = runner_result.order
+                runner_record = TradeRecord(
+                    id=request.id + "_r",
+                    direction=request.direction,
+                    symbol=request.symbol,
+                    volume=runner_volume,
+                    entry_price=entry_price,
+                    entry_time=datetime.now(),
+                    signal_source=request.signal.source + "_runner",
+                    ticket=runner_result.order,
+                    sl=request.sl,
+                    tp=0.0,
+                    risk_dollars=request.risk_dollars,
+                    breakeven_pct=request.breakeven_pct,
+                    state=TradeState.EXECUTED,
+                )
+                self._manager.register_trade(runner_record)
                 log.info(
-                    "Runner order placed: ticket=%s vol=%.2f SL=%.2f (no TP)",
-                    runner_ticket, runner_volume, request.sl,
+                    "Runner EXECUTED: ticket=%s entry=%.2f SL=%.2f (no TP) vol=%.2f",
+                    runner_result.order, entry_price, request.sl, runner_volume,
+                )
+                self._events.trade(
+                    f"Runner OPENED @ {entry_price:.2f} "
+                    f"SL={request.sl:.2f} (no TP) vol={runner_volume:.2f}"
                 )
             else:
                 retcode = runner_result.retcode if runner_result else "N/A"
                 log.error("Runner order FAILED: retcode=%s — main order still active", retcode)
-                runner_volume = 0.0
-
-        record = TradeRecord(
-            id=request.id,
-            direction=request.direction,
-            symbol=request.symbol,
-            volume=main_volume,
-            entry_price=entry_price,
-            entry_time=datetime.now(),
-            signal_source=request.signal.source,
-            ticket=main_ticket,
-            sl=request.sl,
-            tp=request.tp,
-            risk_dollars=request.risk_dollars,
-            breakeven_pct=request.breakeven_pct,
-            runner_ticket=runner_ticket,
-            runner_volume=runner_volume,
-            state=TradeState.EXECUTED,
-        )
-        self._manager.register_trade(record)
-
-        if runner_ticket:
-            log.info(
-                "Trade %s EXECUTED: main=%s (%.2f lots TP=%.2f) + runner=%s (%.2f lots no TP)",
-                request.id, main_ticket, main_volume, request.tp, runner_ticket, runner_volume,
-            )
-            self._events.trade(
-                f"{request.direction.value} OPENED @ {entry_price:.2f} "
-                f"SL={request.sl:.2f} TP={request.tp:.2f} "
-                f"[{main_volume:.2f}+{runner_volume:.2f} lots]"
-            )
-        else:
-            log.info(
-                "Trade %s EXECUTED: ticket=%s entry=%.2f SL=%.2f TP=%.2f",
-                request.id, main_ticket, entry_price, request.sl, request.tp,
-            )
-            self._events.trade(
-                f"{request.direction.value} OPENED @ {entry_price:.2f} "
-                f"SL={request.sl:.2f} TP={request.tp:.2f}"
-            )
 
 
     def reset_signal_tracking(self) -> None:
