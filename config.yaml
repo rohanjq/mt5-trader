@@ -146,13 +146,13 @@ rules:
         - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
         - adx_M5.closed_adx_rising is TRUE
         - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
-        - dc_M1.closed_break_upper is TRUE
+        - dc_M1.closed_price_zone == UPPER
         - macd_M1.closed_histogram > 0
       sell:
         - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
         - adx_M5.closed_adx_rising is TRUE
         - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
-        - dc_M1.closed_break_lower is TRUE
+        - dc_M1.closed_price_zone == LOWER
         - macd_M1.closed_histogram < 0
 
     # ══════════════════════════════════════════════

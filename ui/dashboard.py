@@ -496,6 +496,7 @@ Screen {
 #signal-panel {
     width: 40;
     min-width: 34;
+    height: 100%;
     border: solid $secondary;
     padding: 0 1;
     overflow-y: auto;
