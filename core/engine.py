@@ -84,6 +84,9 @@ class Engine:
             log.error("Failed to connect to MT5 — engine will run in disconnected mode")
             return False
 
+        # Adopt any existing positions from a previous session
+        self.trade_manager.adopt_existing_positions()
+
         # Start config hot-reload
         self.config.start_watching()
         return True

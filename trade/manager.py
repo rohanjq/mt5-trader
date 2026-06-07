@@ -93,6 +93,56 @@ class TradeManager:
 
     # ── trade lifecycle ────────────────────────────────────────────────────
 
+    def adopt_existing_positions(self) -> None:
+        """Check MT5 for open positions and adopt them on startup."""
+        if not self._mt5.connected:
+            return
+
+        symbol = self._config.get("trading.symbol", "BTCUSDT")
+        magic = self._config.get("trading.magic", 100)
+        positions = self._mt5.get_positions(symbol)
+
+        for pos in positions:
+            # Only adopt our own positions (matching magic number)
+            if hasattr(pos, "magic") and pos.magic != magic:
+                continue
+
+            direction = (
+                TradeDirection.BUY if pos.type == 0  # ORDER_TYPE_BUY
+                else TradeDirection.SELL
+            )
+
+            record = TradeRecord(
+                id=f"adopted_{pos.ticket}",
+                direction=direction,
+                symbol=symbol,
+                volume=pos.volume,
+                entry_price=pos.price_open,
+                entry_time=datetime.now(),
+                signal_source="adopted",
+                ticket=pos.ticket,
+                sl=pos.sl if pos.sl else 0.0,
+                tp=pos.tp if pos.tp else 0.0,
+                risk_dollars=0.0,
+                state=TradeState.MONITORING,
+            )
+            record.profit = pos.profit
+
+            with self._lock:
+                if self._open_trade is not None:
+                    log.warning("Already tracking a position — skipping ticket=%s", pos.ticket)
+                    continue
+                self._open_trade = record
+
+            log.info(
+                "Adopted existing position: ticket=%s %s @ %.2f SL=%.2f TP=%.2f P&L=%.2f",
+                pos.ticket, direction.value, pos.price_open, record.sl, record.tp, pos.profit,
+            )
+            self._events.trade(
+                f"Adopted {direction.value} @ {pos.price_open:.2f} "
+                f"ticket={pos.ticket} P&L={pos.profit:+.2f}"
+            )
+
     def register_trade(self, record: TradeRecord) -> None:
         with self._lock:
             record.state = TradeState.MONITORING
