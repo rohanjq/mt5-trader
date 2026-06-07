@@ -304,7 +304,7 @@ class TradeInitiator:
                     signal_source=request.signal.source + "_runner",
                     ticket=runner_result.order,
                     sl=request.sl,
-                    tp=0.0,
+                    tp=request.tp,  # internal target (MT5 order has TP=0)
                     risk_dollars=request.risk_dollars,
                     breakeven_pct=request.breakeven_pct,
                     state=TradeState.EXECUTED,

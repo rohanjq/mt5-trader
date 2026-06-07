@@ -298,11 +298,7 @@ class TradeManager:
             self._evaluate_exit_rules(trade, tick)
 
     def sync_positions_from_mt5(self) -> None:
-        """Detect if MT5 positions were closed externally.
-
-        When a main trade (has TP) disappears and its runner counterpart is
-        still alive, the TP was hit — move runner SL to midpoint.
-        """
+        """Detect if MT5 positions were closed externally."""
         if not self._mt5.connected:
             return
 
@@ -320,28 +316,6 @@ class TradeManager:
                 trade = self._open_trades.get(rule_name)
                 if not trade:
                     continue
-
-            # If this is a main trade, check for runner counterpart
-            if not rule_name.endswith("_runner") and trade.tp > 0:
-                runner_key = f"{rule_name}_runner"
-                with self._lock:
-                    runner_trade = self._open_trades.get(runner_key)
-                if runner_trade:
-                    midpoint = (trade.entry_price + trade.tp) / 2.0
-                    self._mt5.modify_position(
-                        ticket=runner_trade.ticket, sl=midpoint, tp=0.0,
-                        symbol=trade.symbol,
-                    )
-                    with self._lock:
-                        if runner_key in self._open_trades:
-                            self._open_trades[runner_key].sl = midpoint
-                    log.info(
-                        "Main TP hit (ticket=%s, rule=%s) — runner %s SL → %.2f",
-                        trade.ticket, rule_name, runner_trade.ticket, midpoint,
-                    )
-                    self._events.trade(
-                        f"TP hit ({trade.volume:.2f} lots). Runner SL → {midpoint:.2f}"
-                    )
 
             log.warning(
                 "Tracked position ticket=%s (rule=%s) no longer in MT5 — marking closed",
@@ -407,8 +381,10 @@ class TradeManager:
                         return
                     old_sl = self._open_trades[rule_name].sl
                     self._open_trades[rule_name].sl = result.new_sl
+                # Runners have TP=0 on broker; don't accidentally set internal TP
+                mt5_tp = 0.0 if rule_name.endswith("_runner") else trade.tp
                 self._mt5.modify_position(
-                    ticket=trade.ticket, sl=result.new_sl, tp=trade.tp, symbol=trade.symbol,
+                    ticket=trade.ticket, sl=result.new_sl, tp=mt5_tp, symbol=trade.symbol,
                 )
                 log.info(
                     "Exit rule %s: SL moved %.2f → %.2f — %s",
