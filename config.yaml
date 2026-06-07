@@ -36,10 +36,9 @@ exit_rules:
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
 rules:
-  # ── Python-based rules (in rules/*.py) ──
+  # ── All Python rules disabled ──
   utbot_simple:
-    enabled: true                    # simple 1m UT Bot signal for testing
-    timeframe: M1
+    enabled: false
   dc_confluence:
     enabled: false
   dc_wick_rejection:
@@ -47,60 +46,55 @@ rules:
   utbot_multi_tf:
     enabled: false
 
-  # ── Expression rules (YAML-defined, no Python needed) ──
-  # Format: signal_name.field_name OPERATOR value
-  # Operators: ==, !=, >, >=, <, <=, in, not_in, is, is_not
-  # All conditions are ANDed. Buy and sell are separate.
+  # ── Expression rules (YAML only) ──
   expressions:
-    - name: ut_m1_with_m15_trend
-      enabled: false
-      priority: 140
-      description: "UT 1m signal + 15m trend alignment"
+    # UT 3m signal + 1m consecutive bars + 45m trend
+    - name: "3m_trend_sell"
+      enabled: true
+      priority: 100
+      description: "UT 3m signal + 1m bear bars + 45m trend"
+      buy:
+        - utbot_M3.closed_signal == BUY
+        - utbot_M1.consecutive_bull_bars >= 2
+        - utbot_M45.closed_bias == BULLISH
+      sell:
+        - utbot_M3.closed_signal == SELL
+        - utbot_M1.consecutive_bear_bars >= 2
+        - utbot_M45.closed_bias == BEARISH
+
+    # UT 1m signal + DC zone near mid (mean reversion)
+    - name: "1m_dc_mid_reversal"
+      enabled: true
+      priority: 110
+      description: "UT 1m signal + price near DC mid zone"
       buy:
         - utbot_M1.closed_signal == BUY
-        - utbot_M15.closed_bias == BULLISH
+        - dc_M15.closed_price_zone in LOWER_MID,MID
       sell:
         - utbot_M1.closed_signal == SELL
-        - utbot_M15.closed_bias == BEARISH
+        - dc_M15.closed_price_zone in UPPER_MID,MID
 
-    - name: dc_zone_ut_entry
-      enabled: false
-      priority: 105
-      description: "DC zone + UT Bot signal + trend bars"
+    # UT 1m + 3m bias aligned (frequent)
+    - name: "1m_3m_align"
+      enabled: true
+      priority: 130
+      description: "UT 1m signal + 3m bias aligned"
       buy:
-        - dc_M15.closed_price_zone in LOWER,LOWER_MID
         - utbot_M1.closed_signal == BUY
-        - utbot_M45.consecutive_bull_bars >= 5
-      sell:
-        - dc_M15.closed_price_zone in UPPER,UPPER_MID
-        - utbot_M1.closed_signal == SELL
-        - utbot_M45.consecutive_bear_bars >= 5
-
-    - name: dc_wick_ut_bias
-      enabled: false
-      priority: 115
-      description: "DC wick rejection + UT Bot bias"
-      buy:
-        - dc_M15.closed_lower_wick_rej is TRUE
         - utbot_M3.closed_bias == BULLISH
       sell:
-        - dc_M15.closed_upper_wick_rej is TRUE
+        - utbot_M1.closed_signal == SELL
         - utbot_M3.closed_bias == BEARISH
 
-    - name: full_alignment
-      enabled: false
-      priority: 90
-      description: "All TFs aligned + DC zone + UT signal"
+    # UT 1m signal alone (most frequent, fallback)
+    - name: "1m_signal_only"
+      enabled: true
+      priority: 200
+      description: "UT 1m signal only"
       buy:
         - utbot_M1.closed_signal == BUY
-        - utbot_M15.closed_bias == BULLISH
-        - utbot_M45.closed_bias == BULLISH
-        - dc_M15.closed_price_zone in LOWER,LOWER_MID,MID
       sell:
         - utbot_M1.closed_signal == SELL
-        - utbot_M15.closed_bias == BEARISH
-        - utbot_M45.closed_bias == BEARISH
-        - dc_M15.closed_price_zone in UPPER,UPPER_MID,MID
 
 logging:
   level: INFO
