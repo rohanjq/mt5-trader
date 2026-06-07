@@ -112,7 +112,7 @@ rules:
         - ema50_M5.closed_price_vs_ema == ABOVE
         - ema200_M5.closed_price_vs_ema == ABOVE
         - ema50_M5.ema_slope == RISING
-        - rsi14_M1.closed_cross == CROSS_UP_52
+        - rsi14_M1.closed_cross in CROSS_UP_50,CROSS_UP_52
       sell:
         - ema50_M5.closed_price_vs_ema == BELOW
         - ema200_M5.closed_price_vs_ema == BELOW
