@@ -1,0 +1,26 @@
+# MT5 Auto-Trader Configuration
+# This file is hot-reloaded — changes to trading.volume take effect immediately.
+
+mt5:
+  host: localhost
+  port: 8001
+
+trading:
+  symbol: BTCUSDT
+  volume: 0.001        # ← hot-reloadable
+  magic: 100
+  deviation: 20
+  filling: FOK
+
+signals:
+  poll_interval: 2.0   # seconds between signal reads
+  csv_dir: ../MetaTrader5-Docker/data/signals
+
+filters:
+  cooldown_minutes: 5
+  max_consecutive_losses: 3
+  pause_after_consecutive_minutes: 15
+  max_daily_loss: 500.0
+
+logging:
+  level: INFO
