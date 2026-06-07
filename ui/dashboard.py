@@ -107,12 +107,11 @@ class PositionPanel(Static):
 
         sl_str = f"{trade.sl:.2f}" if trade.sl > 0 else "—"
         tp_str = f"{trade.tp:.2f}" if trade.tp > 0 else "—"
-        risk_str = f"${trade.risk_dollars:.2f}" if trade.risk_dollars > 0 else "—"
 
         text = (
             f"Direction: {direction}  │  Entry: {trade.entry_price:.2f}  │  "
             f"Vol: {trade.volume}  │  "
-            f"SL: {sl_str}  │  TP: {tp_str}  │  Risk: {risk_str}  │  "
+            f"SL: {sl_str}  │  TP: {tp_str}  │  "
             f"P&L: [{pnl_color}]{trade.profit:+.2f}[/]  │  "
             f"Duration: {duration}  │  Ticket: {trade.ticket}"
         )

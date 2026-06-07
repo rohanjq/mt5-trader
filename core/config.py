@@ -21,9 +21,8 @@ _DEFAULT_CONFIG: dict[str, Any] = {
         "magic": 100,
         "deviation": 20,
         "filling": "FOK",
-        "risk_dollars": 5.0,
+        "sl_dollars": 5.0,
         "reward_ratio": 1.25,
-        "use_signal_sl": True,
     },
     "signals": {
         "poll_interval": 2.0,
@@ -37,8 +36,8 @@ _DEFAULT_CONFIG: dict[str, Any] = {
     },
     "exit_rules": {
         "signal_reversal_exit": True,
-        "breakeven_at_r": 1.75,
-        "trailing_stop_r": 0.0,
+        "breakeven_trigger_dollars": 1.75,
+        "trailing_stop_dollars": 0.0,
     },
     "logging": {
         "level": "INFO",

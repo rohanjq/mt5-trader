@@ -101,52 +101,33 @@ class TradeInitiator:
     def _calculate_risk(
         self, signal: Signal, direction: TradeDirection,
     ) -> tuple[float, float, float, float]:
-        """Calculate SL, TP, volume, and risk_dollars from config + signal metadata.
+        """Calculate SL, TP, volume from config.
 
-        Returns (sl, tp, volume, risk_dollars).
+        SL/TP are fixed dollar distances from entry price.
+        Volume is always the configured fixed value.
+
+        Returns (sl, tp, volume, sl_dollars).
         """
-        risk_dollars = float(self._config.get("trading.risk_dollars", 0))
+        volume = float(self._config.get("trading.volume", 0.001))
+        sl_dollars = float(self._config.get("trading.sl_dollars", 5.0))
         reward_ratio = float(self._config.get("trading.reward_ratio", 1.25))
-        use_signal_sl = self._config.get("trading.use_signal_sl", True)
-        default_volume = float(self._config.get("trading.volume", 0.001))
+        tp_dollars = sl_dollars * reward_ratio
 
-        # Try to get SL from signal's trail_stop
-        sl = 0.0
-        if use_signal_sl:
-            trail_stop_str = signal.metadata.get("trail_stop", "")
-            try:
-                sl = float(trail_stop_str) if trail_stop_str else 0.0
-            except (ValueError, TypeError):
-                sl = 0.0
-
-        # Get current price for TP calculation
+        # Get current price
         tick = self._mt5.get_tick() if self._mt5.connected else None
-        entry_price = 0.0
-        if tick:
-            entry_price = tick.ask if direction == TradeDirection.BUY else tick.bid
+        if not tick:
+            return 0.0, 0.0, volume, sl_dollars
 
-        # Calculate TP from SL distance and reward ratio
-        tp = 0.0
-        sl_distance = 0.0
-        if sl > 0 and entry_price > 0:
-            sl_distance = abs(entry_price - sl)
-            if direction == TradeDirection.BUY:
-                tp = entry_price + (sl_distance * reward_ratio)
-            else:
-                tp = entry_price - (sl_distance * reward_ratio)
+        entry_price = tick.ask if direction == TradeDirection.BUY else tick.bid
 
-        # Calculate volume from risk_dollars if set
-        volume = default_volume
-        if risk_dollars > 0 and sl_distance > 0:
-            volume = risk_dollars / sl_distance
-            # Round to broker precision (3 decimals for crypto)
-            volume = round(volume, 3)
-            # Clamp to minimum
-            if volume < 0.001:
-                volume = 0.001
-                log.warning("Calculated volume too small, clamped to 0.001")
+        if direction == TradeDirection.BUY:
+            sl = entry_price - sl_dollars
+            tp = entry_price + tp_dollars
+        else:
+            sl = entry_price + sl_dollars
+            tp = entry_price - tp_dollars
 
-        return sl, tp, volume, risk_dollars
+        return sl, tp, volume, sl_dollars
 
     def _execute(self, request: TradeRequest) -> None:
         if not self._mt5.connected:
