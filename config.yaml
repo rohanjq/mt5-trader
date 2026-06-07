@@ -22,6 +22,8 @@ signals:
       timeframes: [M1, M3, M15, M45]
     - indicator: dc
       timeframes: [M15, M45]
+    - indicator: liqgrab
+      timeframes: [M5, M15, H1]
 
 filters:
   cooldown_minutes: 5
@@ -95,6 +97,56 @@ rules:
         - utbot_M1.closed_signal == BUY
       sell:
         - utbot_M1.closed_signal == SELL
+
+    # ── Liquidity Grab rules ──
+
+    # LG composite signal alone (already filtered by rejection+breakout+MA)
+    - name: "lg_composite"
+      enabled: true
+      priority: 85
+      description: "LG composite signal (rej+breakout+MA)"
+      buy:
+        - liqgrab_M15.liq_signal == BUY
+      sell:
+        - liqgrab_M15.liq_signal == SELL
+
+    # LG signal + UT Bot 1m confirmation
+    - name: "lg_ut_confirm"
+      enabled: true
+      priority: 80
+      description: "LG M15 signal + UT 1m bias aligned"
+      buy:
+        - liqgrab_M15.liq_signal == BUY
+        - utbot_M1.closed_bias == BULLISH
+      sell:
+        - liqgrab_M15.liq_signal == SELL
+        - utbot_M1.closed_bias == BEARISH
+
+    # LG rejection + DC support zone (no breakout needed yet)
+    - name: "lg_dc_support"
+      enabled: true
+      priority: 95
+      description: "LG rejection at DC support/resistance"
+      buy:
+        - liqgrab_H1.rejection_up is TRUE
+        - dc_M15.closed_price_zone in LOWER,LOWER_MID
+        - utbot_M3.closed_bias == BULLISH
+      sell:
+        - liqgrab_H1.rejection_down is TRUE
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID
+        - utbot_M3.closed_bias == BEARISH
+
+    # LG M5 signal for faster entries + 15m trend
+    - name: "lg_fast_trend"
+      enabled: true
+      priority: 90
+      description: "LG M5 fast + UT 15m trend"
+      buy:
+        - liqgrab_M5.liq_signal == BUY
+        - utbot_M15.closed_bias == BULLISH
+      sell:
+        - liqgrab_M5.liq_signal == SELL
+        - utbot_M15.closed_bias == BEARISH
 
 logging:
   level: INFO

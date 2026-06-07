@@ -65,11 +65,13 @@ def build_signal_plugins(config: Config) -> list[BaseSignal]:
         timeframes: [M1, M3, M5, M15, M45]
     """
     from signals.donchian import DonchianSignal
+    from signals.liq_grab import LiqGrabSignal
     from signals.ut_bot import UTBotSignal
 
     indicator_classes = {
         "utbot": UTBotSignal,
         "dc": DonchianSignal,
+        "liqgrab": LiqGrabSignal,
     }
 
     sources = config.get("signals.sources", [])

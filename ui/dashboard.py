@@ -127,6 +127,33 @@ class SignalPanel(Static):
                     lines.append(f"  DC  {zone_col}  {wick}")
                     lines.append(f"  [dim]U={upper} L={lower}[/]")
 
+                elif indicator == "LIQGRAB":
+                    lsig = meta.get("liq_signal", "NONE")
+                    if lsig.upper() == "BUY":
+                        sig_col = f"[bold green]★ BUY[/]"
+                    elif lsig.upper() == "SELL":
+                        sig_col = f"[bold red]★ SELL[/]"
+                    else:
+                        sig_col = f"[dim]{lsig}[/]"
+
+                    rej_up = meta.get("rejection_up", "FALSE")
+                    rej_dn = meta.get("rejection_down", "FALSE")
+                    bk_up = meta.get("breakout_up", "FALSE")
+                    bk_dn = meta.get("breakout_down", "FALSE")
+                    ma_trend = meta.get("ma_trend", "—")
+                    parts = []
+                    if rej_up.upper() == "TRUE":
+                        parts.append("[green]RejUp[/]")
+                    if rej_dn.upper() == "TRUE":
+                        parts.append("[red]RejDn[/]")
+                    if bk_up.upper() == "TRUE":
+                        parts.append("[green]BrkUp[/]")
+                    if bk_dn.upper() == "TRUE":
+                        parts.append("[red]BrkDn[/]")
+                    flags = " ".join(parts) if parts else "[dim]quiet[/]"
+                    lines.append(f"  LG  {sig_col}  MA={ma_trend}")
+                    lines.append(f"  [dim]{flags}[/]")
+
                 else:
                     lines.append(f"  {indicator}: {sig.direction.value}")
 

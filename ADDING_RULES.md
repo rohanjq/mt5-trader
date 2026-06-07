@@ -165,6 +165,36 @@ Available timeframes: M1, M3, M5, M15, M45 (configured in `config.yaml`)
 **Key insight**: Wick rejections are one-bar events (like `closed_signal`). The zone
 is persistent and good for bias/context.
 
+### Liquidity Grab Fields (`liqgrab_{TF}`)
+
+Available timeframes: M3, M5, M15, H1, H4 (configured in `config.yaml`)
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `liq_signal` | str | BUY / SELL / NONE | **Composite signal** — fires when rejection + breakout + MA trend all align. High quality. |
+| `rejection_up` | str | TRUE / FALSE | Bullish liquidity grab — lower wick swept below key support and closed above. |
+| `rejection_down` | str | TRUE / FALSE | Bearish liquidity grab — upper wick swept above key resistance and closed below. |
+| `rejection_up_bar` | int | -1 if none | How many bars ago the bullish rejection occurred. |
+| `rejection_down_bar` | int | -1 if none | How many bars ago the bearish rejection occurred. |
+| `breakout_up` | str | TRUE / FALSE | Price broke above a recent key high (bullish breakout after grab). |
+| `breakout_down` | str | TRUE / FALSE | Price broke below a recent key low (bearish breakout after grab). |
+| `key_high` | float / NONE | Identified resistance level. |
+| `key_low` | float / NONE | Identified support level. |
+| `dist_to_key_high` | float | Distance from current high to key_high (negative = below). |
+| `dist_to_key_low` | float | Distance from current low to key_low (positive = above). |
+| `ma_value` | float | SMA value (trend filter). |
+| `ma_trend` | str | ABOVE / BELOW | Price relative to MA — ABOVE = bullish, BELOW = bearish. |
+
+**How it works** (Smart Money Concepts):
+1. Find key level (highest high / lowest low with confirmed rejection)
+2. Detect liquidity grab: wick sweeps past key level, body closes on the other side (wick ≥ 2x body)
+3. Wait for breakout: price then breaks through the opposite key level
+4. Filter by trend: price must be on the right side of MA (above for buy, below for sell)
+5. All 3 met → `liq_signal` fires
+
+**Key insight**: `liq_signal` is already a multi-condition composite — using it alone is valid.
+The sub-components (`rejection_up`, `breakout_up`, `ma_trend`) are available for custom combos.
+
 ---
 
 ## Creating a New Rule
