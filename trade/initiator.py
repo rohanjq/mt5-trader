@@ -50,7 +50,6 @@ class TradeInitiator:
         self._manager = trade_manager
         self._lock = threading.Lock()
         self._rules: list[BaseRule] = []
-        self._last_trigger_key: str | None = None  # dedup
         self._events = EventLog.get()
         self._warmed_up = False  # smart warmup: check signal freshness
 
@@ -258,13 +257,11 @@ class TradeInitiator:
                 "Trade %s execution FAILED: retcode=%s comment=%s",
                 request.id, retcode, comment,
             )
-            # Reset so the signal can be retried on next poll
-            self._last_trigger_key = None
+
 
     def reset_signal_tracking(self) -> None:
         """Reset so the next signal of any direction will be acted on."""
-        with self._lock:
-            self._last_trigger_key = None
+        pass  # Rising-edge detection in ExpressionRule handles dedup now
 
     def manual_trade(self, direction: TradeDirection) -> bool:
         """Execute a manual trade bypassing all filters.
