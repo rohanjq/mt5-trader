@@ -30,23 +30,26 @@ filters:
   max_daily_loss: 500.0
 
 exit_rules:
-  signal_reversal_exit: true         # close when signal flips opposite
+  signal_reversal_exit: false        # let TP/SL hit instead of closing on signal flip
   breakeven_trigger_dollars: 50.0    # move SL to entry when price moves $50
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
 rules:
+  utbot_simple:
+    enabled: true                    # simple 1m UT Bot signal for testing
+    timeframe: M1
   dc_confluence:
-    enabled: true
+    enabled: false                   # disabled for testing
     dc_timeframe: M15
     ut_entry_timeframe: M1
     ut_trend_timeframe: M45
     min_trend_bars: 5
   dc_wick_rejection:
-    enabled: true
+    enabled: false                   # disabled for testing
     dc_timeframe: M15
     ut_timeframe: M3
   utbot_multi_tf:
-    enabled: true
+    enabled: false                   # disabled for testing
     entry_timeframe: M1
     mid_timeframe: M15
     trend_timeframe: M45
