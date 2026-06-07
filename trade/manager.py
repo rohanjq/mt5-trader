@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from core.events import EventLog
 from core.models import Signal, TradeDirection, TradeRecord, TradeState
 from exits.base import BaseExitRule, ExitAction
 
@@ -33,6 +34,12 @@ class TradeManager:
         self._latest_signals: dict[str, Signal] = {}
         self._on_close_callbacks: list = []
 
+        # For reversal cooldown filter
+        self._last_trade_direction: TradeDirection | None = None
+        self._last_close_time: float | None = None
+
+        self._events = EventLog.get()
+
     # ── properties ─────────────────────────────────────────────────────────
 
     @property
@@ -59,6 +66,16 @@ class TradeManager:
     def consecutive_losses(self) -> int:
         with self._lock:
             return self._consecutive_losses
+
+    @property
+    def last_trade_direction(self) -> TradeDirection | None:
+        with self._lock:
+            return self._last_trade_direction
+
+    @property
+    def last_close_time(self) -> float | None:
+        with self._lock:
+            return self._last_close_time
 
     # ── exit rules ─────────────────────────────────────────────────────────
 
@@ -95,6 +112,8 @@ class TradeManager:
 
             self._trade_history.append(trade)
             self._open_trade = None
+            self._last_trade_direction = trade.direction
+            self._last_close_time = time.time()
 
             if profit < 0:
                 self._last_loss_time = time.time()
@@ -103,9 +122,21 @@ class TradeManager:
                     "Trade %s CLOSED with LOSS: %.2f (consecutive: %d)",
                     trade.id, profit, self._consecutive_losses,
                 )
+                self._events.trade(
+                    f"{trade.direction.value} CLOSED — LOSS: {profit:+.2f}"
+                )
+            elif profit == 0:
+                self._consecutive_losses = 0
+                log.info("Trade %s CLOSED at BREAKEVEN", trade.id)
+                self._events.trade(
+                    f"{trade.direction.value} CLOSED — BREAKEVEN"
+                )
             else:
                 self._consecutive_losses = 0
                 log.info("Trade %s CLOSED with PROFIT: %.2f", trade.id, profit)
+                self._events.trade(
+                    f"{trade.direction.value} CLOSED — PROFIT: {profit:+.2f}"
+                )
 
             # Notify listeners (e.g., initiator resets signal tracking)
             for cb in self._on_close_callbacks:
@@ -189,11 +220,28 @@ class TradeManager:
                 # Check if our tracked position still exists
                 tickets = {p.ticket for p in mt5_positions}
                 if self._open_trade.ticket not in tickets:
+                    trade = self._open_trade
                     log.warning(
                         "Tracked position ticket=%s no longer in MT5 — marking closed",
-                        self._open_trade.ticket,
+                        trade.ticket,
                     )
-                    self.close_trade(profit=0.0, exit_price=self._open_trade.entry_price)
+                    # Get the real exit price from current tick
+                    tick = self._mt5.get_tick(trade.symbol)
+                    if tick:
+                        if trade.direction == TradeDirection.BUY:
+                            exit_price = tick.bid
+                        else:
+                            exit_price = tick.ask
+                        profit = (
+                            (exit_price - trade.entry_price) * trade.volume
+                            if trade.direction == TradeDirection.BUY
+                            else (trade.entry_price - exit_price) * trade.volume
+                        )
+                    else:
+                        # Fallback if no tick available
+                        exit_price = trade.entry_price
+                        profit = 0.0
+                    self.close_trade(profit=profit, exit_price=exit_price)
 
     # ── statistics ─────────────────────────────────────────────────────────
 
@@ -205,7 +253,8 @@ class TradeManager:
                 if t.entry_time.date() == today
             ]
         wins = [t for t in today_trades if t.profit > 0]
-        losses = [t for t in today_trades if t.profit <= 0]
+        losses = [t for t in today_trades if t.profit < 0]
+        breakevens = [t for t in today_trades if t.profit == 0.0]
         total_profit = sum(t.profit for t in today_trades)
 
         return {
@@ -230,6 +279,7 @@ class TradeManager:
 
             if result.action == ExitAction.CLOSE:
                 log.info("Exit rule %s: CLOSE — %s", rule.name, result.reason)
+                self._events.exit_event(f"Exit [{rule.name}]: CLOSE — {result.reason}")
                 self.close_current_position()
                 return
 
@@ -247,6 +297,9 @@ class TradeManager:
                     "Exit rule %s: SL moved %.2f → %.2f — %s",
                     rule.name, old_sl, result.new_sl, result.reason,
                 )
+                self._events.exit_event(
+                    f"Exit [{rule.name}]: SL {old_sl:.2f} → {result.new_sl:.2f}"
+                )
 
             if result.action == ExitAction.MODIFY_TP and result.new_tp is not None:
                 with self._lock:
@@ -261,4 +314,7 @@ class TradeManager:
                 log.info(
                     "Exit rule %s: TP moved %.2f → %.2f — %s",
                     rule.name, old_tp, result.new_tp, result.reason,
+                )
+                self._events.exit_event(
+                    f"Exit [{rule.name}]: TP {old_tp:.2f} → {result.new_tp:.2f}"
                 )

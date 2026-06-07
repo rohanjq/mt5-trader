@@ -11,6 +11,7 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.reactive import reactive
 from textual.widgets import DataTable, Footer, Header, Label, Static
 
+from core.events import EventLevel, EventLog
 from core.models import Signal, SignalDirection, TradeState
 
 if TYPE_CHECKING:
@@ -281,6 +282,37 @@ class RulesPanel(Static):
         label.update("  │  ".join(parts) if parts else "[dim]No rules loaded[/]")
 
 
+class EventLogPanel(Static):
+    """Live event stream — rule triggers, filter blocks, trade opens/closes."""
+
+    _LEVEL_COLORS = {
+        EventLevel.INFO: "dim",
+        EventLevel.TRADE: "green",
+        EventLevel.BLOCK: "red",
+        EventLevel.WARN: "yellow",
+        EventLevel.EXIT: "cyan",
+    }
+
+    def compose(self) -> ComposeResult:
+        yield Label("[dim]Waiting for events...[/]", id="event-text")
+
+    def refresh_content(self) -> None:
+        label = self.query_one("#event-text", Label)
+        events = EventLog.get().recent(15)
+        if not events:
+            label.update("[dim]No events yet[/]")
+            return
+
+        lines: list[str] = []
+        for ev in events:
+            ts = datetime.fromtimestamp(ev.timestamp).strftime("%H:%M:%S")
+            color = self._LEVEL_COLORS.get(ev.level, "white")
+            tag = ev.level.value
+            lines.append(f"[dim]{ts}[/] [{color}]{tag:5s}[/] {ev.message}")
+
+        label.update("\n".join(lines))
+
+
 # ── Main App ───────────────────────────────────────────────────────────────────
 
 DASHBOARD_CSS = """
@@ -346,6 +378,13 @@ Screen {
     padding: 0 1;
 }
 
+#event-log-panel {
+    height: 1fr;
+    border: solid $success-darken-1;
+    padding: 0 1;
+    overflow-y: auto;
+}
+
 Static {
     height: auto;
 }
@@ -380,6 +419,7 @@ class TradingDashboard(App):
                 yield SummaryPanel(self._engine, id="summary-panel")
                 yield FilterPanel(self._engine, id="filter-panel")
                 yield RulesPanel(self._engine, id="rules-panel")
+                yield EventLogPanel(id="event-log-panel")
                 yield TradeLogPanel(self._engine, id="trade-log-panel")
             yield SignalPanel(self._engine, id="signal-panel")
         yield Footer()
@@ -395,6 +435,7 @@ class TradingDashboard(App):
             self.query_one("#summary-panel", SummaryPanel).refresh_content()
             self.query_one("#filter-panel", FilterPanel).refresh_content()
             self.query_one("#rules-panel", RulesPanel).refresh_content()
+            self.query_one("#event-log-panel", EventLogPanel).refresh_content()
             self.query_one("#trade-log-panel", TradeLogPanel).refresh_content()
         except Exception:
             pass  # UI race conditions during shutdown

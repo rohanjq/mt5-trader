@@ -5,6 +5,7 @@ import threading
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from core.events import EventLog
 from core.models import (
     FilterVerdict,
     Signal,
@@ -47,6 +48,7 @@ class TradeInitiator:
         self._lock = threading.Lock()
         self._rules: list[BaseRule] = []
         self._last_trigger_key: str | None = None  # dedup
+        self._events = EventLog.get()
 
     def set_rules(self, rules: list[BaseRule]) -> None:
         self._rules = rules
@@ -82,6 +84,9 @@ class TradeInitiator:
                 log.info(
                     "Rule %s triggered: %s — %s",
                     rule.name, result.direction.value, result.reason,
+                )
+                self._events.trade(
+                    f"Rule [{rule.name}] triggered {result.direction.value}: {result.reason}"
                 )
                 self._initiate_trade(result, signals)
                 return  # Only one trade per cycle
@@ -120,6 +125,7 @@ class TradeInitiator:
             request.state = TradeState.REJECTED
             request.rejection_reason = reason
             log.info("Trade %s rejected: %s", request.id, reason)
+            self._events.block(f"Trade BLOCKED: {reason}")
             return
 
         request.state = TradeState.FILTERS_PASSED
@@ -194,6 +200,10 @@ class TradeInitiator:
             log.info(
                 "Trade %s EXECUTED: ticket=%s entry=%.2f SL=%.2f TP=%.2f",
                 request.id, result.order, entry_price, request.sl, request.tp,
+            )
+            self._events.trade(
+                f"{request.direction.value} OPENED @ {entry_price:.2f} "
+                f"SL={request.sl:.2f} TP={request.tp:.2f}"
             )
         else:
             retcode = result.retcode if result else "N/A"

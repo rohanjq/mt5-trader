@@ -28,6 +28,7 @@ filters:
   max_consecutive_losses: 3
   pause_after_consecutive_minutes: 15
   max_daily_loss: 500.0
+  reversal_cooldown_seconds: 60    # block reverse direction for 60s after close
 
 exit_rules:
   signal_reversal_exit: false        # let TP/SL hit instead of closing on signal flip
