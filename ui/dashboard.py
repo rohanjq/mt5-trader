@@ -45,66 +45,91 @@ class StatusPanel(Static):
 
 
 class SignalPanel(Static):
-    """Current signals from all sources."""
+    """Vertical signal sidebar grouped by timeframe."""
 
     def __init__(self, engine: Engine, **kw) -> None:
         super().__init__(**kw)
         self._engine = engine
 
     def compose(self) -> ComposeResult:
-        table = DataTable(id="signal-table")
-        table.add_columns("Source", "Direction", "Bias/Zone", "Signal", "Detail", "Updated")
-        yield table
+        yield Label("[dim]Waiting for signals...[/]", id="signal-text")
 
     def refresh_content(self) -> None:
-        table = self.query_one("#signal-table", DataTable)
-        table.clear()
-
+        label = self.query_one("#signal-text", Label)
         signals = self._engine.latest_signals
+
+        if not signals:
+            label.update("[dim]No signals[/]")
+            return
+
+        # Group signals by timeframe
+        tf_order = ["M1", "M3", "M5", "M10", "M15", "M45", "H1", "H4", "D1"]
+        groups: dict[str, list[tuple[str, Signal]]] = {}
         for name, sig in signals.items():
-            if sig.direction == SignalDirection.BUY:
-                direction = "[green]▲ BUY[/]"
-            elif sig.direction == SignalDirection.SELL:
-                direction = "[red]▼ SELL[/]"
-            else:
-                direction = "[yellow]— NEUTRAL[/]"
+            # Extract timeframe from name like utbot_M1, dc_M15
+            parts = name.split("_", 1)
+            tf = parts[1] if len(parts) > 1 else "?"
+            groups.setdefault(tf, []).append((name, sig))
 
-            meta = sig.metadata
-            ts = datetime.fromtimestamp(sig.timestamp).strftime("%H:%M:%S")
+        lines: list[str] = []
+        sorted_tfs = sorted(groups.keys(), key=lambda t: tf_order.index(t) if t in tf_order else 99)
 
-            if name.startswith("utbot_"):
-                bias = meta.get('closed_bias', '—')
-                sig_val = meta.get('closed_signal', 'NONE')
-                if sig_val.upper() == "BUY":
-                    sig_col = f"[green]{sig_val}[/]"
-                elif sig_val.upper() == "SELL":
-                    sig_col = f"[red]{sig_val}[/]"
+        for tf in sorted_tfs:
+            lines.append(f"[bold cyan]── {tf} ──[/]")
+            for name, sig in groups[tf]:
+                meta = sig.metadata
+                indicator = name.split("_")[0].upper()
+
+                if indicator == "UTBOT":
+                    bias = meta.get("closed_bias", "—")
+                    if bias.upper() == "BULLISH":
+                        bias_col = f"[green]{bias}[/]"
+                    elif bias.upper() == "BEARISH":
+                        bias_col = f"[red]{bias}[/]"
+                    else:
+                        bias_col = f"[dim]{bias}[/]"
+
+                    sig_val = meta.get("closed_signal", "NONE")
+                    if sig_val.upper() == "BUY":
+                        sig_col = f"[bold green]★ {sig_val}[/]"
+                    elif sig_val.upper() == "SELL":
+                        sig_col = f"[bold red]★ {sig_val}[/]"
+                    else:
+                        sig_col = f"[dim]{sig_val}[/]"
+
+                    atr = meta.get("closed_atr", "—")
+                    bull = meta.get("consecutive_bull_bars", "0")
+                    bear = meta.get("consecutive_bear_bars", "0")
+                    lines.append(f"  UT  {bias_col}  {sig_col}")
+                    lines.append(f"  [dim]ATR={atr} Bull={bull} Bear={bear}[/]")
+
+                elif indicator == "DC":
+                    zone = meta.get("closed_price_zone", "—")
+                    if zone.upper() in ("LOWER", "LOWER_MID"):
+                        zone_col = f"[green]{zone}[/]"
+                    elif zone.upper() in ("UPPER", "UPPER_MID"):
+                        zone_col = f"[red]{zone}[/]"
+                    else:
+                        zone_col = f"[yellow]{zone}[/]"
+
+                    uw = meta.get("closed_upper_wick_rej", "FALSE").upper() == "TRUE"
+                    lw = meta.get("closed_lower_wick_rej", "FALSE").upper() == "TRUE"
+                    if lw:
+                        wick = "[green]↓ LowerWick[/]"
+                    elif uw:
+                        wick = "[red]↑ UpperWick[/]"
+                    else:
+                        wick = "[dim]no wick[/]"
+
+                    upper = meta.get("upper_band", "—")
+                    lower = meta.get("lower_band", "—")
+                    lines.append(f"  DC  {zone_col}  {wick}")
+                    lines.append(f"  [dim]U={upper} L={lower}[/]")
+
                 else:
-                    sig_col = f"[dim]{sig_val}[/]"
-                atr = meta.get('closed_atr', '—')
-                trail = meta.get('closed_trail_stop', '—')
-                bull = meta.get('consecutive_bull_bars', '—')
-                bear = meta.get('consecutive_bear_bars', '—')
-                detail = f"ATR={atr} Bull={bull} Bear={bear}"
-                table.add_row(name, direction, bias, sig_col, detail, ts)
-            elif name.startswith("dc_"):
-                zone = meta.get('closed_price_zone', '—')
-                uw = meta.get('closed_upper_wick_rej', 'FALSE')
-                lw = meta.get('closed_lower_wick_rej', 'FALSE')
-                wick = ""
-                if lw.upper() == "TRUE":
-                    wick = "[green]↓ Lower[/]"
-                elif uw.upper() == "TRUE":
-                    wick = "[red]↑ Upper[/]"
-                else:
-                    wick = "[dim]None[/]"
-                upper = meta.get('upper_band', '—')
-                lower = meta.get('lower_band', '—')
-                detail = f"U={upper} L={lower}"
-                table.add_row(name, direction, zone, wick, detail, ts)
-            else:
-                info = " ".join(f"{k}={v}" for k, v in list(meta.items())[:3])
-                table.add_row(name, direction, "—", "—", info, ts)
+                    lines.append(f"  {indicator}: {sig.direction.value}")
+
+        label.update("\n".join(lines))
 
 
 class PositionPanel(Static):
@@ -263,17 +288,32 @@ Screen {
     layout: vertical;
 }
 
+#top-bar {
+    height: 3;
+}
+
 #status-panel {
     height: 3;
     border: solid $primary;
     padding: 0 1;
 }
 
+#main-area {
+    height: 1fr;
+    layout: horizontal;
+}
+
+#left-panels {
+    width: 1fr;
+    layout: vertical;
+}
+
 #signal-panel {
-    height: auto;
-    max-height: 12;
+    width: 36;
+    min-width: 30;
     border: solid $secondary;
     padding: 0 1;
+    overflow-y: auto;
 }
 
 #position-panel {
@@ -334,12 +374,14 @@ class TradingDashboard(App):
     def compose(self) -> ComposeResult:
         yield Header()
         yield StatusPanel(self._engine, id="status-panel")
-        yield SignalPanel(self._engine, id="signal-panel")
-        yield PositionPanel(self._engine, id="position-panel")
-        yield SummaryPanel(self._engine, id="summary-panel")
-        yield FilterPanel(self._engine, id="filter-panel")
-        yield RulesPanel(self._engine, id="rules-panel")
-        yield TradeLogPanel(self._engine, id="trade-log-panel")
+        with Horizontal(id="main-area"):
+            with Vertical(id="left-panels"):
+                yield PositionPanel(self._engine, id="position-panel")
+                yield SummaryPanel(self._engine, id="summary-panel")
+                yield FilterPanel(self._engine, id="filter-panel")
+                yield RulesPanel(self._engine, id="rules-panel")
+                yield TradeLogPanel(self._engine, id="trade-log-panel")
+            yield SignalPanel(self._engine, id="signal-panel")
         yield Footer()
 
     def on_mount(self) -> None:
