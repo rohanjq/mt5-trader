@@ -21,9 +21,28 @@ signals:
     - indicator: utbot
       timeframes: [M1, M3, M15, M45]
     - indicator: dc
-      timeframes: [M15, M45]
+      timeframes: [M1, M15, M45]
     - indicator: liqgrab
       timeframes: [M5, M15, H1]
+    # ── Filter/context indicators (used by strategy expressions) ──
+    - indicator: ema50
+      timeframes: [M5, M15]
+    - indicator: ema200
+      timeframes: [M5, M15]
+    - indicator: ema20
+      timeframes: [M3]
+    - indicator: rsi14
+      timeframes: [M1]
+    - indicator: adx
+      timeframes: [M5]
+    - indicator: bb
+      timeframes: [M1]
+    - indicator: atr
+      timeframes: [M1]
+    - indicator: macd
+      timeframes: [M1, M3]
+    - indicator: stoch
+      timeframes: [M3]
 
 filters:
   cooldown_minutes: 5
@@ -50,6 +69,156 @@ rules:
 
   # ── Expression rules (YAML only) ──
   expressions:
+    # ══════════════════════════════════════════════
+    # Deep Research Strategies (highest conviction)
+    # ══════════════════════════════════════════════
+
+    # Strategy D: MACD-Stochastic re-entry (continuation in trend)
+    # M15 uptrend regime + M3 MACD bullish flip + Stoch oversold cross + close > EMA20
+    # Best "secondary continuation" when trending but choppy. RR 1:1.5
+    - name: "macd_stoch_reentry"
+      enabled: true
+      priority: 35
+      sl_dollars: 120.0
+      reward_ratio: 1.5
+      description: "MACD-Stoch re-entry (M15 trend + M3 trigger)"
+      buy:
+        - ema200_M15.closed_price_vs_ema == ABOVE
+        - ema50_M15.closed_price_vs_ema == ABOVE
+        - ema50_M15.ema_slope == RISING
+        - macd_M3.closed_hist_cross == BULLISH_FLIP
+        - stoch_M3.closed_cross == BULLISH_OS
+        - ema20_M3.closed_price_vs_ema == ABOVE
+      sell:
+        - ema200_M15.closed_price_vs_ema == BELOW
+        - ema50_M15.closed_price_vs_ema == BELOW
+        - ema50_M15.ema_slope == FALLING
+        - macd_M3.closed_hist_cross == BEARISH_FLIP
+        - stoch_M3.closed_cross == BEARISH_OB
+        - ema20_M3.closed_price_vs_ema == BELOW
+
+    # Strategy A: EMA pullback continuation (most balanced)
+    # M5 EMA50>EMA200 regime + EMA50 rising + RSI14 crossing up through 52
+    # Waits for pullback recovery before rejoining trend. RR 1:1.5
+    - name: "ema_pullback"
+      enabled: true
+      priority: 40
+      sl_dollars: 100.0
+      reward_ratio: 1.5
+      description: "EMA pullback continuation (M5 trend + M1 RSI trigger)"
+      buy:
+        - ema50_M5.closed_price_vs_ema == ABOVE
+        - ema200_M5.closed_price_vs_ema == ABOVE
+        - ema50_M5.ema_slope == RISING
+        - rsi14_M1.closed_cross == CROSS_UP_52
+      sell:
+        - ema50_M5.closed_price_vs_ema == BELOW
+        - ema200_M5.closed_price_vs_ema == BELOW
+        - ema50_M5.ema_slope == FALLING
+        - rsi14_M1.closed_cross == CROSS_DOWN_50
+
+    # Strategy B: Bollinger range fade (highest win-rate)
+    # Only in ranging markets (ADX<18). Buys re-entry from below lower band.
+    # Tighter stops, target midline. RR 1:1.0
+    - name: "bb_range_fade"
+      enabled: true
+      priority: 45
+      sl_dollars: 75.0
+      reward_ratio: 1.0
+      description: "BB range fade (ADX ranging + BB re-entry)"
+      buy:
+        - adx_M5.closed_trend_strength == RANGING
+        - bb_M1.closed_reenter_from_below is TRUE
+      sell:
+        - adx_M5.closed_trend_strength == RANGING
+        - bb_M1.closed_reenter_from_above is TRUE
+
+    # Strategy C: Donchian volatility breakout (most aggressive)
+    # Trending ADX + expanding ATR + DC breakout + MACD confirmation.
+    # Wider stops for explosive moves. RR 1:1.8
+    - name: "dc_vol_breakout"
+      enabled: true
+      priority: 50
+      sl_dollars: 150.0
+      reward_ratio: 1.8
+      description: "DC volatility breakout (ADX trend + ATR expanding)"
+      buy:
+        - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx_M5.closed_adx_rising is TRUE
+        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - dc_M1.closed_break_upper is TRUE
+        - macd_M1.closed_histogram > 0
+      sell:
+        - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx_M5.closed_adx_rising is TRUE
+        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - dc_M1.closed_break_lower is TRUE
+        - macd_M1.closed_histogram < 0
+
+    # ══════════════════════════════════════════════
+    # Liquidity Grab rules
+    # ══════════════════════════════════════════════
+
+    # LG signal + UT Bot 1m confirmation
+    - name: "lg_ut_confirm"
+      enabled: true
+      priority: 80
+      sl_dollars: 100.0
+      reward_ratio: 1.25
+      description: "LG M15 signal + UT 1m bias aligned"
+      buy:
+        - liqgrab_M15.liq_signal == BUY
+        - utbot_M1.closed_bias == BULLISH
+      sell:
+        - liqgrab_M15.liq_signal == SELL
+        - utbot_M1.closed_bias == BEARISH
+
+    # LG composite signal alone (already filtered by rejection+breakout+MA)
+    - name: "lg_composite"
+      enabled: true
+      priority: 85
+      sl_dollars: 100.0
+      reward_ratio: 1.25
+      description: "LG composite signal (rej+breakout+MA)"
+      buy:
+        - liqgrab_M15.liq_signal == BUY
+      sell:
+        - liqgrab_M15.liq_signal == SELL
+
+    # LG M5 signal for faster entries + 15m trend
+    - name: "lg_fast_trend"
+      enabled: true
+      priority: 90
+      sl_dollars: 100.0
+      reward_ratio: 1.25
+      description: "LG M5 fast + UT 15m trend"
+      buy:
+        - liqgrab_M5.liq_signal == BUY
+        - utbot_M15.closed_bias == BULLISH
+      sell:
+        - liqgrab_M5.liq_signal == SELL
+        - utbot_M15.closed_bias == BEARISH
+
+    # LG rejection + DC support zone (no breakout needed yet)
+    - name: "lg_dc_support"
+      enabled: true
+      priority: 95
+      sl_dollars: 100.0
+      reward_ratio: 1.25
+      description: "LG rejection at DC support/resistance"
+      buy:
+        - liqgrab_H1.rejection_up is TRUE
+        - dc_M15.closed_price_zone in LOWER,LOWER_MID
+        - utbot_M3.closed_bias == BULLISH
+      sell:
+        - liqgrab_H1.rejection_down is TRUE
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID
+        - utbot_M3.closed_bias == BEARISH
+
+    # ══════════════════════════════════════════════
+    # UT Bot / DC combo rules (original)
+    # ══════════════════════════════════════════════
+
     # UT 3m signal + 1m consecutive bars + 45m trend
     - name: "3m_trend_sell"
       enabled: true
@@ -88,65 +257,15 @@ rules:
         - utbot_M1.closed_signal == SELL
         - utbot_M3.closed_bias == BEARISH
 
-    # UT 1m signal alone (most frequent, fallback)
+    # UT 1m signal alone — DISABLED (too noisy, no confirmation)
     - name: "1m_signal_only"
-      enabled: true
+      enabled: false
       priority: 200
       description: "UT 1m signal only"
       buy:
         - utbot_M1.closed_signal == BUY
       sell:
         - utbot_M1.closed_signal == SELL
-
-    # ── Liquidity Grab rules ──
-
-    # LG composite signal alone (already filtered by rejection+breakout+MA)
-    - name: "lg_composite"
-      enabled: true
-      priority: 85
-      description: "LG composite signal (rej+breakout+MA)"
-      buy:
-        - liqgrab_M15.liq_signal == BUY
-      sell:
-        - liqgrab_M15.liq_signal == SELL
-
-    # LG signal + UT Bot 1m confirmation
-    - name: "lg_ut_confirm"
-      enabled: true
-      priority: 80
-      description: "LG M15 signal + UT 1m bias aligned"
-      buy:
-        - liqgrab_M15.liq_signal == BUY
-        - utbot_M1.closed_bias == BULLISH
-      sell:
-        - liqgrab_M15.liq_signal == SELL
-        - utbot_M1.closed_bias == BEARISH
-
-    # LG rejection + DC support zone (no breakout needed yet)
-    - name: "lg_dc_support"
-      enabled: true
-      priority: 95
-      description: "LG rejection at DC support/resistance"
-      buy:
-        - liqgrab_H1.rejection_up is TRUE
-        - dc_M15.closed_price_zone in LOWER,LOWER_MID
-        - utbot_M3.closed_bias == BULLISH
-      sell:
-        - liqgrab_H1.rejection_down is TRUE
-        - dc_M15.closed_price_zone in UPPER,UPPER_MID
-        - utbot_M3.closed_bias == BEARISH
-
-    # LG M5 signal for faster entries + 15m trend
-    - name: "lg_fast_trend"
-      enabled: true
-      priority: 90
-      description: "LG M5 fast + UT 15m trend"
-      buy:
-        - liqgrab_M5.liq_signal == BUY
-        - utbot_M15.closed_bias == BULLISH
-      sell:
-        - liqgrab_M5.liq_signal == SELL
-        - utbot_M15.closed_bias == BEARISH
 
 logging:
   level: INFO

@@ -65,6 +65,7 @@ def build_signal_plugins(config: Config) -> list[BaseSignal]:
         timeframes: [M1, M3, M5, M15, M45]
     """
     from signals.donchian import DonchianSignal
+    from signals.generic import GenericCSVSignal
     from signals.liq_grab import LiqGrabSignal
     from signals.ut_bot import UTBotSignal
 
@@ -84,11 +85,12 @@ def build_signal_plugins(config: Config) -> list[BaseSignal]:
     for src in sources:
         indicator = src.get("indicator", "")
         cls = indicator_classes.get(indicator)
-        if cls is None:
-            log.warning("Unknown indicator type: %s", indicator)
-            continue
         for tf in src.get("timeframes", []):
-            instance = cls(config, tf)
+            if cls is not None:
+                instance = cls(config, tf)
+            else:
+                # Generic CSV reader for unregistered indicator types
+                instance = GenericCSVSignal(config, indicator, tf)
             plugins.append(instance)
             log.info("Signal source: %s", instance.name)
 

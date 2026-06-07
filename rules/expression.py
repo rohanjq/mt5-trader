@@ -143,6 +143,8 @@ class ExpressionRule(BaseRule):
         priority_val: int,
         buy_conditions: list[Condition],
         sell_conditions: list[Condition],
+        sl_dollars: float | None = None,
+        reward_ratio: float | None = None,
     ) -> None:
         super().__init__(config)
         self.name = rule_name
@@ -150,6 +152,8 @@ class ExpressionRule(BaseRule):
         self.priority = priority_val
         self._buy_conditions = buy_conditions
         self._sell_conditions = sell_conditions
+        self._sl_dollars = sl_dollars
+        self._reward_ratio = reward_ratio
 
     def evaluate(self, signals: dict[str, Signal]) -> TriggerResult:
         if not self.config.get(f"rules.{self.name}.enabled", True):
@@ -171,6 +175,8 @@ class ExpressionRule(BaseRule):
                 action=TriggerAction.TRIGGER_BUY,
                 reason=", ".join(parts),
                 rule_name=self.name,
+                sl_dollars=self._sl_dollars,
+                reward_ratio=self._reward_ratio,
             )
             return self._last_result
 
@@ -181,6 +187,8 @@ class ExpressionRule(BaseRule):
                 action=TriggerAction.TRIGGER_SELL,
                 reason=", ".join(parts),
                 rule_name=self.name,
+                sl_dollars=self._sl_dollars,
+                reward_ratio=self._reward_ratio,
             )
             return self._last_result
 
@@ -235,6 +243,8 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
             log.warning("Rule %s has no valid conditions — skipping", name)
             continue
 
+        raw_sl = defn.get("sl_dollars")
+        raw_rr = defn.get("reward_ratio")
         rule = ExpressionRule(
             config=config,
             rule_name=name,
@@ -242,6 +252,8 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
             priority_val=priority,
             buy_conditions=buy_conds,
             sell_conditions=sell_conds,
+            sl_dollars=float(raw_sl) if raw_sl is not None else None,
+            reward_ratio=float(raw_rr) if raw_rr is not None else None,
         )
         expr_rules.append(rule)
         log.info(

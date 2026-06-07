@@ -155,7 +155,43 @@ class SignalPanel(Static):
                     lines.append(f"  [dim]{flags}[/]")
 
                 else:
-                    lines.append(f"  {indicator}: {sig.direction.value}")
+                    # Compact 1-line rendering for filter/context indicators
+                    tag = indicator[:6]
+                    if indicator.startswith("EMA"):
+                        vs = meta.get("closed_price_vs_ema", "—")
+                        slope = meta.get("ema_slope", "")
+                        col = "[green]" if vs == "ABOVE" else "[red]" if vs == "BELOW" else "[dim]"
+                        lines.append(f"  {tag} {col}{vs}[/] {slope}")
+                    elif indicator.startswith("RSI"):
+                        val = meta.get("closed_rsi", "—")
+                        zone = meta.get("closed_zone", "—")
+                        col = "[red]" if "OB" in zone else "[green]" if "OS" in zone else "[dim]"
+                        lines.append(f"  {tag} {col}{zone}[/] ({val})")
+                    elif indicator == "ADX":
+                        ts = meta.get("closed_trend_strength", "—")
+                        bias = meta.get("closed_di_bias", "—")
+                        col = "[green]" if bias == "BULLISH" else "[red]" if bias == "BEARISH" else "[dim]"
+                        lines.append(f"  ADX  {ts} {col}{bias}[/]")
+                    elif indicator == "BB":
+                        pct = meta.get("closed_pct_in_band", "—")
+                        re_up = meta.get("closed_reenter_from_below", "FALSE")
+                        re_dn = meta.get("closed_reenter_from_above", "FALSE")
+                        flag = "[green]↑ReEntry[/]" if re_up.upper() == "TRUE" else "[red]↓ReEntry[/]" if re_dn.upper() == "TRUE" else ""
+                        lines.append(f"  BB   pct={pct} {flag}")
+                    elif indicator == "MACD":
+                        hc = meta.get("closed_hist_cross", "NONE")
+                        col = "[green]" if hc == "BULLISH_FLIP" else "[red]" if hc == "BEARISH_FLIP" else "[dim]"
+                        lines.append(f"  MACD {col}{hc}[/]")
+                    elif indicator == "STOCH":
+                        cr = meta.get("closed_cross", "NONE")
+                        col = "[green]" if "BULLISH" in cr else "[red]" if "BEARISH" in cr else "[dim]"
+                        lines.append(f"  STCH {col}{cr}[/]")
+                    elif indicator == "ATR":
+                        vs = meta.get("volatility_state", "—")
+                        col = "[yellow]" if vs in ("EXPANDING", "ABOVE_AVG") else "[dim]"
+                        lines.append(f"  ATR  {col}{vs}[/]")
+                    else:
+                        lines.append(f"  {tag}: {sig.direction.value}")
 
         label.update("\n".join(lines))
 

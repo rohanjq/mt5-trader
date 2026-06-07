@@ -100,7 +100,7 @@ class TradeInitiator:
 
     def _initiate_trade(self, trigger: TriggerResult, signals: dict[str, Signal]) -> None:
         symbol = self._config.get("trading.symbol", "BTCUSDT")
-        sl, tp, volume, sl_dollars = self._calculate_risk(trigger.direction)
+        sl, tp, volume, sl_dollars = self._calculate_risk(trigger.direction, trigger)
 
         source_signal = Signal(
             source=trigger.rule_name,
@@ -139,18 +139,25 @@ class TradeInitiator:
         self._execute(request)
 
     def _calculate_risk(
-        self, direction: TradeDirection,
+        self, direction: TradeDirection, trigger: TriggerResult | None = None,
     ) -> tuple[float, float, float, float]:
-        """Calculate SL, TP, volume from config.
+        """Calculate SL, TP, volume from config (with per-rule overrides).
 
-        SL/TP are fixed dollar distances from entry price.
-        Volume is always the configured fixed value.
+        If the triggering rule specifies ``sl_dollars`` or ``reward_ratio``,
+        those values override the global config defaults.
 
         Returns (sl, tp, volume, sl_dollars).
         """
         volume = float(self._config.get("trading.volume", 0.001))
         sl_dollars = float(self._config.get("trading.sl_dollars", 5.0))
         reward_ratio = float(self._config.get("trading.reward_ratio", 1.25))
+
+        # Per-rule overrides
+        if trigger is not None and trigger.sl_dollars is not None:
+            sl_dollars = trigger.sl_dollars
+        if trigger is not None and trigger.reward_ratio is not None:
+            reward_ratio = trigger.reward_ratio
+
         tp_dollars = sl_dollars * reward_ratio
 
         # Get current price

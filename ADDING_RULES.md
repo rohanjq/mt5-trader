@@ -113,9 +113,38 @@ rules:
 3. Set `name`, `enabled`, `priority`, `description`
 4. Add `buy:` conditions (all must be true to trigger BUY)
 5. Add `sell:` conditions (all must be true to trigger SELL)
-6. Save — the config hot-reloads (or restart)
+6. **Optional**: Set `sl_dollars` and `reward_ratio` for per-rule risk/reward (overrides global defaults)
+7. Save — the config hot-reloads (or restart)
 
 That's it. No Python code needed.
+
+### Per-Rule Risk/Reward
+
+Each expression rule can override the global `trading.sl_dollars` and `trading.reward_ratio`:
+
+```yaml
+- name: "breakout_strategy"
+  enabled: true
+  priority: 50
+  sl_dollars: 150.0     # wider stop for breakouts ($150 instead of default $100)
+  reward_ratio: 1.8     # target 1.8R ($270 TP)
+  description: "Breakout with wide stops"
+  buy: [...]
+  sell: [...]
+```
+
+If `sl_dollars` or `reward_ratio` are omitted, the global config values are used.
+
+**Current per-rule settings:**
+
+| Strategy | SL | RR | TP | Style |
+|----------|----|----|-------|-------|
+| `macd_stoch_reentry` | $120 | 1:1.5 | $180 | Continuation pullback |
+| `ema_pullback` | $100 | 1:1.5 | $150 | Trend pullback |
+| `bb_range_fade` | $75 | 1:1.0 | $75 | Mean reversion |
+| `dc_vol_breakout` | $150 | 1:1.8 | $270 | Breakout |
+| LG rules | $100 | 1:1.25 | $125 | Smart money |
+| Original UT/DC rules | (global) | (global) | (global) | Default |
 
 ---
 
@@ -194,6 +223,66 @@ Available timeframes: M3, M5, M15, H1, H4 (configured in `config.yaml`)
 
 **Key insight**: `liq_signal` is already a multi-condition composite — using it alone is valid.
 The sub-components (`rejection_up`, `breakout_up`, `ma_trend`) are available for custom combos.
+
+### EMA Fields (`ema{period}_{TF}`)
+
+Signal names include the period: `ema9_M1`, `ema21_M1`, `ema50_M5`, `ema200_M15`, etc.
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `closed_price_vs_ema` | str | ABOVE / BELOW | Price position relative to EMA. |
+| `ema_slope` | str | RISING / FALLING / FLAT | EMA direction over last 3 bars. |
+| `running_dist_pct` | float | | Distance from price to EMA as % (near 0 = at EMA). |
+
+### RSI Fields (`rsi{period}_{TF}`)
+
+Signal names include the period: `rsi14_M1`, `rsi2_M1`, `rsi14_M3`, etc.
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `closed_rsi` | float | 0-100 | RSI value. |
+| `closed_zone` | str | EXTREME_OB / OVERBOUGHT / BULLISH / NEUTRAL / BEARISH / OVERSOLD / EXTREME_OS | RSI zone classification. |
+| `closed_cross` | str | CROSS_UP_30 / CROSS_DOWN_70 / CROSS_UP_50 / CROSS_DOWN_50 / CROSS_UP_52 / NONE | Level cross event on closed bar. |
+
+### Bollinger Bands Fields (`bb_{TF}`)
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `closed_pct_in_band` | float | 0-100 | Where price sits within bands (0=lower, 100=upper). |
+| `closed_reenter_from_below` | str | TRUE / FALSE | Bar opened below lower band, closed above it (bullish reversal). |
+| `closed_reenter_from_above` | str | TRUE / FALSE | Bar opened above upper band, closed below it (bearish reversal). |
+| `band_width` | float | | Band width (squeeze detection: shrinking = breakout likely). |
+
+### ADX Fields (`adx_{TF}`)
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `closed_trend_strength` | str | RANGING / WEAK_TREND / TRENDING / STRONG_TREND | Trend regime classification. |
+| `closed_adx_rising` | str | TRUE / FALSE | ADX increasing over last 3 bars (trend strengthening). |
+| `closed_di_bias` | str | BULLISH / BEARISH | +DI vs -DI directional bias. |
+
+### MACD Fields (`macd_{TF}`)
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `closed_hist_cross` | str | BULLISH_FLIP / BEARISH_FLIP / NONE | Histogram sign change (classic signal). |
+| `closed_zero_cross` | str | CROSS_ABOVE / CROSS_BELOW / NONE | MACD line zero-line cross. |
+| `closed_histogram` | float | | Raw histogram value (> 0 = bullish momentum). |
+
+### Stochastic Fields (`stoch_{TF}`)
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `closed_cross` | str | BULLISH_OS / BULLISH / BEARISH_OB / BEARISH / NONE | K/D cross event. `BULLISH_OS` = strongest buy (K crosses D in oversold). |
+| `closed_zone` | str | OVERBOUGHT / OVERSOLD / NEUTRAL | Stochastic zone. |
+
+### Standalone ATR Fields (`atr_{TF}`)
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `volatility_state` | str | EXPANDING / ABOVE_AVG / BELOW_AVG / CONTRACTING | Volatility regime (ATR vs its 20-bar SMA). |
+| `running_atr` | float | | Current ATR value. |
+| `atr_vs_sma_ratio` | float | | ATR / SMA20(ATR). >1 = above average volatility. |
 
 ---
 
