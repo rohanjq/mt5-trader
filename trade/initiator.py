@@ -112,12 +112,6 @@ class TradeInitiator:
                 if not result.should_trade or result.direction is None:
                     continue
 
-                # Dedup: don't re-trigger same rule+direction
-                key = f"{rule.name}:{result.direction.value}"
-                if key == self._last_trigger_key:
-                    continue
-
-                self._last_trigger_key = key
                 log.info(
                     "Rule %s triggered: %s — %s",
                     rule.name, result.direction.value, result.reason,

@@ -156,6 +156,9 @@ class ExpressionRule(BaseRule):
         self._sl_dollars = sl_dollars
         self._reward_ratio = reward_ratio
         self._breakeven_pct = breakeven_pct
+        # Rising-edge detection: only fire on False→True transition
+        self._prev_buy_met = False
+        self._prev_sell_met = False
 
     def evaluate(self, signals: dict[str, Signal]) -> TriggerResult:
         if not self.config.get(f"rules.{self.name}.enabled", True):
@@ -171,7 +174,19 @@ class ExpressionRule(BaseRule):
                 break
 
         # Evaluate BUY conditions (all must be true)
-        if self._buy_conditions and all(c.evaluate(signals) for c in self._buy_conditions):
+        buy_met = bool(self._buy_conditions and all(c.evaluate(signals) for c in self._buy_conditions))
+        sell_met = bool(self._sell_conditions and all(c.evaluate(signals) for c in self._sell_conditions))
+
+        # Rising-edge: only trigger on the False→True transition.
+        # If conditions were already met last cycle, don't re-fire.
+        # When at least one condition drops and comes back, it fires again.
+        buy_edge = buy_met and not self._prev_buy_met
+        sell_edge = sell_met and not self._prev_sell_met
+
+        self._prev_buy_met = buy_met
+        self._prev_sell_met = sell_met
+
+        if buy_edge:
             parts = [c.describe(signals) for c in self._buy_conditions]
             self._last_result = TriggerResult(
                 action=TriggerAction.TRIGGER_BUY,
@@ -183,8 +198,7 @@ class ExpressionRule(BaseRule):
             )
             return self._last_result
 
-        # Evaluate SELL conditions (all must be true)
-        if self._sell_conditions and all(c.evaluate(signals) for c in self._sell_conditions):
+        if sell_edge:
             parts = [c.describe(signals) for c in self._sell_conditions]
             self._last_result = TriggerResult(
                 action=TriggerAction.TRIGGER_SELL,
