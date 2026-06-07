@@ -49,6 +49,7 @@ class TradeInitiator:
         self._rules: list[BaseRule] = []
         self._last_trigger_key: str | None = None  # dedup
         self._events = EventLog.get()
+        self._warmed_up = False  # skip first poll cycle (stale CSV data)
 
     def set_rules(self, rules: list[BaseRule]) -> None:
         self._rules = rules
@@ -61,6 +62,12 @@ class TradeInitiator:
     def on_signals(self, signals: dict[str, Signal]) -> None:
         """Called by the engine with ALL latest signals each poll cycle."""
         with self._lock:
+            if not self._warmed_up:
+                self._warmed_up = True
+                log.info("Warmup cycle — skipping stale signals")
+                self._events.info("Warmup — baseline read, skipping stale signals")
+                return
+
             if self._manager.has_open_position:
                 return
 
