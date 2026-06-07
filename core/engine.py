@@ -12,6 +12,7 @@ from exits.base import discover_exit_rules
 from filters.base import BaseFilter, FilterChain, discover_filters
 from filters.manual_switch import ManualSwitchFilter
 from signals.base import BaseSignal, discover_signals
+from strategies.base import discover_strategies
 from trade.initiator import TradeInitiator
 from trade.manager import TradeManager
 
@@ -68,6 +69,10 @@ class Engine:
         # Discover exit rules
         exit_rules = discover_exit_rules(self.config)
         self.trade_manager.set_exit_rules(exit_rules)
+
+        # Discover strategies
+        strategies = discover_strategies(self.config)
+        self.trade_initiator.set_strategies(strategies)
 
         # When a trade closes, reset signal tracking so the next signal is acted on
         self.trade_manager.on_trade_closed(
@@ -128,12 +133,14 @@ class Engine:
                     with self._signals_lock:
                         self._latest_signals[plugin.name] = signal
 
-                    # Notify initiator
-                    self.trade_initiator.on_signal(signal)
+                # Pass all signals to the initiator (strategies evaluate them)
+                snapshot = self.latest_signals
+                self.trade_initiator.on_signals(snapshot)
+
+                # Update trade manager with latest signals (for exit rules)
+                self.trade_manager.update_signals(snapshot)
 
                 # Notify UI callbacks
-                snapshot = self.latest_signals
-                self.trade_manager.update_signals(snapshot)
                 for cb in self._signal_callbacks:
                     try:
                         cb(snapshot)

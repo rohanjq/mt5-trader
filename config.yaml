@@ -26,8 +26,14 @@ filters:
 
 exit_rules:
   signal_reversal_exit: true         # close when signal flips opposite
-  breakeven_trigger_dollars: 50.0     # move SL to entry when price moves $50
+  breakeven_trigger_dollars: 50.0    # move SL to entry when price moves $50
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
+
+strategies:
+  utbot_simple:
+    enabled: true                    # trade on UT Bot signal alone
+  dc_reversal:
+    enabled: true                    # DC wick rejection + UT Bot confirmation
 
 logging:
   level: INFO

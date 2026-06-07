@@ -53,7 +53,7 @@ class SignalPanel(Static):
 
     def compose(self) -> ComposeResult:
         table = DataTable(id="signal-table")
-        table.add_columns("Source", "Direction", "Bias", "Trail Stop", "ATR", "Bars Since", "Updated")
+        table.add_columns("Source", "Direction", "Key Info", "Updated")
         yield table
 
     def refresh_content(self) -> None:
@@ -72,15 +72,22 @@ class SignalPanel(Static):
 
             meta = sig.metadata
             ts = datetime.fromtimestamp(sig.timestamp).strftime("%H:%M:%S")
-            table.add_row(
-                name,
-                direction,
-                meta.get("bias", "—"),
-                meta.get("trail_stop", "—"),
-                meta.get("atr_value", "—"),
-                meta.get("bars_since_signal", "—"),
-                ts,
-            )
+
+            # Build key info string based on signal source
+            if name == "ut_bot_1m":
+                info = f"Bias={meta.get('bias', '—')} TS={meta.get('trail_stop', '—')} ATR={meta.get('atr_value', '—')}"
+            elif name == "dc_channels":
+                info = f"Zone={meta.get('price_zone', '—')} U={meta.get('upper_band', '—')} L={meta.get('lower_band', '—')}"
+                uw = meta.get("upper_wick_rejection", "")
+                lw = meta.get("lower_wick_rejection", "")
+                if uw == "TRUE":
+                    info += " [red]↑WICK[/]"
+                if lw == "TRUE":
+                    info += " [green]↓WICK[/]"
+            else:
+                info = " ".join(f"{k}={v}" for k, v in list(meta.items())[:3])
+
+            table.add_row(name, direction, info, ts)
 
 
 class PositionPanel(Static):

@@ -14,6 +14,7 @@ from core.models import (
     TradeRequest,
     TradeState,
 )
+from strategies.base import BaseStrategy, StrategySignal
 
 if TYPE_CHECKING:
     from core.config import Config
@@ -25,10 +26,11 @@ log = logging.getLogger(__name__)
 
 
 class TradeInitiator:
-    """Evaluates signals and initiates trades through the filter chain.
+    """Evaluates strategies against latest signals and initiates trades.
 
-    Calculates SL from signal metadata (trail_stop), TP from reward ratio,
-    and optionally sizes the position from risk_dollars.
+    Strategies are evaluated in priority order. First one that says
+    ``should_trade=True`` wins. Once a position is open, no strategy
+    can trigger until the position is closed.
     """
 
     def __init__(
@@ -43,63 +45,85 @@ class TradeInitiator:
         self._filters = filter_chain
         self._manager = trade_manager
         self._lock = threading.Lock()
-        self._last_signal_direction: SignalDirection | None = None
+        self._strategies: list[BaseStrategy] = []
+        self._last_strategy_signal: str | None = None  # "BUY" or "SELL" — dedup
 
-    def on_signal(self, signal: Signal) -> None:
-        """Called by the engine when a new signal is available."""
-        if signal.direction == SignalDirection.NEUTRAL:
-            return
+    def set_strategies(self, strategies: list[BaseStrategy]) -> None:
+        self._strategies = strategies
+        log.info("Strategies loaded: %s", [s.name for s in strategies])
 
+    def on_signals(self, signals: dict[str, Signal]) -> None:
+        """Called by the engine with ALL latest signals each poll cycle."""
         with self._lock:
-            # Don't re-enter on the same signal direction if we already have a position
             if self._manager.has_open_position:
                 return
 
-            # Avoid acting on the same repeated signal
-            if signal.direction == self._last_signal_direction:
-                return
+            # Evaluate strategies in priority order
+            for strategy in self._strategies:
+                try:
+                    result = strategy.evaluate(signals)
+                except Exception:
+                    log.exception("Strategy %s raised an exception", strategy.name)
+                    continue
 
-            self._last_signal_direction = signal.direction
+                if not result.should_trade or result.direction is None:
+                    continue
 
-            symbol = self._config.get("trading.symbol", "BTCUSDT")
-            direction = (
-                TradeDirection.BUY
-                if signal.direction == SignalDirection.BUY
-                else TradeDirection.SELL
-            )
+                # Dedup: don't re-trigger same direction
+                sig_key = f"{strategy.name}:{result.direction.value}"
+                if sig_key == self._last_strategy_signal:
+                    continue
 
-            # ── Calculate SL, TP, volume from risk ──
-            sl, tp, volume, risk_dollars = self._calculate_risk(signal, direction)
+                self._last_strategy_signal = sig_key
+                log.info(
+                    "Strategy %s triggered: %s — %s",
+                    strategy.name, result.direction.value, result.reason,
+                )
+                self._initiate_trade(result, signals)
+                return  # Only one trade per cycle
 
-            request = TradeRequest(
-                direction=direction,
-                symbol=symbol,
-                volume=volume,
-                signal=signal,
-                sl=sl,
-                tp=tp,
-                risk_dollars=risk_dollars,
-            )
-            log.info(
-                "Trade request %s: %s %s vol=%.4f SL=%.2f TP=%.2f risk=$%.2f (signal: %s)",
-                request.id, direction.value, symbol, volume, sl, tp, risk_dollars,
-                signal.source,
-            )
+    def _initiate_trade(self, strat: StrategySignal, signals: dict[str, Signal]) -> None:
+        symbol = self._config.get("trading.symbol", "BTCUSDT")
+        sl, tp, volume, sl_dollars = self._calculate_risk(strat.direction)
 
-            # Run through filter chain
-            verdict, reason = self._filters.evaluate(request)
+        # Build a synthetic Signal for the trade record
+        source_signal = Signal(
+            source=strat.strategy_name,
+            direction=(
+                SignalDirection.BUY if strat.direction == TradeDirection.BUY
+                else SignalDirection.SELL
+            ),
+            metadata={"reason": strat.reason},
+        )
 
-            if verdict == FilterVerdict.BLOCK:
-                request.state = TradeState.REJECTED
-                request.rejection_reason = reason
-                log.info("Trade %s rejected: %s", request.id, reason)
-                return
+        request = TradeRequest(
+            direction=strat.direction,
+            symbol=symbol,
+            volume=volume,
+            signal=source_signal,
+            sl=sl,
+            tp=tp,
+            risk_dollars=sl_dollars,
+        )
+        log.info(
+            "Trade request %s: %s %s vol=%.4f SL=%.2f TP=%.2f (strategy: %s)",
+            request.id, strat.direction.value, symbol, volume, sl, tp,
+            strat.strategy_name,
+        )
 
-            request.state = TradeState.FILTERS_PASSED
-            self._execute(request)
+        # Run through filter chain
+        verdict, reason = self._filters.evaluate(request)
+        if verdict == FilterVerdict.BLOCK:
+            request.state = TradeState.REJECTED
+            request.rejection_reason = reason
+            log.info("Trade %s rejected: %s", request.id, reason)
+            return
+
+        request.state = TradeState.FILTERS_PASSED
+        self._execute(request)
 
     def _calculate_risk(
-        self, signal: Signal, direction: TradeDirection,
+        self, direction: TradeDirection,
     ) -> tuple[float, float, float, float]:
         """Calculate SL, TP, volume from config.
 
@@ -176,9 +200,9 @@ class TradeInitiator:
                 request.id, retcode, comment,
             )
             # Reset so the signal can be retried on next poll
-            self._last_signal_direction = None
+            self._last_strategy_signal = None
 
     def reset_signal_tracking(self) -> None:
         """Reset so the next signal of any direction will be acted on."""
         with self._lock:
-            self._last_signal_direction = None
+            self._last_strategy_signal = None
