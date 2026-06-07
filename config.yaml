@@ -59,6 +59,11 @@ exit_rules:
   tp_close_pct: 80.0               # % of volume to close when TP is reached
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
+notifications:
+  enabled: true
+  pushover_user_key: "uossifvqjkvrzm4e4766tvvhcz8aww"
+  pushover_app_token: ""             # set here or PUSHOVER_APP_TOKEN env var
+
 rules:
   # ── Expression rules (YAML only) ──
   expressions:

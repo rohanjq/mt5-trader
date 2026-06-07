@@ -8,6 +8,7 @@ from typing import Callable
 from core.config import Config
 from core.models import Signal, SignalDirection
 from core.mt5_client import MT5Client
+from core.notifications import PushoverNotifier
 from exits.base import discover_exit_rules
 from filters.base import BaseFilter, FilterChain, discover_filters
 from filters.manual_switch import ManualSwitchFilter
@@ -26,6 +27,7 @@ class Engine:
         self.config = config
         self.mt5_client = MT5Client(config)
         self.trade_manager = TradeManager(config, self.mt5_client)
+        self.notifier = PushoverNotifier(config)
         self.filter_chain = FilterChain()
         self.trade_initiator = TradeInitiator(
             config, self.mt5_client, self.filter_chain, self.trade_manager,
@@ -80,6 +82,9 @@ class Engine:
         self.trade_manager.on_trade_closed(
             lambda _trade: self.trade_initiator.reset_signal_tracking()
         )
+
+        # Notifications on trade events
+        self.trade_manager.set_notifier(self.notifier)
 
         # Connect to MT5
         if not self.mt5_client.connect():

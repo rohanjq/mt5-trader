@@ -38,7 +38,14 @@ class TradeManager:
         self._last_trade_direction: TradeDirection | None = None
         self._last_close_time: float | None = None
 
+        self._notifier = None
+
         self._events = EventLog.get()
+
+    # ── notifications ──────────────────────────────────────────────────────
+
+    def set_notifier(self, notifier) -> None:
+        self._notifier = notifier
 
     # ── properties ─────────────────────────────────────────────────────────
 
@@ -179,6 +186,15 @@ class TradeManager:
             self._open_trades[record.signal_source] = record
             log.info("Trade %s registered under rule '%s' and monitoring", record.id, record.signal_source)
 
+        if self._notifier:
+            tp_str = f"TP={record.tp:.2f}" if record.tp > 0 else "no TP"
+            self._notifier.send(
+                f"{record.direction.value} {record.symbol} @ {record.entry_price:.2f}\n"
+                f"SL={record.sl:.2f} {tp_str} vol={record.volume:.2f}\n"
+                f"Rule: {record.signal_source}",
+                title="Trade Opened",
+            )
+
     def close_trade(self, profit: float, exit_price: float, rule_name: str | None = None) -> TradeRecord | None:
         with self._lock:
             # Find the trade to close
@@ -228,6 +244,18 @@ class TradeManager:
                     cb(trade)
                 except Exception:
                     log.exception("on_trade_closed callback error")
+
+            # Push notification
+            if self._notifier:
+                result_str = "WIN" if profit > 0 else ("LOSS" if profit < 0 else "BE")
+                self._notifier.send(
+                    f"{trade.direction.value} {trade.symbol} closed\n"
+                    f"P&L: {profit:+.2f} ({result_str})\n"
+                    f"Entry: {trade.entry_price:.2f} → Exit: {exit_price:.2f}\n"
+                    f"Rule: {trade.signal_source}",
+                    title=f"Trade Closed ({result_str})",
+                    priority=-1 if profit > 0 else 0,
+                )
 
             return trade
 
