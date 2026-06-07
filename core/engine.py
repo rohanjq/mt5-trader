@@ -69,7 +69,7 @@ class Engine:
         # Discover exit rules
         exit_rules = discover_exit_rules(self.config)
         for er in exit_rules:
-            er.set_mt5_client(self.mt5)
+            er.set_mt5_client(self.mt5_client)
         self.trade_manager.set_exit_rules(exit_rules)
 
         # Discover trigger rules
