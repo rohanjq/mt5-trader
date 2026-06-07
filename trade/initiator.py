@@ -175,6 +175,8 @@ class TradeInitiator:
                 "Trade %s execution FAILED: retcode=%s comment=%s",
                 request.id, retcode, comment,
             )
+            # Reset so the signal can be retried on next poll
+            self._last_signal_direction = None
 
     def reset_signal_tracking(self) -> None:
         """Reset so the next signal of any direction will be acted on."""
