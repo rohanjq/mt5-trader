@@ -292,6 +292,7 @@ class TradeInitiator:
                 metadata={"reason": "Manual trade"},
             )
 
+            breakeven_pct = float(self._config.get("exit_rules.breakeven_pct", 0.0))
             request = TradeRequest(
                 direction=direction,
                 symbol=symbol,
@@ -300,6 +301,7 @@ class TradeInitiator:
                 sl=sl,
                 tp=tp,
                 risk_dollars=sl_dollars,
+                breakeven_pct=breakeven_pct,
             )
             request.state = TradeState.FILTERS_PASSED
             self._events.trade(
