@@ -2,10 +2,7 @@ from __future__ import annotations
 
 import abc
 import csv
-import importlib
-import inspect
 import logging
-import pkgutil
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -18,11 +15,7 @@ log = logging.getLogger(__name__)
 
 
 class BaseSignal(abc.ABC):
-    """Base class for all signal plugins.
-
-    Subclass this in ``signals/<name>.py`` and implement ``read()``.
-    The plugin will be auto-discovered at startup.
-    """
+    """Base class for all signal plugins."""
 
     name: str = "unnamed"
 
@@ -34,7 +27,6 @@ class BaseSignal(abc.ABC):
         """Read the latest indicator state and return a normalised Signal."""
         ...
 
-    # helper for CSV-based signal sources
     def _read_csv(self, path: str | Path) -> dict[str, str]:
         """Read a key,value CSV into a dict. Returns empty dict on error.
 
@@ -43,7 +35,6 @@ class BaseSignal(abc.ABC):
         """
         p = Path(path)
         if not p.exists():
-            log.warning("Signal CSV not found: %s", p)
             return {}
         for encoding in ("utf-8-sig", "utf-16", "latin-1"):
             try:
@@ -61,28 +52,42 @@ class BaseSignal(abc.ABC):
             except Exception:
                 log.exception("Error reading CSV %s", p)
                 return {}
-            return {}
+        return {}
 
 
-def discover_signals(config: Config) -> list[BaseSignal]:
-    """Auto-discover all BaseSignal subclasses in the ``signals`` package."""
-    import signals as pkg
+def build_signal_plugins(config: Config) -> list[BaseSignal]:
+    """Build signal plugin instances from config.
+
+    Config format under ``signals.sources``:
+      - indicator: utbot
+        timeframes: [M1, M3, M10, M15, M45]
+      - indicator: dc
+        timeframes: [M1, M3, M5, M15, M45]
+    """
+    from signals.donchian import DonchianSignal
+    from signals.ut_bot import UTBotSignal
+
+    indicator_classes = {
+        "utbot": UTBotSignal,
+        "dc": DonchianSignal,
+    }
+
+    sources = config.get("signals.sources", [])
+    if not sources:
+        # Fallback: single UT Bot M1 for backwards compat
+        log.warning("No signals.sources in config — using default utbot M1")
+        return [UTBotSignal(config, "M1")]
 
     plugins: list[BaseSignal] = []
-    for importer, modname, ispkg in pkgutil.iter_modules(pkg.__path__):
-        if modname.startswith("_"):
+    for src in sources:
+        indicator = src.get("indicator", "")
+        cls = indicator_classes.get(indicator)
+        if cls is None:
+            log.warning("Unknown indicator type: %s", indicator)
             continue
-        try:
-            mod = importlib.import_module(f"signals.{modname}")
-        except Exception:
-            log.exception("Failed to import signal plugin signals.%s", modname)
-            continue
-        for _name, obj in inspect.getmembers(mod, inspect.isclass):
-            if issubclass(obj, BaseSignal) and obj is not BaseSignal:
-                try:
-                    instance = obj(config)
-                    plugins.append(instance)
-                    log.info("Loaded signal plugin: %s", instance.name)
-                except Exception:
-                    log.exception("Failed to instantiate signal plugin %s", _name)
+        for tf in src.get("timeframes", []):
+            instance = cls(config, tf)
+            plugins.append(instance)
+            log.info("Signal source: %s", instance.name)
+
     return plugins

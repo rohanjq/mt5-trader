@@ -10,50 +10,42 @@ from signals.base import BaseSignal
 log = logging.getLogger(__name__)
 
 
-class DonchianChannelSignal(BaseSignal):
-    """Reads Donchian Channel EA signal from CSV.
+class DonchianSignal(BaseSignal):
+    """Reads Donchian Channel signal from SignalMaster CSV.
 
-    The EA writes dc_channels_<SYMBOL>.csv with channel data, wick detection, etc.
-    This plugin reports:
-      - UPPER_WICK_REJECTION → potential SELL signal
-      - LOWER_WICK_REJECTION → potential BUY signal
+    File: ``<SYMBOL>_dc_<TF>.csv`` (e.g. ``BTCUSDT_dc_M15.csv``)
+
+    Uses closed bar data for confirmed signals:
+      - closed_lower_wick_rej=TRUE → BUY
+      - closed_upper_wick_rej=TRUE → SELL
       - Otherwise NEUTRAL
 
-    This signal alone doesn't trigger trades — it's combined with UT Bot
-    via the DCReversalStrategy.
+    All CSV fields are passed through as metadata for trigger rules.
     """
 
-    name = "dc_channels"
+    def __init__(self, config: Config, timeframe: str = "M15") -> None:
+        super().__init__(config)
+        self._timeframe = timeframe
+        self.name = f"dc_{timeframe}"
 
     def read(self) -> Signal:
         csv_dir = self.config.get("signals.csv_dir", "../MetaTrader5-Docker/data/signals")
         symbol = self.config.get("trading.symbol", "BTCUSDT")
-        path = Path(csv_dir) / f"dc_channels_{symbol}.csv"
+        path = Path(csv_dir) / f"{symbol}_dc_{self._timeframe}.csv"
         data = self._read_csv(path)
 
         if not data:
             return Signal(source=self.name, direction=SignalDirection.NEUTRAL)
 
-        upper_wick = data.get("upper_wick_rejection", "").upper() == "TRUE"
-        lower_wick = data.get("lower_wick_rejection", "").upper() == "TRUE"
+        metadata = dict(data)
 
-        metadata = {
-            "upper_band": data.get("upper_band", ""),
-            "lower_band": data.get("lower_band", ""),
-            "mid_band": data.get("mid_band", ""),
-            "channel_width": data.get("channel_width", ""),
-            "price_zone": data.get("price_zone", ""),
-            "pct_in_channel": data.get("pct_in_channel", ""),
-            "touched_upper": data.get("touched_upper", ""),
-            "touched_lower": data.get("touched_lower", ""),
-            "upper_wick_rejection": data.get("upper_wick_rejection", ""),
-            "lower_wick_rejection": data.get("lower_wick_rejection", ""),
-        }
+        upper_wick = data.get("closed_upper_wick_rej", "").upper() == "TRUE"
+        lower_wick = data.get("closed_lower_wick_rej", "").upper() == "TRUE"
 
-        if upper_wick:
-            direction = SignalDirection.SELL
-        elif lower_wick:
+        if lower_wick:
             direction = SignalDirection.BUY
+        elif upper_wick:
+            direction = SignalDirection.SELL
         else:
             direction = SignalDirection.NEUTRAL
 

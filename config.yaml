@@ -17,6 +17,11 @@ trading:
 signals:
   poll_interval: 2.0   # seconds between signal reads
   csv_dir: ../MetaTrader5-Docker/data/signals
+  sources:
+    - indicator: utbot
+      timeframes: [M1, M3, M15, M45]
+    - indicator: dc
+      timeframes: [M15, M45]
 
 filters:
   cooldown_minutes: 5
@@ -29,11 +34,22 @@ exit_rules:
   breakeven_trigger_dollars: 50.0    # move SL to entry when price moves $50
   trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
 
-strategies:
-  utbot_simple:
-    enabled: true                    # trade on UT Bot signal alone
-  dc_reversal:
-    enabled: true                    # DC wick rejection + UT Bot confirmation
+rules:
+  dc_confluence:
+    enabled: true
+    dc_timeframe: M15
+    ut_entry_timeframe: M1
+    ut_trend_timeframe: M45
+    min_trend_bars: 5
+  dc_wick_rejection:
+    enabled: true
+    dc_timeframe: M15
+    ut_timeframe: M3
+  utbot_multi_tf:
+    enabled: true
+    entry_timeframe: M1
+    mid_timeframe: M15
+    trend_timeframe: M45
 
 logging:
   level: INFO

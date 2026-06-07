@@ -74,12 +74,12 @@ class SignalPanel(Static):
             ts = datetime.fromtimestamp(sig.timestamp).strftime("%H:%M:%S")
 
             # Build key info string based on signal source
-            if name == "ut_bot_1m":
-                info = f"Bias={meta.get('bias', '—')} TS={meta.get('trail_stop', '—')} ATR={meta.get('atr_value', '—')}"
-            elif name == "dc_channels":
-                info = f"Zone={meta.get('price_zone', '—')} U={meta.get('upper_band', '—')} L={meta.get('lower_band', '—')}"
-                uw = meta.get("upper_wick_rejection", "")
-                lw = meta.get("lower_wick_rejection", "")
+            if name.startswith("utbot_"):
+                info = f"Bias={meta.get('closed_bias', '—')} Sig={meta.get('closed_signal', '—')} ATR={meta.get('closed_atr', '—')}"
+            elif name.startswith("dc_"):
+                info = f"Zone={meta.get('closed_price_zone', '—')} U={meta.get('upper_band', '—')} L={meta.get('lower_band', '—')}"
+                uw = meta.get("closed_upper_wick_rej", "")
+                lw = meta.get("closed_lower_wick_rej", "")
                 if uw == "TRUE":
                     info += " [red]↑WICK[/]"
                 if lw == "TRUE":
@@ -211,6 +211,34 @@ class FilterPanel(Static):
         label.update("  │  ".join(parts) if parts else "[dim]No filters loaded[/]")
 
 
+class RulesPanel(Static):
+    """Active trigger rules and their last evaluation result."""
+
+    def __init__(self, engine: Engine, **kw) -> None:
+        super().__init__(**kw)
+        self._engine = engine
+
+    def compose(self) -> ComposeResult:
+        yield Label("", id="rules-text")
+
+    def refresh_content(self) -> None:
+        label = self.query_one("#rules-text", Label)
+        parts: list[str] = []
+
+        for rule in self._engine.trade_initiator.rules:
+            result = rule.last_result
+            if result.should_trade:
+                if result.action.value == "TRIGGER_BUY":
+                    icon = "[green]▲ BUY[/]"
+                else:
+                    icon = "[red]▼ SELL[/]"
+                parts.append(f"{icon} {rule.name}")
+            else:
+                parts.append(f"[dim]● {rule.name}[/]")
+
+        label.update("  │  ".join(parts) if parts else "[dim]No rules loaded[/]")
+
+
 # ── Main App ───────────────────────────────────────────────────────────────────
 
 DASHBOARD_CSS = """
@@ -246,6 +274,12 @@ Screen {
 #filter-panel {
     height: 3;
     border: solid $warning;
+    padding: 0 1;
+}
+
+#rules-panel {
+    height: 3;
+    border: solid $accent-darken-1;
     padding: 0 1;
 }
 
@@ -287,6 +321,7 @@ class TradingDashboard(App):
         yield PositionPanel(self._engine, id="position-panel")
         yield SummaryPanel(self._engine, id="summary-panel")
         yield FilterPanel(self._engine, id="filter-panel")
+        yield RulesPanel(self._engine, id="rules-panel")
         yield TradeLogPanel(self._engine, id="trade-log-panel")
         yield Footer()
 
@@ -300,6 +335,7 @@ class TradingDashboard(App):
             self.query_one("#position-panel", PositionPanel).refresh_content()
             self.query_one("#summary-panel", SummaryPanel).refresh_content()
             self.query_one("#filter-panel", FilterPanel).refresh_content()
+            self.query_one("#rules-panel", RulesPanel).refresh_content()
             self.query_one("#trade-log-panel", TradeLogPanel).refresh_content()
         except Exception:
             pass  # UI race conditions during shutdown

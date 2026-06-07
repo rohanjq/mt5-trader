@@ -11,41 +11,41 @@ log = logging.getLogger(__name__)
 
 
 class UTBotSignal(BaseSignal):
-    """Reads UT Bot Alerts EA signal from CSV.
+    """Reads UT Bot signal from SignalMaster CSV.
 
-    Emits BUY when current_bias=BULLISH and last_signal_type=BUY,
-    SELL when current_bias=BEARISH and last_signal_type=SELL,
-    NEUTRAL otherwise.
+    File: ``<SYMBOL>_utbot_<TF>.csv`` (e.g. ``BTCUSDT_utbot_M1.csv``)
+
+    Uses closed bar data for confirmed signals:
+      - closed_bias=BULLISH + closed_signal=BUY → BUY
+      - closed_bias=BEARISH + closed_signal=SELL → SELL
+      - Otherwise NEUTRAL
+
+    All key-value pairs from the CSV are passed through as metadata.
     """
 
-    name = "ut_bot_1m"
+    def __init__(self, config: Config, timeframe: str = "M1") -> None:
+        super().__init__(config)
+        self._timeframe = timeframe
+        self.name = f"utbot_{timeframe}"
 
     def read(self) -> Signal:
         csv_dir = self.config.get("signals.csv_dir", "../MetaTrader5-Docker/data/signals")
-        path = Path(csv_dir) / "ut_bot_signals.csv"
+        symbol = self.config.get("trading.symbol", "BTCUSDT")
+        path = Path(csv_dir) / f"{symbol}_utbot_{self._timeframe}.csv"
         data = self._read_csv(path)
 
         if not data:
             return Signal(source=self.name, direction=SignalDirection.NEUTRAL)
 
-        bias = data.get("current_bias", "").upper()
-        last_signal = data.get("last_signal_type", "").upper()
+        # Pass ALL fields as metadata — rules can access anything
+        metadata = dict(data)
 
-        metadata = {
-            "bias": bias,
-            "last_signal": last_signal,
-            "trail_stop": data.get("trail_stop", ""),
-            "bid": data.get("bid", ""),
-            "ask": data.get("ask", ""),
-            "atr_value": data.get("atr_value", ""),
-            "consecutive_bull_bars": data.get("consecutive_bull_bars", ""),
-            "consecutive_bear_bars": data.get("consecutive_bear_bars", ""),
-            "bars_since_signal": data.get("bars_since_signal", ""),
-        }
+        bias = data.get("closed_bias", "").upper()
+        signal = data.get("closed_signal", "").upper()
 
-        if bias == "BULLISH" and last_signal == "BUY":
+        if bias == "BULLISH" and signal == "BUY":
             direction = SignalDirection.BUY
-        elif bias == "BEARISH" and last_signal == "SELL":
+        elif bias == "BEARISH" and signal == "SELL":
             direction = SignalDirection.SELL
         else:
             direction = SignalDirection.NEUTRAL

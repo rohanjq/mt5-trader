@@ -11,8 +11,8 @@ from core.mt5_client import MT5Client
 from exits.base import discover_exit_rules
 from filters.base import BaseFilter, FilterChain, discover_filters
 from filters.manual_switch import ManualSwitchFilter
-from signals.base import BaseSignal, discover_signals
-from strategies.base import discover_strategies
+from rules.base import discover_rules
+from signals.base import BaseSignal, build_signal_plugins
 from trade.initiator import TradeInitiator
 from trade.manager import TradeManager
 
@@ -48,7 +48,7 @@ class Engine:
     def setup(self) -> bool:
         """Discover plugins, connect MT5, wire everything together."""
         # Discover signal plugins
-        self._signal_plugins = discover_signals(self.config)
+        self._signal_plugins = build_signal_plugins(self.config)
         if not self._signal_plugins:
             log.warning("No signal plugins discovered")
 
@@ -70,9 +70,9 @@ class Engine:
         exit_rules = discover_exit_rules(self.config)
         self.trade_manager.set_exit_rules(exit_rules)
 
-        # Discover strategies
-        strategies = discover_strategies(self.config)
-        self.trade_initiator.set_strategies(strategies)
+        # Discover trigger rules
+        rules = discover_rules(self.config)
+        self.trade_initiator.set_rules(rules)
 
         # When a trade closes, reset signal tracking so the next signal is acted on
         self.trade_manager.on_trade_closed(
