@@ -211,54 +211,106 @@ class TradeInitiator:
             log.error("MT5 not connected — cannot execute trade %s", request.id)
             return
 
+        partial_tp = self._config.get("exit_rules.partial_tp", False)
+        tp_close_pct = float(self._config.get("exit_rules.tp_close_pct", 80.0))
+
+        if partial_tp:
+            main_volume = round(request.volume * (tp_close_pct / 100.0), 2)
+            runner_volume = round(request.volume - main_volume, 2)
+            if runner_volume < 0.01:
+                partial_tp = False  # volume too small to split
+                main_volume = request.volume
+                runner_volume = 0.0
+        else:
+            main_volume = request.volume
+            runner_volume = 0.0
+
+        # Place main order (with TP)
         if request.direction == TradeDirection.BUY:
-            # When partial_tp is enabled, don't set server-side TP — our exit rule handles it
-            mt5_tp = 0.0 if self._config.get("exit_rules.partial_tp", False) else request.tp
             result = self._mt5.buy(
-                volume=request.volume, symbol=request.symbol,
-                sl=request.sl, tp=mt5_tp,
+                volume=main_volume, symbol=request.symbol,
+                sl=request.sl, tp=request.tp,
             )
         else:
-            mt5_tp = 0.0 if self._config.get("exit_rules.partial_tp", False) else request.tp
             result = self._mt5.sell(
-                volume=request.volume, symbol=request.symbol,
-                sl=request.sl, tp=mt5_tp,
+                volume=main_volume, symbol=request.symbol,
+                sl=request.sl, tp=request.tp,
             )
 
-        if result and result.retcode == 10009:
-            tick = self._mt5.get_tick(request.symbol)
-            entry_price = tick.ask if request.direction == TradeDirection.BUY else tick.bid
-
-            record = TradeRecord(
-                id=request.id,
-                direction=request.direction,
-                symbol=request.symbol,
-                volume=request.volume,
-                entry_price=entry_price,
-                entry_time=datetime.now(),
-                signal_source=request.signal.source,
-                ticket=result.order,
-                sl=request.sl,
-                tp=request.tp,
-                risk_dollars=request.risk_dollars,
-                breakeven_pct=request.breakeven_pct,
-                state=TradeState.EXECUTED,
-            )
-            self._manager.register_trade(record)
-            log.info(
-                "Trade %s EXECUTED: ticket=%s entry=%.2f SL=%.2f TP=%.2f",
-                request.id, result.order, entry_price, request.sl, request.tp,
-            )
-            self._events.trade(
-                f"{request.direction.value} OPENED @ {entry_price:.2f} "
-                f"SL={request.sl:.2f} TP={request.tp:.2f}"
-            )
-        else:
+        if not result or result.retcode != 10009:
             retcode = result.retcode if result else "N/A"
             comment = result.comment if result else "no result"
             log.error(
                 "Trade %s execution FAILED: retcode=%s comment=%s",
                 request.id, retcode, comment,
+            )
+            return
+
+        tick = self._mt5.get_tick(request.symbol)
+        entry_price = tick.ask if request.direction == TradeDirection.BUY else tick.bid
+        main_ticket = result.order
+
+        # Place runner order (no TP) if partial_tp
+        runner_ticket = 0
+        if partial_tp and runner_volume >= 0.01:
+            if request.direction == TradeDirection.BUY:
+                runner_result = self._mt5.buy(
+                    volume=runner_volume, symbol=request.symbol,
+                    sl=request.sl, tp=0.0,
+                )
+            else:
+                runner_result = self._mt5.sell(
+                    volume=runner_volume, symbol=request.symbol,
+                    sl=request.sl, tp=0.0,
+                )
+            if runner_result and runner_result.retcode == 10009:
+                runner_ticket = runner_result.order
+                log.info(
+                    "Runner order placed: ticket=%s vol=%.2f SL=%.2f (no TP)",
+                    runner_ticket, runner_volume, request.sl,
+                )
+            else:
+                retcode = runner_result.retcode if runner_result else "N/A"
+                log.error("Runner order FAILED: retcode=%s — main order still active", retcode)
+                runner_volume = 0.0
+
+        record = TradeRecord(
+            id=request.id,
+            direction=request.direction,
+            symbol=request.symbol,
+            volume=main_volume,
+            entry_price=entry_price,
+            entry_time=datetime.now(),
+            signal_source=request.signal.source,
+            ticket=main_ticket,
+            sl=request.sl,
+            tp=request.tp,
+            risk_dollars=request.risk_dollars,
+            breakeven_pct=request.breakeven_pct,
+            runner_ticket=runner_ticket,
+            runner_volume=runner_volume,
+            state=TradeState.EXECUTED,
+        )
+        self._manager.register_trade(record)
+
+        if runner_ticket:
+            log.info(
+                "Trade %s EXECUTED: main=%s (%.2f lots TP=%.2f) + runner=%s (%.2f lots no TP)",
+                request.id, main_ticket, main_volume, request.tp, runner_ticket, runner_volume,
+            )
+            self._events.trade(
+                f"{request.direction.value} OPENED @ {entry_price:.2f} "
+                f"SL={request.sl:.2f} TP={request.tp:.2f} "
+                f"[{main_volume:.2f}+{runner_volume:.2f} lots]"
+            )
+        else:
+            log.info(
+                "Trade %s EXECUTED: ticket=%s entry=%.2f SL=%.2f TP=%.2f",
+                request.id, main_ticket, entry_price, request.sl, request.tp,
+            )
+            self._events.trade(
+                f"{request.direction.value} OPENED @ {entry_price:.2f} "
+                f"SL={request.sl:.2f} TP={request.tp:.2f}"
             )
 
 
