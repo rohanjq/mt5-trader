@@ -29,14 +29,14 @@ _DEFAULT_CONFIG: dict[str, Any] = {
         "csv_dir": "../MetaTrader5-Docker/data/signals",
     },
     "filters": {
-        "cooldown_minutes": 5,
+        "cooldown_seconds": 30,
         "max_consecutive_losses": 3,
         "pause_after_consecutive_minutes": 15,
-        "max_daily_loss": 500.0,
+        "max_daily_loss": -1,
     },
     "exit_rules": {
-        "signal_reversal_exit": True,
-        "breakeven_trigger_dollars": 50.0,
+        "signal_reversal_exit": False,
+        "breakeven_pct": 65.0,
         "trailing_stop_dollars": 0.0,
     },
     "logging": {
