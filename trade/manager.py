@@ -25,7 +25,7 @@ class TradeManager:
         self._mt5 = mt5_client
         self._lock = threading.RLock()
 
-        self._open_trade: TradeRecord | None = None
+        self._open_trades: dict[str, TradeRecord] = {}  # rule_name → TradeRecord
         self._trade_history: list[TradeRecord] = []
         self._last_loss_time: float | None = None
         self._consecutive_losses: int = 0
@@ -43,14 +43,30 @@ class TradeManager:
     # ── properties ─────────────────────────────────────────────────────────
 
     @property
+    def multi_position(self) -> bool:
+        return bool(self._config.get("trading.multi_position", False))
+
+    @property
     def has_open_position(self) -> bool:
         with self._lock:
-            return self._open_trade is not None
+            return len(self._open_trades) > 0
 
     @property
     def open_trade(self) -> TradeRecord | None:
+        """First open trade (backward compat for single-position UI)."""
         with self._lock:
-            return self._open_trade
+            if not self._open_trades:
+                return None
+            return next(iter(self._open_trades.values()))
+
+    @property
+    def open_trades(self) -> list[TradeRecord]:
+        with self._lock:
+            return list(self._open_trades.values())
+
+    def has_position_for_rule(self, rule_name: str) -> bool:
+        with self._lock:
+            return rule_name in self._open_trades
 
     @property
     def trade_history(self) -> list[TradeRecord]:
@@ -129,10 +145,14 @@ class TradeManager:
             record.profit = pos.profit
 
             with self._lock:
-                if self._open_trade is not None:
-                    log.warning("Already tracking a position — skipping ticket=%s", pos.ticket)
+                key = f"adopted_{pos.ticket}"
+                if key in self._open_trades:
+                    log.warning("Already tracking ticket=%s — skipping", pos.ticket)
                     continue
-                self._open_trade = record
+                if not self.multi_position and self._open_trades:
+                    log.warning("Single-position mode, already tracking — skipping ticket=%s", pos.ticket)
+                    continue
+                self._open_trades[key] = record
 
             log.info(
                 "Adopted existing position: ticket=%s %s @ %.2f SL=%.2f TP=%.2f P&L=%.2f",
@@ -146,22 +166,26 @@ class TradeManager:
     def register_trade(self, record: TradeRecord) -> None:
         with self._lock:
             record.state = TradeState.MONITORING
-            self._open_trade = record
-            log.info("Trade %s registered and monitoring", record.id)
+            self._open_trades[record.signal_source] = record
+            log.info("Trade %s registered under rule '%s' and monitoring", record.id, record.signal_source)
 
-    def close_trade(self, profit: float, exit_price: float) -> TradeRecord | None:
+    def close_trade(self, profit: float, exit_price: float, rule_name: str | None = None) -> TradeRecord | None:
         with self._lock:
-            if self._open_trade is None:
+            # Find the trade to close
+            if rule_name and rule_name in self._open_trades:
+                trade = self._open_trades.pop(rule_name)
+            elif not rule_name and self._open_trades:
+                # Fallback: close first (for manual close / single mode)
+                key = next(iter(self._open_trades))
+                trade = self._open_trades.pop(key)
+            else:
                 return None
-
-            trade = self._open_trade
             trade.exit_price = exit_price
             trade.exit_time = datetime.now()
             trade.profit = profit
             trade.state = TradeState.CLOSED
 
             self._trade_history.append(trade)
-            self._open_trade = None
             self._last_trade_direction = trade.direction
             self._last_close_time = time.time()
 
@@ -197,11 +221,16 @@ class TradeManager:
 
             return trade
 
-    def close_current_position(self) -> TradeRecord | None:
-        """Close the current open position via MT5."""
+    def close_current_position(self, rule_name: str | None = None) -> TradeRecord | None:
+        """Close an open position via MT5. If rule_name given, close that specific one."""
         with self._lock:
-            trade = self._open_trade
-            if trade is None:
+            if rule_name and rule_name in self._open_trades:
+                trade = self._open_trades[rule_name]
+            elif self._open_trades:
+                # Close first open trade (single mode or manual)
+                trade = next(iter(self._open_trades.values()))
+                rule_name = trade.signal_source
+            else:
                 log.info("No open position to close")
                 return None
 
@@ -225,73 +254,73 @@ class TradeManager:
                 exit_price = tick.ask
                 profit = (trade.entry_price - exit_price) * trade.volume
 
-            return self.close_trade(profit, exit_price)
+            return self.close_trade(profit, exit_price, rule_name=rule_name)
         else:
             retcode = result.retcode if result else "N/A"
             log.error("Failed to close position: retcode=%s", retcode)
             return None
 
     def update_open_position(self) -> None:
-        """Update unrealized P&L and run exit rules."""
+        """Update unrealized P&L and run exit rules for ALL open positions."""
         with self._lock:
-            trade = self._open_trade
-            if trade is None:
+            trades = list(self._open_trades.items())  # [(rule_name, record), ...]
+            if not trades:
                 return
 
         if not self._mt5.connected:
             return
 
-        tick = self._mt5.get_tick(trade.symbol)
+        tick = self._mt5.get_tick()
         if not tick:
             return
 
-        # Update P&L
-        with self._lock:
-            if self._open_trade is None:
-                return
-            if trade.direction == TradeDirection.BUY:
-                self._open_trade.profit = (tick.bid - trade.entry_price) * trade.volume
-            else:
-                self._open_trade.profit = (trade.entry_price - tick.ask) * trade.volume
+        for rule_name, trade in trades:
+            with self._lock:
+                if rule_name not in self._open_trades:
+                    continue  # closed in the meantime
+                if trade.direction == TradeDirection.BUY:
+                    self._open_trades[rule_name].profit = (tick.bid - trade.entry_price) * trade.volume
+                else:
+                    self._open_trades[rule_name].profit = (trade.entry_price - tick.ask) * trade.volume
 
-        # Run exit rules
-        self._evaluate_exit_rules(trade, tick)
+            # Run exit rules per position
+            self._evaluate_exit_rules(trade, tick)
 
     def sync_positions_from_mt5(self) -> None:
-        """Detect if MT5 has positions we don't know about, or if our tracked
-        position was closed externally."""
+        """Detect if MT5 positions were closed externally."""
         if not self._mt5.connected:
             return
 
         mt5_positions = self._mt5.get_positions()
+        tickets = {p.ticket for p in mt5_positions}
 
         with self._lock:
-            if self._open_trade and self._open_trade.ticket:
-                # Check if our tracked position still exists
-                tickets = {p.ticket for p in mt5_positions}
-                if self._open_trade.ticket not in tickets:
-                    trade = self._open_trade
-                    log.warning(
-                        "Tracked position ticket=%s no longer in MT5 — marking closed",
-                        trade.ticket,
-                    )
-                    # Get the real exit price from current tick
-                    tick = self._mt5.get_tick(trade.symbol)
-                    if tick:
-                        if trade.direction == TradeDirection.BUY:
-                            exit_price = tick.bid
-                        else:
-                            exit_price = tick.ask
-                        profit = (
-                            (exit_price - trade.entry_price) * trade.volume
-                            if trade.direction == TradeDirection.BUY
-                            else (trade.entry_price - exit_price) * trade.volume
-                        )
-                    else:
-                        # Fallback if no tick available
-                        exit_price = trade.entry_price
-                        profit = 0.0
-                    self.close_trade(profit=profit, exit_price=exit_price)
+            closed_rules: list[str] = []
+            for rule_name, trade in self._open_trades.items():
+                if trade.ticket and trade.ticket not in tickets:
+                    closed_rules.append(rule_name)
+
+        for rule_name in closed_rules:
+            with self._lock:
+                trade = self._open_trades.get(rule_name)
+                if not trade:
+                    continue
+            log.warning(
+                "Tracked position ticket=%s (rule=%s) no longer in MT5 — marking closed",
+                trade.ticket, rule_name,
+            )
+            tick = self._mt5.get_tick(trade.symbol)
+            if tick:
+                if trade.direction == TradeDirection.BUY:
+                    exit_price = tick.bid
+                    profit = (exit_price - trade.entry_price) * trade.volume
+                else:
+                    exit_price = tick.ask
+                    profit = (trade.entry_price - exit_price) * trade.volume
+            else:
+                exit_price = trade.entry_price
+                profit = 0.0
+            self.close_trade(profit=profit, exit_price=exit_price, rule_name=rule_name)
 
     # ── statistics ─────────────────────────────────────────────────────────
 
@@ -319,7 +348,8 @@ class TradeManager:
     # ── exit rule evaluation ───────────────────────────────────────────────
 
     def _evaluate_exit_rules(self, trade: TradeRecord, tick: Any) -> None:
-        """Run all exit rules against the open position. CLOSE wins over MODIFY."""
+        """Run all exit rules against an open position. CLOSE wins over MODIFY."""
+        rule_name = trade.signal_source
         for rule in self._exit_rules:
             try:
                 result = rule.evaluate(trade, self._latest_signals, tick)
@@ -330,15 +360,15 @@ class TradeManager:
             if result.action == ExitAction.CLOSE:
                 log.info("Exit rule %s: CLOSE — %s", rule.name, result.reason)
                 self._events.exit_event(f"Exit [{rule.name}]: CLOSE — {result.reason}")
-                self.close_current_position()
+                self.close_current_position(rule_name=rule_name)
                 return
 
             if result.action == ExitAction.MODIFY_SL and result.new_sl is not None:
                 with self._lock:
-                    if self._open_trade is None:
+                    if rule_name not in self._open_trades:
                         return
-                    old_sl = self._open_trade.sl
-                    self._open_trade.sl = result.new_sl
+                    old_sl = self._open_trades[rule_name].sl
+                    self._open_trades[rule_name].sl = result.new_sl
                 tp = trade.tp
                 self._mt5.modify_position(
                     ticket=trade.ticket, sl=result.new_sl, tp=tp, symbol=trade.symbol,
@@ -353,10 +383,10 @@ class TradeManager:
 
             if result.action == ExitAction.MODIFY_TP and result.new_tp is not None:
                 with self._lock:
-                    if self._open_trade is None:
+                    if rule_name not in self._open_trades:
                         return
-                    old_tp = self._open_trade.tp
-                    self._open_trade.tp = result.new_tp
+                    old_tp = self._open_trades[rule_name].tp
+                    self._open_trades[rule_name].tp = result.new_tp
                 sl = trade.sl
                 self._mt5.modify_position(
                     ticket=trade.ticket, sl=sl, tp=result.new_tp, symbol=trade.symbol,

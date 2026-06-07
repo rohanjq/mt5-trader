@@ -284,28 +284,32 @@ class PositionPanel(Static):
         yield Label("", id="position-text")
 
     def refresh_content(self) -> None:
-        trade = self._engine.trade_manager.open_trade
+        trades = self._engine.trade_manager.open_trades
         label = self.query_one("#position-text", Label)
 
-        if trade is None:
+        if not trades:
             label.update("[dim]No open position[/]")
             return
 
-        direction = "[green]BUY[/]" if trade.direction.value == "BUY" else "[red]SELL[/]"
-        pnl_color = "green" if trade.profit >= 0 else "red"
-        duration = timedelta(seconds=int(trade.duration_seconds))
+        lines: list[str] = []
+        for trade in trades:
+            direction = "[green]BUY[/]" if trade.direction.value == "BUY" else "[red]SELL[/]"
+            pnl_color = "green" if trade.profit >= 0 else "red"
+            duration = timedelta(seconds=int(trade.duration_seconds))
 
-        sl_str = f"{trade.sl:.2f}" if trade.sl > 0 else "—"
-        tp_str = f"{trade.tp:.2f}" if trade.tp > 0 else "—"
+            sl_str = f"{trade.sl:.2f}" if trade.sl > 0 else "—"
+            tp_str = f"{trade.tp:.2f}" if trade.tp > 0 else "—"
 
-        text = (
-            f"Direction: {direction}  │  Entry: {trade.entry_price:.2f}  │  "
-            f"Vol: {trade.volume}  │  "
-            f"SL: {sl_str}  │  TP: {tp_str}  │  "
-            f"P&L: [{pnl_color}]{trade.profit:+.2f}[/]  │  "
-            f"Duration: {duration}  │  Ticket: {trade.ticket}"
-        )
-        label.update(text)
+            rule_tag = f"[dim]{trade.signal_source}[/]" if len(trades) > 1 else ""
+            lines.append(
+                f"Direction: {direction}  │  Entry: {trade.entry_price:.2f}  │  "
+                f"Vol: {trade.volume}  │  "
+                f"SL: {sl_str}  │  TP: {tp_str}  │  "
+                f"P&L: [{pnl_color}]{trade.profit:+.2f}[/]  │  "
+                f"Duration: {duration}  │  Ticket: {trade.ticket}"
+                f"  {rule_tag}"
+            )
+        label.update("\n".join(lines))
 
 
 class SummaryPanel(Static):
@@ -503,7 +507,8 @@ Screen {
 }
 
 #position-panel {
-    height: 4;
+    height: auto;
+    max-height: 10;
     border: solid $accent;
     padding: 0 1;
 }
@@ -612,12 +617,17 @@ class TradingDashboard(App):
             self.notify(f"Auto-trading {state}", severity="information")
 
     def action_close_position(self) -> None:
-        result = self._engine.trade_manager.close_current_position()
-        if result:
-            self._engine.trade_initiator.reset_signal_tracking()
-            self.notify(f"Position closed: P&L {result.profit:+.2f}", severity="information")
-        else:
+        trades = self._engine.trade_manager.open_trades
+        if not trades:
             self.notify("No open position to close", severity="warning")
+            return
+        closed = 0
+        for trade in list(trades):
+            result = self._engine.trade_manager.close_current_position(rule_name=trade.signal_source)
+            if result:
+                closed += 1
+        self._engine.trade_initiator.reset_signal_tracking()
+        self.notify(f"Closed {closed} position(s)", severity="information")
 
     def action_reconnect_mt5(self) -> None:
         self._engine.mt5_client.disconnect()

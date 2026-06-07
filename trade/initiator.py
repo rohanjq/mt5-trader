@@ -94,11 +94,15 @@ class TradeInitiator:
                     self._events.info("Warmup — stale signals skipped, waiting for fresh data")
                     return
 
-            if self._manager.has_open_position:
+            if not self._manager.multi_position and self._manager.has_open_position:
                 return
 
             # Evaluate rules in priority order
             for rule in self._rules:
+                # In multi-position mode, skip rules that already have a position
+                if self._manager.multi_position and self._manager.has_position_for_rule(rule.name):
+                    continue
+
                 try:
                     result = rule.evaluate(signals)
                 except Exception:
@@ -122,7 +126,8 @@ class TradeInitiator:
                     f"Rule [{rule.name}] triggered {result.direction.value}: {result.reason}"
                 )
                 self._initiate_trade(result, signals)
-                return  # Only one trade per cycle
+                if not self._manager.multi_position:
+                    return  # Single mode: only one trade per cycle
 
     def _initiate_trade(self, trigger: TriggerResult, signals: dict[str, Signal]) -> None:
         symbol = self._config.get("trading.symbol", "BTCUSDT")
@@ -274,8 +279,11 @@ class TradeInitiator:
         Returns True if the trade was placed.
         """
         with self._lock:
-            if self._manager.has_open_position:
+            if not self._manager.multi_position and self._manager.has_open_position:
                 self._events.warn("Manual trade rejected — position already open")
+                return False
+            if self._manager.has_position_for_rule("manual"):
+                self._events.warn("Manual trade rejected — manual position already open")
                 return False
 
             symbol = self._config.get("trading.symbol", "BTCUSDT")

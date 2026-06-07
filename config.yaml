@@ -11,6 +11,7 @@ trading:
   magic: 100
   deviation: 20
   filling: FOK
+  multi_position: true   # allow multiple simultaneous positions (one per rule)
   sl_dollars: 175.0    # default SL = $175 from entry (overridable per strategy)
   reward_ratio: 1.25   # default TP = SL × ratio
 
@@ -241,7 +242,7 @@ rules:
 
     # UT 1m signal + DC zone near mid (mean reversion)
     - name: "1m_dc_mid_reversal"
-      enabled: true
+      enabled: false
       priority: 110
       description: "UT 1m signal + price near DC mid zone"
       buy:
@@ -253,7 +254,7 @@ rules:
 
     # UT 1m + 3m bias aligned (frequent)
     - name: "1m_3m_align"
-      enabled: true
+      enabled: false
       priority: 130
       description: "UT 1m signal + 3m bias aligned"
       buy:
