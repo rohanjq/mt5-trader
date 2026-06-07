@@ -67,6 +67,7 @@ class TradeRequest:
     tp: float = 0.0
     risk_dollars: float = 0.0
     breakeven_pct: float = 0.0
+    partial_tp: bool = True
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     state: TradeState = TradeState.SIGNAL_RECEIVED
     rejection_reason: str = ""

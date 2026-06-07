@@ -146,6 +146,7 @@ class ExpressionRule(BaseRule):
         sl_dollars: float | None = None,
         reward_ratio: float | None = None,
         breakeven_pct: float | None = None,
+        partial_tp: bool | None = None,
     ) -> None:
         super().__init__(config)
         self.name = rule_name
@@ -156,6 +157,7 @@ class ExpressionRule(BaseRule):
         self._sl_dollars = sl_dollars
         self._reward_ratio = reward_ratio
         self._breakeven_pct = breakeven_pct
+        self._partial_tp = partial_tp
         # Rising-edge detection: only fire on False→True transition
         self._prev_buy_met = False
         self._prev_sell_met = False
@@ -195,6 +197,7 @@ class ExpressionRule(BaseRule):
                 sl_dollars=self._sl_dollars,
                 reward_ratio=self._reward_ratio,
                 breakeven_pct=self._breakeven_pct,
+                partial_tp=self._partial_tp,
             )
             return self._last_result
 
@@ -207,6 +210,7 @@ class ExpressionRule(BaseRule):
                 sl_dollars=self._sl_dollars,
                 reward_ratio=self._reward_ratio,
                 breakeven_pct=self._breakeven_pct,
+                partial_tp=self._partial_tp,
             )
             return self._last_result
 
@@ -264,6 +268,7 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
         raw_sl = defn.get("sl_dollars")
         raw_rr = defn.get("reward_ratio")
         raw_be = defn.get("breakeven_pct")
+        raw_ptp = defn.get("partial_tp")
         rule = ExpressionRule(
             config=config,
             rule_name=name,
@@ -274,6 +279,7 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
             sl_dollars=float(raw_sl) if raw_sl is not None else None,
             reward_ratio=float(raw_rr) if raw_rr is not None else None,
             breakeven_pct=float(raw_be) if raw_be is not None else None,
+            partial_tp=bool(raw_ptp) if raw_ptp is not None else None,
         )
         expr_rules.append(rule)
         log.info(

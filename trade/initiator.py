@@ -131,6 +131,11 @@ class TradeInitiator:
         if breakeven_pct is None:
             breakeven_pct = float(self._config.get("exit_rules.breakeven_pct", 0.0))
 
+        # Per-rule partial_tp (fall back to global config)
+        partial_tp = trigger.partial_tp
+        if partial_tp is None:
+            partial_tp = bool(self._config.get("exit_rules.partial_tp", False))
+
         source_signal = Signal(
             source=trigger.rule_name,
             direction=(
@@ -149,6 +154,7 @@ class TradeInitiator:
             tp=tp,
             risk_dollars=sl_dollars,
             breakeven_pct=breakeven_pct,
+            partial_tp=partial_tp,
         )
         log.info(
             "Trade request %s: %s %s vol=%.4f SL=%.2f TP=%.2f (rule: %s)",
@@ -211,7 +217,7 @@ class TradeInitiator:
             log.error("MT5 not connected — cannot execute trade %s", request.id)
             return
 
-        partial_tp = self._config.get("exit_rules.partial_tp", False)
+        partial_tp = request.partial_tp
         tp_close_pct = float(self._config.get("exit_rules.tp_close_pct", 80.0))
 
         if partial_tp:
@@ -345,6 +351,7 @@ class TradeInitiator:
             )
 
             breakeven_pct = float(self._config.get("exit_rules.breakeven_pct", 0.0))
+            partial_tp = bool(self._config.get("exit_rules.partial_tp", False))
             request = TradeRequest(
                 direction=direction,
                 symbol=symbol,
@@ -354,6 +361,7 @@ class TradeInitiator:
                 tp=tp,
                 risk_dollars=sl_dollars,
                 breakeven_pct=breakeven_pct,
+                partial_tp=partial_tp,
             )
             request.state = TradeState.FILTERS_PASSED
             self._events.trade(
