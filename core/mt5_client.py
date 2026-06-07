@@ -93,7 +93,8 @@ class MT5Client:
                 log.error("Order failed: retcode=%s comment=%s", retcode, comment)
             return result
 
-    def buy(self, volume: float | None = None, symbol: str | None = None) -> Any:
+    def buy(self, volume: float | None = None, symbol: str | None = None,
+             sl: float = 0.0, tp: float = 0.0) -> Any:
         symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
         volume = volume or self._config.get("trading.volume", 0.001)
         tick = self.get_tick(symbol)
@@ -112,9 +113,14 @@ class MT5Client:
             "type_time": self.mt5.ORDER_TIME_GTC,
             "type_filling": self.mt5.ORDER_FILLING_FOK,
         }
+        if sl > 0:
+            request["sl"] = float(sl)
+        if tp > 0:
+            request["tp"] = float(tp)
         return self.send_order(request)
 
-    def sell(self, volume: float | None = None, symbol: str | None = None) -> Any:
+    def sell(self, volume: float | None = None, symbol: str | None = None,
+              sl: float = 0.0, tp: float = 0.0) -> Any:
         symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
         volume = volume or self._config.get("trading.volume", 0.001)
         tick = self.get_tick(symbol)
@@ -133,6 +139,10 @@ class MT5Client:
             "type_time": self.mt5.ORDER_TIME_GTC,
             "type_filling": self.mt5.ORDER_FILLING_FOK,
         }
+        if sl > 0:
+            request["sl"] = float(sl)
+        if tp > 0:
+            request["tp"] = float(tp)
         return self.send_order(request)
 
     def close_position(self, ticket: int, volume: float, direction: str, symbol: str | None = None) -> Any:
@@ -169,3 +179,27 @@ class MT5Client:
         with self._lock:
             positions = self.mt5.positions_get(symbol=symbol)
             return list(positions) if positions else []
+
+    def modify_position(self, ticket: int, sl: float = 0.0, tp: float = 0.0,
+                        symbol: str | None = None) -> Any:
+        """Modify SL/TP of an open position using TRADE_ACTION_SLTP."""
+        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        request = {
+            "action": self.mt5.TRADE_ACTION_SLTP,
+            "symbol": symbol,
+            "position": ticket,
+        }
+        if sl > 0:
+            request["sl"] = float(sl)
+        if tp > 0:
+            request["tp"] = float(tp)
+        with self._lock:
+            log.info("Modifying position %s: sl=%.2f tp=%.2f", ticket, sl, tp)
+            result = self.mt5.order_send(request)
+            if result and result.retcode == 10009:
+                log.info("Position %s modified successfully", ticket)
+            else:
+                retcode = result.retcode if result else "None"
+                comment = result.comment if result else "no result"
+                log.error("Position modify failed: retcode=%s comment=%s", retcode, comment)
+            return result

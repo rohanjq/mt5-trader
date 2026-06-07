@@ -8,6 +8,7 @@ from typing import Callable
 from core.config import Config
 from core.models import Signal, SignalDirection
 from core.mt5_client import MT5Client
+from exits.base import discover_exit_rules
 from filters.base import BaseFilter, FilterChain, discover_filters
 from filters.manual_switch import ManualSwitchFilter
 from signals.base import BaseSignal, discover_signals
@@ -63,6 +64,15 @@ class Engine:
             self.manual_switch = ManualSwitchFilter(self.config)
             self.manual_switch.set_trade_manager(self.trade_manager)
             self.filter_chain.add(self.manual_switch)
+
+        # Discover exit rules
+        exit_rules = discover_exit_rules(self.config)
+        self.trade_manager.set_exit_rules(exit_rules)
+
+        # When a trade closes, reset signal tracking so the next signal is acted on
+        self.trade_manager.on_trade_closed(
+            lambda _trade: self.trade_initiator.reset_signal_tracking()
+        )
 
         # Connect to MT5
         if not self.mt5_client.connect():
@@ -123,6 +133,7 @@ class Engine:
 
                 # Notify UI callbacks
                 snapshot = self.latest_signals
+                self.trade_manager.update_signals(snapshot)
                 for cb in self._signal_callbacks:
                     try:
                         cb(snapshot)

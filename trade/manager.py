@@ -4,9 +4,10 @@ import logging
 import threading
 import time
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from core.models import TradeDirection, TradeRecord, TradeState
+from core.models import Signal, TradeDirection, TradeRecord, TradeState
+from exits.base import BaseExitRule, ExitAction
 
 if TYPE_CHECKING:
     from core.config import Config
@@ -16,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 class TradeManager:
-    """Tracks open and closed trades, monitors positions, reports outcomes."""
+    """Tracks open and closed trades, monitors positions, runs exit rules."""
 
     def __init__(self, config: Config, mt5_client: MT5Client) -> None:
         self._config = config
@@ -27,6 +28,10 @@ class TradeManager:
         self._trade_history: list[TradeRecord] = []
         self._last_loss_time: float | None = None
         self._consecutive_losses: int = 0
+
+        self._exit_rules: list[BaseExitRule] = []
+        self._latest_signals: dict[str, Signal] = {}
+        self._on_close_callbacks: list = []
 
     # ── properties ─────────────────────────────────────────────────────────
 
@@ -54,6 +59,20 @@ class TradeManager:
     def consecutive_losses(self) -> int:
         with self._lock:
             return self._consecutive_losses
+
+    # ── exit rules ─────────────────────────────────────────────────────────
+
+    def set_exit_rules(self, rules: list[BaseExitRule]) -> None:
+        self._exit_rules = rules
+        log.info("Exit rules loaded: %s", [r.name for r in rules])
+
+    def update_signals(self, signals: dict[str, Signal]) -> None:
+        """Called by the engine to keep the manager aware of latest signals."""
+        self._latest_signals = signals
+
+    def on_trade_closed(self, callback) -> None:
+        """Register a callback fired after a trade is closed (for signal reset)."""
+        self._on_close_callbacks.append(callback)
 
     # ── trade lifecycle ────────────────────────────────────────────────────
 
@@ -87,6 +106,13 @@ class TradeManager:
             else:
                 self._consecutive_losses = 0
                 log.info("Trade %s CLOSED with PROFIT: %.2f", trade.id, profit)
+
+            # Notify listeners (e.g., initiator resets signal tracking)
+            for cb in self._on_close_callbacks:
+                try:
+                    cb(trade)
+                except Exception:
+                    log.exception("on_trade_closed callback error")
 
             return trade
 
@@ -125,7 +151,7 @@ class TradeManager:
             return None
 
     def update_open_position(self) -> None:
-        """Update unrealized P&L of the open position from MT5 tick data."""
+        """Update unrealized P&L and run exit rules."""
         with self._lock:
             trade = self._open_trade
             if trade is None:
@@ -138,6 +164,7 @@ class TradeManager:
         if not tick:
             return
 
+        # Update P&L
         with self._lock:
             if self._open_trade is None:
                 return
@@ -145,6 +172,9 @@ class TradeManager:
                 self._open_trade.profit = (tick.bid - trade.entry_price) * trade.volume
             else:
                 self._open_trade.profit = (trade.entry_price - tick.ask) * trade.volume
+
+        # Run exit rules
+        self._evaluate_exit_rules(trade, tick)
 
     def sync_positions_from_mt5(self) -> None:
         """Detect if MT5 has positions we don't know about, or if our tracked
@@ -186,3 +216,49 @@ class TradeManager:
             "avg_loss": sum(t.profit for t in losses) / len(losses) if losses else 0.0,
             "net_pnl": total_profit,
         }
+
+    # ── exit rule evaluation ───────────────────────────────────────────────
+
+    def _evaluate_exit_rules(self, trade: TradeRecord, tick: Any) -> None:
+        """Run all exit rules against the open position. CLOSE wins over MODIFY."""
+        for rule in self._exit_rules:
+            try:
+                result = rule.evaluate(trade, self._latest_signals, tick)
+            except Exception:
+                log.exception("Exit rule %s raised an exception — skipping", rule.name)
+                continue
+
+            if result.action == ExitAction.CLOSE:
+                log.info("Exit rule %s: CLOSE — %s", rule.name, result.reason)
+                self.close_current_position()
+                return
+
+            if result.action == ExitAction.MODIFY_SL and result.new_sl is not None:
+                with self._lock:
+                    if self._open_trade is None:
+                        return
+                    old_sl = self._open_trade.sl
+                    self._open_trade.sl = result.new_sl
+                tp = trade.tp
+                self._mt5.modify_position(
+                    ticket=trade.ticket, sl=result.new_sl, tp=tp, symbol=trade.symbol,
+                )
+                log.info(
+                    "Exit rule %s: SL moved %.2f → %.2f — %s",
+                    rule.name, old_sl, result.new_sl, result.reason,
+                )
+
+            if result.action == ExitAction.MODIFY_TP and result.new_tp is not None:
+                with self._lock:
+                    if self._open_trade is None:
+                        return
+                    old_tp = self._open_trade.tp
+                    self._open_trade.tp = result.new_tp
+                sl = trade.sl
+                self._mt5.modify_position(
+                    ticket=trade.ticket, sl=sl, tp=result.new_tp, symbol=trade.symbol,
+                )
+                log.info(
+                    "Exit rule %s: TP moved %.2f → %.2f — %s",
+                    rule.name, old_tp, result.new_tp, result.reason,
+                )

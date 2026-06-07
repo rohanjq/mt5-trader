@@ -7,10 +7,13 @@ mt5:
 
 trading:
   symbol: BTCUSDT
-  volume: 0.001        # ← hot-reloadable
+  volume: 0.001        # ← fallback if risk_dollars is 0 (hot-reloadable)
   magic: 100
   deviation: 20
   filling: FOK
+  risk_dollars: 5.0    # ← $ risked per trade; 0 = use fixed volume instead
+  reward_ratio: 1.25   # ← TP = SL_distance × this ratio (1:1.25 R:R)
+  use_signal_sl: true  # ← use trail_stop from signal CSV as SL
 
 signals:
   poll_interval: 2.0   # seconds between signal reads
@@ -21,6 +24,11 @@ filters:
   max_consecutive_losses: 3
   pause_after_consecutive_minutes: 15
   max_daily_loss: 500.0
+
+exit_rules:
+  signal_reversal_exit: true   # close when signal flips opposite
+  breakeven_at_r: 1.75         # move SL to entry when profit >= 1.75R (0 = off)
+  trailing_stop_r: 0.0         # trail SL at this R-distance from price (0 = off)
 
 logging:
   level: INFO

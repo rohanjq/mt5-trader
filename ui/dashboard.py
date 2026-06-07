@@ -105,9 +105,14 @@ class PositionPanel(Static):
         pnl_color = "green" if trade.profit >= 0 else "red"
         duration = timedelta(seconds=int(trade.duration_seconds))
 
+        sl_str = f"{trade.sl:.2f}" if trade.sl > 0 else "—"
+        tp_str = f"{trade.tp:.2f}" if trade.tp > 0 else "—"
+        risk_str = f"${trade.risk_dollars:.2f}" if trade.risk_dollars > 0 else "—"
+
         text = (
             f"Direction: {direction}  │  Entry: {trade.entry_price:.2f}  │  "
-            f"Volume: {trade.volume}  │  "
+            f"Vol: {trade.volume}  │  "
+            f"SL: {sl_str}  │  TP: {tp_str}  │  Risk: {risk_str}  │  "
             f"P&L: [{pnl_color}]{trade.profit:+.2f}[/]  │  "
             f"Duration: {duration}  │  Ticket: {trade.ticket}"
         )
@@ -221,7 +226,7 @@ Screen {
 }
 
 #position-panel {
-    height: 3;
+    height: 4;
     border: solid $accent;
     padding: 0 1;
 }

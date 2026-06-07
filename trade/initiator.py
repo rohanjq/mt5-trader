@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import threading
-import time
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -28,8 +27,8 @@ log = logging.getLogger(__name__)
 class TradeInitiator:
     """Evaluates signals and initiates trades through the filter chain.
 
-    Current rule: UT Bot BUY → open BUY of configured volume.
-                  UT Bot SELL → open SELL of configured volume.
+    Calculates SL from signal metadata (trail_stop), TP from reward ratio,
+    and optionally sizes the position from risk_dollars.
     """
 
     def __init__(
@@ -63,23 +62,28 @@ class TradeInitiator:
             self._last_signal_direction = signal.direction
 
             symbol = self._config.get("trading.symbol", "BTCUSDT")
-            volume = float(self._config.get("trading.volume", 0.001))
-
             direction = (
                 TradeDirection.BUY
                 if signal.direction == SignalDirection.BUY
                 else TradeDirection.SELL
             )
 
+            # ── Calculate SL, TP, volume from risk ──
+            sl, tp, volume, risk_dollars = self._calculate_risk(signal, direction)
+
             request = TradeRequest(
                 direction=direction,
                 symbol=symbol,
                 volume=volume,
                 signal=signal,
+                sl=sl,
+                tp=tp,
+                risk_dollars=risk_dollars,
             )
             log.info(
-                "Trade request %s: %s %s %.4f (signal: %s)",
-                request.id, direction.value, symbol, volume, signal.source,
+                "Trade request %s: %s %s vol=%.4f SL=%.2f TP=%.2f risk=$%.2f (signal: %s)",
+                request.id, direction.value, symbol, volume, sl, tp, risk_dollars,
+                signal.source,
             )
 
             # Run through filter chain
@@ -94,15 +98,71 @@ class TradeInitiator:
             request.state = TradeState.FILTERS_PASSED
             self._execute(request)
 
+    def _calculate_risk(
+        self, signal: Signal, direction: TradeDirection,
+    ) -> tuple[float, float, float, float]:
+        """Calculate SL, TP, volume, and risk_dollars from config + signal metadata.
+
+        Returns (sl, tp, volume, risk_dollars).
+        """
+        risk_dollars = float(self._config.get("trading.risk_dollars", 0))
+        reward_ratio = float(self._config.get("trading.reward_ratio", 1.25))
+        use_signal_sl = self._config.get("trading.use_signal_sl", True)
+        default_volume = float(self._config.get("trading.volume", 0.001))
+
+        # Try to get SL from signal's trail_stop
+        sl = 0.0
+        if use_signal_sl:
+            trail_stop_str = signal.metadata.get("trail_stop", "")
+            try:
+                sl = float(trail_stop_str) if trail_stop_str else 0.0
+            except (ValueError, TypeError):
+                sl = 0.0
+
+        # Get current price for TP calculation
+        tick = self._mt5.get_tick() if self._mt5.connected else None
+        entry_price = 0.0
+        if tick:
+            entry_price = tick.ask if direction == TradeDirection.BUY else tick.bid
+
+        # Calculate TP from SL distance and reward ratio
+        tp = 0.0
+        sl_distance = 0.0
+        if sl > 0 and entry_price > 0:
+            sl_distance = abs(entry_price - sl)
+            if direction == TradeDirection.BUY:
+                tp = entry_price + (sl_distance * reward_ratio)
+            else:
+                tp = entry_price - (sl_distance * reward_ratio)
+
+        # Calculate volume from risk_dollars if set
+        volume = default_volume
+        if risk_dollars > 0 and sl_distance > 0:
+            volume = risk_dollars / sl_distance
+            # Round to broker precision (3 decimals for crypto)
+            volume = round(volume, 3)
+            # Clamp to minimum
+            if volume < 0.001:
+                volume = 0.001
+                log.warning("Calculated volume too small, clamped to 0.001")
+
+        return sl, tp, volume, risk_dollars
+
     def _execute(self, request: TradeRequest) -> None:
         if not self._mt5.connected:
             log.error("MT5 not connected — cannot execute trade %s", request.id)
             return
 
         if request.direction == TradeDirection.BUY:
-            result = self._mt5.buy(volume=request.volume, symbol=request.symbol)
+            result = self._mt5.buy(
+                volume=request.volume, symbol=request.symbol,
+                sl=request.sl, tp=request.tp,
+            )
         else:
-            result = self._mt5.sell(volume=request.volume, symbol=request.symbol)
+            result = self._mt5.sell(
+                volume=request.volume, symbol=request.symbol,
+                sl=request.sl, tp=request.tp,
+            )
 
         if result and result.retcode == 10009:
             tick = self._mt5.get_tick(request.symbol)
@@ -117,12 +177,15 @@ class TradeInitiator:
                 entry_time=datetime.now(),
                 signal_source=request.signal.source,
                 ticket=result.order,
+                sl=request.sl,
+                tp=request.tp,
+                risk_dollars=request.risk_dollars,
                 state=TradeState.EXECUTED,
             )
             self._manager.register_trade(record)
             log.info(
-                "Trade %s EXECUTED: ticket=%s entry=%.2f",
-                request.id, result.order, entry_price,
+                "Trade %s EXECUTED: ticket=%s entry=%.2f SL=%.2f TP=%.2f",
+                request.id, result.order, entry_price, request.sl, request.tp,
             )
         else:
             retcode = result.retcode if result else "N/A"
