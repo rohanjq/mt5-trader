@@ -240,10 +240,10 @@ rules:
       description: "UT 1m signal + price near DC mid zone"
       buy:
         - utbot_M1.closed_signal == BUY
-        - dc_M15.closed_price_zone in LOWER_MID,MID
+        - dc_M15.closed_price_zone in LOWER_MID,MIDDLE
       sell:
         - utbot_M1.closed_signal == SELL
-        - dc_M15.closed_price_zone in UPPER_MID,MID
+        - dc_M15.closed_price_zone in UPPER_MID,MIDDLE
 
     # UT 1m + 3m bias aligned (frequent)
     - name: "1m_3m_align"

@@ -86,12 +86,12 @@ rules:
         - utbot_M1.closed_signal == BUY
         - utbot_M15.closed_bias == BULLISH
         - utbot_M45.closed_bias == BULLISH
-        - dc_M15.closed_price_zone in LOWER,LOWER_MID,MID
+        - dc_M15.closed_price_zone in LOWER,LOWER_MID,MIDDLE
       sell:
         - utbot_M1.closed_signal == SELL
         - utbot_M15.closed_bias == BEARISH
         - utbot_M45.closed_bias == BEARISH
-        - dc_M15.closed_price_zone in UPPER,UPPER_MID,MID
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID,MIDDLE
 
     # ATR volatility filter
     - name: ut_low_vol
@@ -181,7 +181,7 @@ Available timeframes: M1, M3, M5, M15, M45 (configured in `config.yaml`)
 
 | Field | Type | Values | Description |
 |-------|------|--------|-------------|
-| `closed_price_zone` | str | UPPER / UPPER_MID / MID / LOWER_MID / LOWER | Where price closed relative to the DC channel. |
+| `closed_price_zone` | str | UPPER / UPPER_MID / MIDDLE / LOWER_MID / LOWER | Where price closed relative to the DC channel. |
 | `closed_upper_wick_rej` | str | TRUE / FALSE | Candle wicked into the upper band and was rejected. Bearish signal. |
 | `closed_lower_wick_rej` | str | TRUE / FALSE | Candle wicked into the lower band and was rejected. Bullish signal. |
 | `upper_band` | float | e.g. 62382.0 | Upper Donchian channel boundary. |
