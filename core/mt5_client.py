@@ -69,6 +69,11 @@ class MT5Client:
 
     # ── market data ────────────────────────────────────────────────────────
 
+    def get_account_info(self) -> Any:
+        """Get MT5 account info (balance, equity, margin, etc.)."""
+        with self._lock:
+            return self.mt5.account_info()
+
     def get_tick(self, symbol: str | None = None) -> Any:
         symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
         with self._lock:

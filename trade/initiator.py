@@ -177,16 +177,22 @@ class TradeInitiator:
     def _calculate_risk(
         self, direction: TradeDirection, trigger: TriggerResult | None = None,
     ) -> tuple[float, float, float, float]:
-        """Calculate SL, TP, volume from config (with per-rule overrides).
+        """Calculate SL, TP, and volume from risk_pct + SL distance.
 
-        If the triggering rule specifies ``sl_dollars`` or ``reward_ratio``,
-        those values override the global config defaults.
+        Volume is dynamically sized so that if SL is hit, the loss equals
+        ``risk_pct`` percent of account balance.
+
+        Per-rule ``sl_dollars`` and ``reward_ratio`` override globals.
+        ``trading.volume`` is used as a fallback if risk_pct sizing fails.
 
         Returns (sl, tp, volume, sl_dollars).
         """
-        volume = float(self._config.get("trading.volume", 0.001))
+        fallback_volume = float(self._config.get("trading.volume", 0.001))
         sl_dollars = float(self._config.get("trading.sl_dollars", 5.0))
         reward_ratio = float(self._config.get("trading.reward_ratio", 1.25))
+        risk_pct = float(self._config.get("trading.risk_pct", 5.0))
+        max_volume = float(self._config.get("trading.max_volume", 10.0))
+        min_volume = float(self._config.get("trading.min_volume", 0.01))
 
         # Per-rule overrides
         if trigger is not None and trigger.sl_dollars is not None:
@@ -199,7 +205,7 @@ class TradeInitiator:
         # Get current price
         tick = self._mt5.get_tick() if self._mt5.connected else None
         if not tick:
-            return 0.0, 0.0, volume, sl_dollars
+            return 0.0, 0.0, fallback_volume, sl_dollars
 
         entry_price = tick.ask if direction == TradeDirection.BUY else tick.bid
 
@@ -209,6 +215,38 @@ class TradeInitiator:
         else:
             sl = entry_price + sl_dollars
             tp = entry_price - tp_dollars
+
+        # Dynamic volume sizing from risk_pct
+        volume = fallback_volume
+        try:
+            account = self._mt5.get_account_info()
+            symbol = self._config.get("trading.symbol", "BTCUSDT")
+            info = self._mt5.get_symbol_info(symbol)
+            if account and info and sl_dollars > 0:
+                risk_amount = account.balance * (risk_pct / 100.0)
+                tick_size = info.trade_tick_size
+                tick_value = info.trade_tick_value
+                volume_step = info.volume_step
+
+                if tick_size > 0 and tick_value > 0:
+                    # Cash risk per 1 lot if SL hit
+                    cash_per_lot = (sl_dollars / tick_size) * tick_value
+                    if cash_per_lot > 0:
+                        raw_volume = risk_amount / cash_per_lot
+                        # Round down to volume step
+                        volume = max(
+                            min_volume,
+                            min(max_volume, int(raw_volume / volume_step) * volume_step),
+                        )
+                        volume = round(volume, 2)
+                        log.info(
+                            "Risk sizing: %.1f%% of $%.0f = $%.0f risk, "
+                            "SL=$%.2f, cash/lot=$%.0f → vol=%.2f",
+                            risk_pct, account.balance, risk_amount,
+                            sl_dollars, cash_per_lot, volume,
+                        )
+        except Exception:
+            log.warning("Risk-based volume sizing failed — using fallback volume %.2f", fallback_volume)
 
         return sl, tp, volume, sl_dollars
 

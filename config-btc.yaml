@@ -7,7 +7,10 @@ mt5:
 
 trading:
   symbol: BTCUSDT
-  volume: 0.75         # fixed lot size (hot-reloadable)
+  volume: 0.75         # fallback if risk sizing fails
+  risk_pct: 5.0        # risk 5% of account balance per trade (hot-reloadable)
+  max_volume: 10.0     # safety cap
+  min_volume: 0.01     # broker minimum
   magic: 100
   deviation: 20
   filling: FOK

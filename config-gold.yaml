@@ -7,13 +7,14 @@ mt5:
 
 trading:
   symbol: XAUUSD
-  volume: 0.25           # 0.25 lots = 25 oz (at 100 oz/lot)
+  volume: 0.25           # fallback if risk sizing fails
+  risk_pct: 5.0          # risk 5% of account balance per trade (hot-reloadable)
+  max_volume: 10.0       # safety cap
+  min_volume: 0.01       # broker minimum
   magic: 200             # separate magic from BTC (100)
   deviation: 20
   filling: FOK
   multi_position: true
-  # Gold: $5 move = $5 × 100 × 0.25 = $125 risk per trade
-  # $10 move = $250 risk — too wide for scalping
   sl_dollars: 5.0         # default SL = $5.00 move from entry
   reward_ratio: 1.25      # default TP = SL × 1.25 = $6.25 move
 
