@@ -24,37 +24,37 @@ signals:
   sources:
     # ── Core indicators ──
     - indicator: utbot
-      timeframes: [M1, M3, M5, M15]
+      timeframes: [M1, M3, M5, M15, M45, H1]
     - indicator: dc
-      timeframes: [M1, M5, M15]
+      timeframes: [M1, M5, M15, M45, H1]
     # ── EMA family ──
     - indicator: ema9
-      timeframes: [M1]
+      timeframes: [M1, M5, M15, M45, H1]
     - indicator: ema21
-      timeframes: [M1, M5]
+      timeframes: [M1, M5, M15, M45, H1]
     - indicator: ema50
-      timeframes: [M5, M15]
+      timeframes: [M5, M15, M45, H1]
     - indicator: ema200
-      timeframes: [M5, M15]
+      timeframes: [M5, M15, M45, H1]
     # ── Oscillators ──
     - indicator: rsi14
-      timeframes: [M1, M5, M15]
+      timeframes: [M1, M5, M15, M45, H1]
     - indicator: rsi2
-      timeframes: [M1]
+      timeframes: [M1, M5, M15]
     - indicator: adx14
-      timeframes: [M1, M5]
+      timeframes: [M1, M5, M15, M45, H1]
     - indicator: macd12_26_9
-      timeframes: [M1]
+      timeframes: [M1, M5, M15]
     - indicator: stoch5_3_3
-      timeframes: [M1]
+      timeframes: [M1, M5, M15]
     # ── Volatility / bands ──
     - indicator: bb20d2
-      timeframes: [M1]
+      timeframes: [M1, M5, M15]
     - indicator: atr14
-      timeframes: [M1, M5]
+      timeframes: [M1, M5, M15, M45, H1]
     # ── Session VWAP ──
     - indicator: vwap
-      timeframes: [M1, M5]
+      timeframes: [M1, M5, M15]
 
 filters:
   cooldown_seconds: 30          # per-trade cooldown
