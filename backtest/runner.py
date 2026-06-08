@@ -34,7 +34,7 @@ class BacktestRunner:
         bt = config.get("backtest", {}) or {}
         initial_balance = bt.get("initial_balance", 10000.0)
         tick_size = bt.get("tick_size", 0.01)
-        tick_value = bt.get("tick_value", 0.01)
+        tick_value = bt.get("tick_value", 1.0)   # XAUUSD: $1 per 0.01 move per lot
         volume_step = bt.get("volume_step", 0.01)
         commission = bt.get("commission_per_lot", 0.0)
         spread = bt.get("spread_points", 0.0)
@@ -80,6 +80,7 @@ class BacktestRunner:
 
         # Step 2: Replay bar by bar
         times = pd.to_datetime(self.df["time"])
+        opens = self.df["open"].values
         highs = self.df["high"].values
         lows = self.df["low"].values
         closes = self.df["close"].values
@@ -87,17 +88,17 @@ class BacktestRunner:
         n_bars = len(self.df)
         log_interval = max(1, n_bars // 20)
 
+        # Pending entries: signals fire on bar i close, fill at bar i+1 open
+        pending_entries: list[tuple[str, str, float, float, float | None, bool | None]] = []
+
         log.info("Starting bar-by-bar replay (%d bars)...", n_bars)
 
         for i in range(n_bars):
             self.total_bars += 1
             bar_time = times.iloc[i].to_pydatetime()
 
-            # Build signal snapshot for this bar (as Signal objects)
-            signals = self._build_signals(all_indicators, i)
-
-            # Check SL/TP on existing positions
-            closed = self.simulator.process_bar(bar_time, highs[i], lows[i], closes[i])
+            # Check SL/TP on existing positions FIRST
+            closed = self.simulator.process_bar(bar_time, opens[i], highs[i], lows[i], closes[i])
             for trade in closed:
                 log.debug(
                     "[%s] %s %s closed @ %.2f P&L=%.2f (%s)",
@@ -106,7 +107,51 @@ class BacktestRunner:
                     trade.exit_price, trade.profit, trade.exit_reason,
                 )
 
-            # Evaluate strategies (same ExpressionRule as live)
+            # Fill pending entries from previous bar's signals at this bar's open
+            for (p_direction, p_rule, p_sl, p_rr, p_be, p_ptp) in pending_entries:
+                if self.simulator.has_position_for_rule(p_rule):
+                    continue
+                if not self.multi_position and self.simulator.has_open_positions:
+                    break
+
+                # Re-check filters at fill time
+                allowed, block_reason = self.filter_chain.evaluate(
+                    p_direction, p_rule, bar_time, self.simulator,
+                )
+                if not allowed:
+                    self.trades_blocked += 1
+                    continue
+
+                entry_price = opens[i]  # fill at this bar's open
+                breakeven_pct = p_be if p_be is not None else self.default_be_pct
+                partial_tp = p_ptp if p_ptp is not None else self.default_partial_tp
+
+                positions = self.simulator.open_position(
+                    direction=p_direction,
+                    price=entry_price,
+                    time=bar_time,
+                    rule_name=p_rule,
+                    sl_dollars=p_sl,
+                    reward_ratio=p_rr,
+                    risk_pct=self.risk_pct,
+                    breakeven_pct=breakeven_pct,
+                    partial_tp=partial_tp,
+                    tp_close_pct=self.tp_close_pct,
+                )
+
+                for pos in positions:
+                    log.info(
+                        "[%s] OPEN %s %s @ %.2f SL=%.2f TP=%.2f vol=%.2f (%s)",
+                        bar_time.strftime("%Y-%m-%d %H:%M"),
+                        pos.direction, p_rule,
+                        pos.entry_price, pos.sl, pos.tp, pos.volume,
+                        "runner" if pos.is_runner else "main",
+                    )
+            pending_entries.clear()
+
+            # Build signal snapshot for this bar and evaluate strategies
+            signals = self._build_signals(all_indicators, i)
+
             for rule in self.strategies:
                 if self.simulator.has_position_for_rule(rule.name):
                     continue
@@ -120,46 +165,15 @@ class BacktestRunner:
                 direction = result.direction.value  # "BUY" or "SELL"
                 self.signals_fired += 1
 
-                # Run through filters
-                allowed, block_reason = self.filter_chain.evaluate(
-                    direction, rule.name, bar_time, self.simulator,
-                )
-                if not allowed:
-                    self.trades_blocked += 1
-                    log.debug("[%s] %s %s BLOCKED: %s",
-                              bar_time.strftime("%Y-%m-%d %H:%M"),
-                              rule.name, direction, block_reason)
-                    continue
-
-                entry_price = closes[i]
-
                 # Per-rule overrides
                 sl_dollars = result.sl_dollars or self.default_sl
                 reward_ratio = result.reward_ratio or self.default_rr
-                breakeven_pct = result.breakeven_pct if result.breakeven_pct is not None else self.default_be_pct
-                partial_tp = result.partial_tp if result.partial_tp is not None else self.default_partial_tp
 
-                positions = self.simulator.open_position(
-                    direction=direction,
-                    price=entry_price,
-                    time=bar_time,
-                    rule_name=rule.name,
-                    sl_dollars=sl_dollars,
-                    reward_ratio=reward_ratio,
-                    risk_pct=self.risk_pct,
-                    breakeven_pct=breakeven_pct,
-                    partial_tp=partial_tp,
-                    tp_close_pct=self.tp_close_pct,
-                )
-
-                for pos in positions:
-                    log.info(
-                        "[%s] OPEN %s %s @ %.2f SL=%.2f TP=%.2f vol=%.2f (%s)",
-                        bar_time.strftime("%Y-%m-%d %H:%M"),
-                        pos.direction, rule.name,
-                        pos.entry_price, pos.sl, pos.tp, pos.volume,
-                        "runner" if pos.is_runner else "main",
-                    )
+                # Queue for next bar's open (no look-ahead)
+                pending_entries.append((
+                    direction, rule.name, sl_dollars, reward_ratio,
+                    result.breakeven_pct, result.partial_tp,
+                ))
 
             # Progress logging
             if (i + 1) % log_interval == 0:

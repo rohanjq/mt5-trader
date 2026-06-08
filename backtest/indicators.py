@@ -463,7 +463,10 @@ def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
 
     # SMA of ATR for comparison
     atr_sma = pd.Series(atr_vals).rolling(20).mean().fillna(pd.Series(atr_vals)).values
-    ratio = np.where(atr_sma != 0, atr_vals / atr_sma, 1.0)
+    # Safe division: avoid 0/0 NaN warnings
+    with np.errstate(invalid="ignore", divide="ignore"):
+        ratio = np.where(atr_sma != 0, atr_vals / atr_sma, 1.0)
+    ratio = np.nan_to_num(ratio, nan=1.0)
 
     # Volatility state
     states = []
@@ -487,29 +490,33 @@ def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
 
 # ── VWAP ───────────────────────────────────────────────────────────────────────
 
-def compute_vwap(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute session VWAP: Σ(TP × Vol) / Σ(Vol), reset daily.
+def compute_vwap(df: pd.DataFrame, session_reset_hour: int = 22) -> pd.DataFrame:
+    """Compute session VWAP: Σ(TP × Vol) / Σ(Vol), reset at session boundary.
+
+    session_reset_hour: UTC hour when session resets (default 22:00 = 5 PM ET).
+    This matches typical forex broker server time session boundaries.
 
     Fields: closed_price_vs_vwap (ABOVE/BELOW), running_dist_pct (%).
     """
     tp = (df["high"] + df["low"] + df["close"]) / 3.0
     vol = df["volume"].values.astype(float)
 
-    # Detect session boundaries (new day)
+    # Detect session boundaries: reset when hour crosses session_reset_hour
     times = pd.to_datetime(df["time"])
-    dates = times.dt.date
+    hours = times.dt.hour
 
     vwap_vals = np.zeros(len(df))
     cum_tp_vol = 0.0
     cum_vol = 0.0
-    prev_date = None
+    prev_hour = -1
 
     for i in range(len(df)):
-        d = dates.iloc[i]
-        if d != prev_date:
+        h = hours.iloc[i]
+        # Reset when we cross the session boundary hour
+        if prev_hour >= 0 and prev_hour != h and h == session_reset_hour:
             cum_tp_vol = 0.0
             cum_vol = 0.0
-            prev_date = d
+        prev_hour = h
 
         v = max(vol[i], 1.0)  # avoid zero volume
         cum_tp_vol += tp.iloc[i] * v

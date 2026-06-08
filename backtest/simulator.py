@@ -61,7 +61,7 @@ class Simulator:
         self,
         initial_balance: float = 10000.0,
         tick_size: float = 0.01,
-        tick_value: float = 0.01,
+        tick_value: float = 1.0,  # XAUUSD: $1 per 0.01 move per lot
         volume_step: float = 0.01,
         commission_per_lot: float = 0.0,
         spread_points: float = 0.0,
@@ -198,10 +198,13 @@ class Simulator:
 
     # ── Bar processing ─────────────────────────────────────────────────────
 
-    def process_bar(self, bar_time: datetime, high: float, low: float, close: float) -> list[ClosedTrade]:
+    def process_bar(self, bar_time: datetime, open_: float, high: float, low: float, close: float) -> list[ClosedTrade]:
         """Check all open positions against this bar's high/low for SL/TP hits.
 
-        Also handles breakeven stop movement.
+        Uses bar open direction to decide SL/TP priority:
+        - If bar opens moving against the position, check SL first.
+        - If bar opens moving in favour, check TP first.
+        This reduces bias vs always checking SL first.
 
         Returns list of trades closed during this bar.
         """
@@ -221,12 +224,28 @@ class Simulator:
                     pos.breakeven_moved = True
                     log.debug("Breakeven moved for %s: SL → %.2f", pos.id, pos.sl)
 
-            # Check SL (check first — conservative)
             sl_hit = False
-            if pos.direction == "BUY" and low <= pos.sl:
-                sl_hit = True
-            elif pos.direction == "SELL" and high >= pos.sl:
-                sl_hit = True
+            tp_hit = False
+
+            if pos.direction == "BUY":
+                sl_hit = low <= pos.sl
+                tp_hit = pos.tp > 0 and high >= pos.tp
+            else:
+                sl_hit = high >= pos.sl
+                tp_hit = pos.tp > 0 and low <= pos.tp
+
+            if sl_hit and tp_hit:
+                # Both hit on same bar — use open direction to decide
+                # If bar opens closer to SL side, SL was likely hit first
+                if pos.direction == "BUY":
+                    check_sl_first = open_ < pos.entry_price  # gap down → SL first
+                else:
+                    check_sl_first = open_ > pos.entry_price  # gap up → SL first
+
+                if check_sl_first:
+                    tp_hit = False
+                else:
+                    sl_hit = False
 
             if sl_hit:
                 exit_price = pos.sl
@@ -234,16 +253,8 @@ class Simulator:
                 to_close.append((rule_name, exit_price, exit_reason, bar_time))
                 continue
 
-            # Check TP (only for non-runner positions)
-            if pos.tp > 0:
-                tp_hit = False
-                if pos.direction == "BUY" and high >= pos.tp:
-                    tp_hit = True
-                elif pos.direction == "SELL" and low <= pos.tp:
-                    tp_hit = True
-
-                if tp_hit:
-                    to_close.append((rule_name, pos.tp, "TP", bar_time))
+            if tp_hit:
+                to_close.append((rule_name, pos.tp, "TP", bar_time))
 
         # Close positions
         for rule_name, exit_price, exit_reason, exit_time in to_close:
