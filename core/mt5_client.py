@@ -203,7 +203,15 @@ class MT5Client:
             deals = self.mt5.history_deals_get(
                 now - timedelta(hours=24), now, position=position_id
             )
-            return list(deals) if deals else []
+            if not deals:
+                return []
+            # rpyc may ignore 'position' kwarg — filter client-side
+            filtered = []
+            for d in deals:
+                pos = getattr(d, 'position_id', None) or getattr(d, 'position', None)
+                if pos == position_id:
+                    filtered.append(d)
+            return filtered
 
     def modify_position(self, ticket: int, sl: float = 0.0, tp: float = 0.0,
                         symbol: str | None = None) -> Any:

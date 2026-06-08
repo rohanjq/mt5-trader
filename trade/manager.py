@@ -269,10 +269,12 @@ class TradeManager:
                     profit = sum(d.profit for d in close_deals)
                     exit_price = close_deals[-1].price
                     log.info(
-                        "Deal history for ticket=%s: profit=%.2f exit=%.5f (%d close deals)",
-                        trade.ticket, profit, exit_price, len(close_deals),
+                        "Deal history for ticket=%s: profit=%.2f exit=%.5f (%d close deals, %d total deals)",
+                        trade.ticket, profit, exit_price, len(close_deals), len(deals),
                     )
                     return profit, exit_price
+                else:
+                    log.debug("No close deals yet for ticket=%s (total deals: %d)", trade.ticket, len(deals))
             except Exception:
                 log.debug("Deal history attempt %d failed for ticket=%s", attempt + 1, trade.ticket, exc_info=True)
             if attempt < 2:
