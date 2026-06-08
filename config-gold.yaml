@@ -200,16 +200,16 @@ rules:
         - rsi14_M15.closed_rsi < 55
         - bb_M1.closed_reenter_from_below is TRUE
         - bb_M1.bb_squeeze is_not TRUE
-        - vwap_M1.running_dist_pct < 0.5
-        - vwap_M1.running_dist_pct > -0.5
+        - vwap_M1.running_dist_pct < 3.0
+        - vwap_M1.running_dist_pct > -3.0
       sell:
         - adx_M5.closed_trend_strength == RANGING
         - rsi14_M15.closed_rsi > 45
         - rsi14_M15.closed_rsi < 55
         - bb_M1.closed_reenter_from_above is TRUE
         - bb_M1.bb_squeeze is_not TRUE
-        - vwap_M1.running_dist_pct < 0.5
-        - vwap_M1.running_dist_pct > -0.5
+        - vwap_M1.running_dist_pct < 3.0
+        - vwap_M1.running_dist_pct > -3.0
 
     # ══════════════════════════════════════════════════════════
     # Gold Strategy 5: UT Bot multi-TF trend (simple fallback)
