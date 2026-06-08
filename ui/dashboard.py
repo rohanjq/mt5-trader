@@ -108,7 +108,13 @@ class SignalPanel(Static):
             sell_total = len(sell_conds) if sell_conds else 0
 
             # Show the side that's closer to firing
-            if sell_pass > buy_pass:
+            if not buy_conds:
+                show_conds = sell_conds
+                side = "SELL"
+            elif not sell_conds:
+                show_conds = buy_conds
+                side = "BUY"
+            elif sell_pass > buy_pass:
                 show_conds = sell_conds
                 side = "SELL"
             else:

@@ -76,6 +76,14 @@ notifications:
   pushover_app_token: ""    # set via PUSHOVER_TOKEN env var
 
 rules:
+  dc_confluence:
+    enabled: false
+  dc_wick_rejection:
+    enabled: false
+  utbot_multi_tf:
+    enabled: false
+  utbot_simple:
+    enabled: false
   expressions:
     # ══════════════════════════════════════════════════════════
     # Strategy 1: UT Bot multi-TF trend (DISABLED — PF 0.95)
