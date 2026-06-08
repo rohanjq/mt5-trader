@@ -1,0 +1,275 @@
+# MT5 Auto-Trader — BTCUSDT Configuration
+# Usage: python main.py --config config-btc.yaml
+
+mt5:
+  host: localhost
+  port: 8001
+
+trading:
+  symbol: BTCUSDT
+  volume: 0.75         # fixed lot size (hot-reloadable)
+  magic: 100
+  deviation: 20
+  filling: FOK
+  multi_position: true   # allow multiple simultaneous positions (one per rule)
+  sl_dollars: 225.0    # default SL = $225 from entry (overridable per strategy)
+  reward_ratio: 1.25   # default TP = SL × ratio
+
+signals:
+  poll_interval: 2.0   # seconds between signal reads
+  csv_dir: ../MetaTrader5-Docker/data/signals
+  sources:
+    - indicator: utbot
+      timeframes: [M1, M3, M15, M45]
+    - indicator: dc
+      timeframes: [M1, M15, M45]
+    - indicator: liqgrab
+      timeframes: [M5, M15, H1]
+    # ── Filter/context indicators (used by strategy expressions) ──
+    - indicator: ema50
+      timeframes: [M5, M15]
+    - indicator: ema200
+      timeframes: [M5, M15]
+    - indicator: ema20
+      timeframes: [M3]
+    - indicator: rsi14
+      timeframes: [M1]
+    - indicator: adx
+      timeframes: [M5]
+    - indicator: bb
+      timeframes: [M1]
+    - indicator: atr
+      timeframes: [M1]
+    - indicator: macd
+      timeframes: [M1, M3]
+    - indicator: stoch
+      timeframes: [M3]
+
+filters:
+  cooldown_seconds: 30               # cooldown after a loss (in seconds)
+  max_consecutive_losses: 3
+  pause_after_consecutive_minutes: 15
+  max_daily_loss: -1                  # -1 = disabled
+  reversal_cooldown_seconds: 30      # block reverse direction for 30s after close
+
+exit_rules:
+  signal_reversal_exit: false        # let TP/SL hit instead of closing on signal flip
+  breakeven_pct: 65.0               # move SL to entry when price moves 65% of risk in our favor
+  partial_tp: true                  # at TP: close 80% of volume, let 20% run with SL at midpoint
+  tp_close_pct: 80.0               # % of volume to close when TP is reached
+  trailing_stop_dollars: 0.0         # trail SL at this $ distance (0 = off)
+
+notifications:
+  enabled: true
+  pushover_user_key: "uossifvqjkvrzm4e4766tvvhcz8aww"
+  pushover_app_token: ""             # set here or PUSHOVER_APP_TOKEN env var
+
+rules:
+  # ── Expression rules (YAML only) ──
+  expressions:
+    # ══════════════════════════════════════════════
+    # Deep Research Strategies (highest conviction)
+    # ══════════════════════════════════════════════
+
+    # Strategy D: MACD-Stochastic re-entry (continuation in trend)
+    # M15 uptrend regime + M3 MACD bullish flip + Stoch oversold cross + close > EMA20
+    # Best "secondary continuation" when trending but choppy. RR 1:1.5
+    - name: "macd_stoch_reentry"
+      enabled: true
+      priority: 35
+      sl_dollars: 300.0
+      reward_ratio: 1.5
+      breakeven_pct: 50.0
+      description: "MACD-Stoch re-entry (M15 trend + M3 trigger)"
+      buy:
+        - ema200_M15.closed_price_vs_ema == ABOVE
+        - ema50_M15.closed_price_vs_ema == ABOVE
+        - ema50_M15.ema_slope == RISING
+        - macd_M3.closed_hist_cross == BULLISH_FLIP
+        - stoch_M3.closed_cross == BULLISH_OS
+        - ema20_M3.closed_price_vs_ema == ABOVE
+      sell:
+        - ema200_M15.closed_price_vs_ema == BELOW
+        - ema50_M15.closed_price_vs_ema == BELOW
+        - ema50_M15.ema_slope == FALLING
+        - macd_M3.closed_hist_cross == BEARISH_FLIP
+        - stoch_M3.closed_cross == BEARISH_OB
+        - ema20_M3.closed_price_vs_ema == BELOW
+
+    # Strategy A: EMA pullback continuation (most balanced)
+    # M5 EMA50>EMA200 regime + EMA50 rising + RSI14 crossing up through 52
+    # Waits for pullback recovery before rejoining trend. RR 1:1.5
+    - name: "ema_pullback"
+      enabled: true
+      priority: 40
+      sl_dollars: 175.0
+      reward_ratio: 1.5
+      description: "EMA pullback continuation (M5 trend + M1 RSI trigger)"
+      buy:
+        - ema50_M5.closed_price_vs_ema == ABOVE
+        - ema200_M5.closed_price_vs_ema == ABOVE
+        - ema50_M5.ema_slope == RISING
+        - rsi14_M1.closed_cross in CROSS_UP_50,CROSS_UP_52
+      sell:
+        - ema50_M5.closed_price_vs_ema == BELOW
+        - ema200_M5.closed_price_vs_ema == BELOW
+        - ema50_M5.ema_slope == FALLING
+        - rsi14_M1.closed_cross == CROSS_DOWN_50
+
+    # Strategy B: Bollinger range fade (highest win-rate)
+    # Only in ranging markets (ADX<18). Buys re-entry from below lower band.
+    # Tighter stops, target midline. RR 1:1.0
+    - name: "bb_range_fade"
+      enabled: true
+      priority: 45
+      sl_dollars: 100.0
+      reward_ratio: 1.0
+      breakeven_pct: 70.0
+      description: "BB range fade (ADX ranging + BB re-entry)"
+      buy:
+        - adx_M5.closed_trend_strength == RANGING
+        - bb_M1.closed_reenter_from_below is TRUE
+      sell:
+        - adx_M5.closed_trend_strength == RANGING
+        - bb_M1.closed_reenter_from_above is TRUE
+
+    # Strategy C: Donchian volatility breakout (most aggressive)
+    # Trending ADX + expanding ATR + DC breakout + MACD confirmation.
+    # Wider stops for explosive moves. RR 1:1.8
+    - name: "dc_vol_breakout"
+      enabled: true
+      priority: 50
+      sl_dollars: 300.0
+      reward_ratio: 1.8
+      breakeven_pct: 50.0
+      description: "DC volatility breakout (ADX trend + ATR expanding)"
+      buy:
+        - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx_M5.closed_adx_rising is TRUE
+        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - dc_M1.closed_price_zone == UPPER
+        - macd_M1.closed_histogram > 0
+      sell:
+        - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx_M5.closed_adx_rising is TRUE
+        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - dc_M1.closed_price_zone == LOWER
+        - macd_M1.closed_histogram < 0
+
+    # ══════════════════════════════════════════════
+    # Liquidity Grab rules
+    # ══════════════════════════════════════════════
+
+    # LG signal + UT Bot 1m confirmation
+    - name: "lg_ut_confirm"
+      enabled: true
+      priority: 80
+      sl_dollars: 250.0
+      reward_ratio: 1.5
+      breakeven_pct: 55.0
+      description: "LG M15 signal + UT 1m bias aligned"
+      buy:
+        - liqgrab_M15.liq_signal == BUY
+        - utbot_M1.closed_bias == BULLISH
+      sell:
+        - liqgrab_M15.liq_signal == SELL
+        - utbot_M1.closed_bias == BEARISH
+
+    # LG composite signal alone (already filtered by rejection+breakout+MA)
+    - name: "lg_composite"
+      enabled: true
+      priority: 85
+      sl_dollars: 250.0
+      reward_ratio: 1.5
+      breakeven_pct: 55.0
+      description: "LG composite signal (rej+breakout+MA)"
+      buy:
+        - liqgrab_M15.liq_signal == BUY
+      sell:
+        - liqgrab_M15.liq_signal == SELL
+
+    # LG M5 signal for faster entries + 15m trend
+    - name: "lg_fast_trend"
+      enabled: true
+      priority: 90
+      sl_dollars: 200.0
+      reward_ratio: 1.4
+      description: "LG M5 fast + UT 15m trend"
+      buy:
+        - liqgrab_M5.liq_signal == BUY
+        - utbot_M15.closed_bias == BULLISH
+      sell:
+        - liqgrab_M5.liq_signal == SELL
+        - utbot_M15.closed_bias == BEARISH
+
+    # LG rejection + DC support zone (no breakout needed yet)
+    - name: "lg_dc_support"
+      enabled: true
+      priority: 95
+      sl_dollars: 250.0
+      reward_ratio: 1.5
+      breakeven_pct: 55.0
+      description: "LG rejection at DC support/resistance"
+      buy:
+        - liqgrab_H1.rejection_up is TRUE
+        - dc_M15.closed_price_zone in LOWER,LOWER_MID
+        - utbot_M3.closed_bias == BULLISH
+      sell:
+        - liqgrab_H1.rejection_down is TRUE
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID
+        - utbot_M3.closed_bias == BEARISH
+
+    # ══════════════════════════════════════════════
+    # UT Bot / DC combo rules (original)
+    # ══════════════════════════════════════════════
+
+    # UT 3m signal + 1m consecutive bars + 45m trend
+    - name: "3m_trend_sell"
+      enabled: true
+      priority: 100
+      description: "UT 3m signal + 1m bear bars + 45m trend"
+      buy:
+        - utbot_M3.closed_signal == BUY
+        - utbot_M1.consecutive_bull_bars >= 2
+        - utbot_M45.closed_bias == BULLISH
+      sell:
+        - utbot_M3.closed_signal == SELL
+        - utbot_M1.consecutive_bear_bars >= 2
+        - utbot_M45.closed_bias == BEARISH
+
+    # UT 1m signal + DC zone near mid (mean reversion)
+    - name: "1m_dc_mid_reversal"
+      enabled: false
+      priority: 110
+      description: "UT 1m signal + price near DC mid zone"
+      buy:
+        - utbot_M1.closed_signal == BUY
+        - dc_M15.closed_price_zone in LOWER_MID,MIDDLE
+      sell:
+        - utbot_M1.closed_signal == SELL
+        - dc_M15.closed_price_zone in UPPER_MID,MIDDLE
+
+    # UT 1m + 3m bias aligned (frequent)
+    - name: "1m_3m_align"
+      enabled: false
+      priority: 130
+      description: "UT 1m signal + 3m bias aligned"
+      buy:
+        - utbot_M1.closed_signal == BUY
+        - utbot_M3.closed_bias == BULLISH
+      sell:
+        - utbot_M1.closed_signal == SELL
+        - utbot_M3.closed_bias == BEARISH
+
+    # UT 1m signal alone — DISABLED (too noisy, no confirmation)
+    - name: "1m_signal_only"
+      enabled: false
+      priority: 200
+      description: "UT 1m signal only"
+      buy:
+        - utbot_M1.closed_signal == BUY
+      sell:
+        - utbot_M1.closed_signal == SELL
+
+logging:
+  level: INFO
