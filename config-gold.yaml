@@ -176,7 +176,7 @@ rules:
     - name: "trend_2w_m2_ema50_bounce2_vwap"
       enabled: true
       priority: 50
-      sl_dollars: 5.0
+      sl_dollars: 7.5
       reward_ratio: 1.0
       breakeven_pct: 0.0
       partial_tp: false
@@ -195,7 +195,7 @@ rules:
     - name: "trend_2w_m2_m15bear_bounce2_vwap"
       enabled: true
       priority: 50
-      sl_dollars: 5.0
+      sl_dollars: 7.5
       reward_ratio: 1.0
       breakeven_pct: 0.0
       partial_tp: false
