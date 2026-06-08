@@ -537,6 +537,7 @@ def compute_vwap(df: pd.DataFrame, session_reset_hour: int = 22) -> pd.DataFrame
 
 _TF_MAP = {
     "M1": "1min",
+    "M2": "2min",
     "M3": "3min",
     "M5": "5min",
     "M10": "10min",
