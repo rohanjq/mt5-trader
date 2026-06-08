@@ -15,3 +15,7 @@ trader-*.log
 
 # Runtime eval snapshots
 eval_snapshot_*.json
+
+# Backtest data + output (CSV files can be large)
+data/*.csv
+output/

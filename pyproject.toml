@@ -3,12 +3,15 @@ name = "mt5-trader"
 version = "0.1.0"
 description = "Automated BTCUSDT trading system for MetaTrader 5 via rpyc bridge"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "mt5linux>=0.2.0",
-    "numpy>=2.4.6",
+    "numpy>=1.26.0",
+    "pandas>=2.2.0",
+    "pandas-ta>=0.3.14b",
     "pyyaml>=6.0.3",
     "rpyc==5.3.1",
+    "tabulate>=0.9.0",
     "textual>=8.2.7",
     "watchdog>=6.0.0",
 ]
