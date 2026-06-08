@@ -6,12 +6,12 @@ Uses stdlib urllib — no extra dependencies needed.
 Config (in config.yaml):
     notifications:
       enabled: true
-      pushover_user_key: "uossifvqjkvrzm4e4766tvvhcz8aww"
-      pushover_app_token: ""  # set in PUSHOVER_APP_TOKEN env or here
+      pushover_user_key: "..."
+      pushover_app_token: "..."
 
 Or set environment variables:
-    PUSHOVER_USER_KEY=...
-    PUSHOVER_APP_TOKEN=...
+    PUSHOVER_TOKEN=...
+    PUSHOVER_USER=...
 """
 from __future__ import annotations
 
@@ -42,16 +42,16 @@ class PushoverNotifier:
 
     @property
     def _user_key(self) -> str:
-        return os.environ.get(
-            "PUSHOVER_USER_KEY",
-            self._config.get("notifications.pushover_user_key", ""),
+        return (
+            os.environ.get("PUSHOVER_USER", "")
+            or self._config.get("notifications.pushover_user_key", "")
         )
 
     @property
     def _app_token(self) -> str:
-        return os.environ.get(
-            "PUSHOVER_APP_TOKEN",
-            self._config.get("notifications.pushover_app_token", ""),
+        return (
+            os.environ.get("PUSHOVER_TOKEN", "")
+            or self._config.get("notifications.pushover_app_token", "")
         )
 
     def send(self, message: str, title: str = "MT5 Trader", priority: int = 0) -> None:
@@ -62,7 +62,7 @@ class PushoverNotifier:
         if not self._enabled:
             return
         if not self._user_key or not self._app_token:
-            log.warning("Pushover notification skipped — missing user_key or app_token")
+            log.warning("Pushover notification skipped — missing user/token")
             return
 
         # Fire and forget in a daemon thread to not block trading
@@ -75,17 +75,29 @@ class PushoverNotifier:
 
     def _send_sync(self, message: str, title: str, priority: int) -> None:
         try:
-            data = urllib.parse.urlencode({
+            payload = {
                 "token": self._app_token,
                 "user": self._user_key,
                 "message": message,
                 "title": title,
                 "priority": str(priority),
-            }).encode("utf-8")
+            }
+            data = urllib.parse.urlencode(payload).encode("utf-8")
 
-            req = urllib.request.Request(PUSHOVER_API_URL, data=data, method="POST")
+            req = urllib.request.Request(
+                PUSHOVER_API_URL,
+                data=data,
+                method="POST",
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
             with urllib.request.urlopen(req, timeout=10) as resp:
                 if resp.status != 200:
-                    log.warning("Pushover returned status %d", resp.status)
+                    body = resp.read().decode("utf-8", errors="replace")
+                    log.warning("Pushover returned status %d: %s", resp.status, body)
+                else:
+                    log.debug("Pushover notification sent OK")
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")
+            log.error("Pushover HTTP %d: %s", e.code, body)
         except Exception:
             log.exception("Failed to send Pushover notification")

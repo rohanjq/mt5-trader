@@ -72,7 +72,7 @@ exit_rules:
 notifications:
   enabled: true
   pushover_user_key: "uossifvqjkvrzm4e4766tvvhcz8aww"
-  pushover_app_token: ""
+  pushover_app_token: "adxjpfvoah7n92hmhh3cbtsw7dnywq"
 
 rules:
   expressions:
