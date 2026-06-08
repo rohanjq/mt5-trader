@@ -282,6 +282,8 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
         # Parse buy conditions
         buy_conds: list[Condition] = []
         for expr in defn.get("buy", []):
+            if isinstance(expr, bool):
+                continue  # skip YAML-converted FALSE/TRUE
             cond = parse_condition(str(expr))
             if cond:
                 buy_conds.append(cond)
@@ -291,6 +293,8 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
         # Parse sell conditions
         sell_conds: list[Condition] = []
         for expr in defn.get("sell", []):
+            if isinstance(expr, bool):
+                continue  # skip YAML-converted FALSE/TRUE
             cond = parse_condition(str(expr))
             if cond:
                 sell_conds.append(cond)

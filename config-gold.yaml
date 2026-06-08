@@ -141,8 +141,7 @@ rules:
       breakeven_pct: 0.0
       partial_tp: false
       description: "M2 SELL + EMA50 M5 below + M5 bounced 2+ bars + VWAP (no M15)"
-      buy:
-        - FALSE
+      buy: []
       sell:
         - utbot_M2.closed_signal == SELL
         - ema50_M5.closed_price_vs_ema == BELOW
@@ -161,8 +160,7 @@ rules:
       breakeven_pct: 0.0
       partial_tp: false
       description: "M2 SELL + M15 bearish + M5 bounced 2+ bars + VWAP"
-      buy:
-        - FALSE
+      buy: []
       sell:
         - utbot_M2.closed_signal == SELL
         - utbot_M15.closed_bias == BEARISH
