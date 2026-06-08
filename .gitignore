@@ -11,3 +11,7 @@ wheels/
 
 # Logs
 trader.log
+trader-*.log
+
+# Runtime eval snapshots
+eval_snapshot_*.json

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 import logging
 import threading
 import time
+from datetime import datetime, timezone
 from typing import Callable
 
 from core.config import Config
@@ -13,6 +15,7 @@ from exits.base import discover_exit_rules
 from filters.base import BaseFilter, FilterChain, discover_filters
 from filters.manual_switch import ManualSwitchFilter
 from rules.base import discover_rules
+from rules.expression import ExpressionRule
 from signals.base import BaseSignal, build_signal_plugins
 from trade.initiator import TradeInitiator
 from trade.manager import TradeManager
@@ -147,6 +150,9 @@ class Engine:
                 snapshot = self.latest_signals
                 self.trade_initiator.on_signals(snapshot)
 
+                # Dump expression evaluation state to file
+                self._dump_eval_snapshot(snapshot)
+
                 # Update trade manager with latest signals (for exit rules)
                 self.trade_manager.update_signals(snapshot)
 
@@ -173,3 +179,28 @@ class Engine:
             except Exception:
                 log.exception("Monitor loop error")
             self._stop_event.wait(1.0)
+
+    def _dump_eval_snapshot(self, signals: dict[str, Signal]) -> None:
+        """Write current expression rule evaluation state to eval_snapshot.json."""
+        try:
+            rules = self.trade_initiator.rules
+            snapshots = []
+            for rule in rules:
+                if isinstance(rule, ExpressionRule):
+                    snapshots.append(rule.snapshot(signals))
+
+            if not snapshots:
+                return
+
+            symbol = self.config.get("trading.symbol", "UNKNOWN")
+            data = {
+                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+                "symbol": symbol,
+                "rules": snapshots,
+            }
+
+            path = f"eval_snapshot_{symbol.lower()}.json"
+            with open(path, "w") as f:
+                json.dump(data, f, indent=2)
+        except Exception:
+            log.debug("Failed to write eval snapshot", exc_info=True)

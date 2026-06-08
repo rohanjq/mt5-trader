@@ -116,6 +116,17 @@ class Condition:
         actual = sig.metadata.get(self.field, "?").strip() if sig else "?"
         return f"{self.signal}.{self.field}={actual}"
 
+    def snapshot(self, signals: dict[str, Signal]) -> dict:
+        """Return evaluation details for this condition."""
+        sig = signals.get(self.signal)
+        actual = sig.metadata.get(self.field, "").strip() if sig else ""
+        passed = self.evaluate(signals)
+        return {
+            "expr": f"{self.signal}.{self.field} {self.operator} {self.value}",
+            "actual": actual if actual else "N/A",
+            "pass": passed,
+        }
+
 
 def parse_condition(expr: str) -> Condition | None:
     """Parse a condition string into a Condition object."""
@@ -216,6 +227,30 @@ class ExpressionRule(BaseRule):
 
         self._last_result = TriggerResult(rule_name=self.name)
         return self._last_result
+
+    def snapshot(self, signals: dict[str, Signal]) -> dict:
+        """Return detailed evaluation state for both buy and sell sides."""
+        buy_details = [c.snapshot(signals) for c in self._buy_conditions]
+        sell_details = [c.snapshot(signals) for c in self._sell_conditions]
+        buy_passed = sum(1 for d in buy_details if d["pass"])
+        sell_passed = sum(1 for d in sell_details if d["pass"])
+        buy_total = len(buy_details)
+        sell_total = len(sell_details)
+
+        return {
+            "rule": self.name,
+            "description": self.description,
+            "sl": self._sl_dollars,
+            "rr": self._reward_ratio,
+            "buy": {
+                "score": f"{buy_passed}/{buy_total}",
+                "conditions": buy_details,
+            },
+            "sell": {
+                "score": f"{sell_passed}/{sell_total}",
+                "conditions": sell_details,
+            },
+        }
 
 
 def load_expression_rules(config: Config) -> list[BaseRule]:
