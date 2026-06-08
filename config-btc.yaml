@@ -37,15 +37,15 @@ signals:
       timeframes: [M3]
     - indicator: rsi14
       timeframes: [M1]
-    - indicator: adx
+    - indicator: adx14
       timeframes: [M5]
-    - indicator: bb
+    - indicator: bb20d2.0
       timeframes: [M1]
-    - indicator: atr
+    - indicator: atr14
       timeframes: [M1]
-    - indicator: macd
+    - indicator: macd12_26_9
       timeframes: [M1, M3]
-    - indicator: stoch
+    - indicator: stoch5_3_3
       timeframes: [M3]
 
 filters:
@@ -88,15 +88,15 @@ rules:
         - ema200_M15.closed_price_vs_ema == ABOVE
         - ema50_M15.closed_price_vs_ema == ABOVE
         - ema50_M15.ema_slope == RISING
-        - macd_M3.closed_hist_cross == BULLISH_FLIP
-        - stoch_M3.closed_cross == BULLISH_OS
+        - macd12_26_9_M3.closed_hist_cross == BULLISH_FLIP
+        - stoch5_3_3_M3.closed_cross == BULLISH_OS
         - ema20_M3.closed_price_vs_ema == ABOVE
       sell:
         - ema200_M15.closed_price_vs_ema == BELOW
         - ema50_M15.closed_price_vs_ema == BELOW
         - ema50_M15.ema_slope == FALLING
-        - macd_M3.closed_hist_cross == BEARISH_FLIP
-        - stoch_M3.closed_cross == BEARISH_OB
+        - macd12_26_9_M3.closed_hist_cross == BEARISH_FLIP
+        - stoch5_3_3_M3.closed_cross == BEARISH_OB
         - ema20_M3.closed_price_vs_ema == BELOW
 
     # Strategy A: EMA pullback continuation (most balanced)
@@ -130,11 +130,11 @@ rules:
       breakeven_pct: 70.0
       description: "BB range fade (ADX ranging + BB re-entry)"
       buy:
-        - adx_M5.closed_trend_strength == RANGING
-        - bb_M1.closed_reenter_from_below is TRUE
+        - adx14_M5.closed_trend_strength == RANGING
+        - bb20d2.0_M1.closed_reenter_from_below is TRUE
       sell:
-        - adx_M5.closed_trend_strength == RANGING
-        - bb_M1.closed_reenter_from_above is TRUE
+        - adx14_M5.closed_trend_strength == RANGING
+        - bb20d2.0_M1.closed_reenter_from_above is TRUE
 
     # Strategy C: Donchian volatility breakout (most aggressive)
     # Trending ADX + expanding ATR + DC breakout + MACD confirmation.
@@ -147,17 +147,17 @@ rules:
       breakeven_pct: 50.0
       description: "DC volatility breakout (ADX trend + ATR expanding)"
       buy:
-        - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
-        - adx_M5.closed_adx_rising is TRUE
-        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - adx14_M5.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx14_M5.closed_adx_rising is TRUE
+        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
         - dc_M1.closed_price_zone == UPPER
-        - macd_M1.closed_histogram > 0
+        - macd12_26_9_M1.closed_histogram > 0
       sell:
-        - adx_M5.closed_trend_strength in TRENDING,STRONG_TREND
-        - adx_M5.closed_adx_rising is TRUE
-        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - adx14_M5.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx14_M5.closed_adx_rising is TRUE
+        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
         - dc_M1.closed_price_zone == LOWER
-        - macd_M1.closed_histogram < 0
+        - macd12_26_9_M1.closed_histogram < 0
 
     # ══════════════════════════════════════════════
     # Liquidity Grab rules

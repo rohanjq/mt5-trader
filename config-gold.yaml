@@ -41,16 +41,16 @@ signals:
       timeframes: [M1, M5, M15]
     - indicator: rsi2
       timeframes: [M1]
-    - indicator: adx
+    - indicator: adx14
       timeframes: [M1, M5]
-    - indicator: macd
+    - indicator: macd12_26_9
       timeframes: [M1]
-    - indicator: stoch
+    - indicator: stoch5_3_3
       timeframes: [M1]
     # ── Volatility / bands ──
-    - indicator: bb
+    - indicator: bb20d2.0
       timeframes: [M1]
-    - indicator: atr
+    - indicator: atr14
       timeframes: [M1, M5]
     # ── Session VWAP ──
     - indicator: vwap
@@ -95,7 +95,7 @@ rules:
         - ema200_M15.closed_price_vs_ema == ABOVE
         - ema21_M5.closed_price_vs_ema == ABOVE
         - ema50_M5.closed_price_vs_ema == ABOVE
-        - adx_M5.closed_trend_strength in WEAK_TREND,TRENDING,STRONG_TREND
+        - adx14_M5.closed_trend_strength in WEAK_TREND,TRENDING,STRONG_TREND
         - rsi2_M1.closed_zone == EXTREME_OS
         - ema9_M1.closed_price_vs_ema == ABOVE
         - rsi14_M1.closed_rsi > 50
@@ -104,7 +104,7 @@ rules:
         - ema200_M15.closed_price_vs_ema == BELOW
         - ema21_M5.closed_price_vs_ema == BELOW
         - ema50_M5.closed_price_vs_ema == BELOW
-        - adx_M5.closed_trend_strength in WEAK_TREND,TRENDING,STRONG_TREND
+        - adx14_M5.closed_trend_strength in WEAK_TREND,TRENDING,STRONG_TREND
         - rsi2_M1.closed_zone == EXTREME_OB
         - ema9_M1.closed_price_vs_ema == BELOW
         - rsi14_M1.closed_rsi < 50
@@ -131,9 +131,9 @@ rules:
         - rsi14_M5.closed_rsi > 55
         - ema9_M1.closed_price_vs_ema == ABOVE
         - ema21_M1.closed_price_vs_ema == ABOVE
-        - adx_M1.closed_trend_strength in TRENDING,STRONG_TREND
-        - adx_M1.closed_di_bias == BULLISH
-        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx14_M1.closed_di_bias == BULLISH
+        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
         - vwap_M1.closed_price_vs_vwap == ABOVE
       sell:
         - ema200_M5.closed_price_vs_ema == BELOW
@@ -142,9 +142,9 @@ rules:
         - rsi14_M5.closed_rsi < 45
         - ema9_M1.closed_price_vs_ema == BELOW
         - ema21_M1.closed_price_vs_ema == BELOW
-        - adx_M1.closed_trend_strength in TRENDING,STRONG_TREND
-        - adx_M1.closed_di_bias == BEARISH
-        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx14_M1.closed_di_bias == BEARISH
+        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
@@ -165,19 +165,19 @@ rules:
         - ema50_M5.closed_price_vs_ema == ABOVE
         - ema200_M5.closed_price_vs_ema == ABOVE
         - dc_M1.dc_compressed is TRUE
-        - bb_M1.bb_squeeze is TRUE
-        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - bb20d2.0_M1.bb_squeeze is TRUE
+        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
         - dc_M1.closed_price_zone == UPPER
-        - adx_M1.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
         - vwap_M1.closed_price_vs_vwap == ABOVE
       sell:
         - ema50_M5.closed_price_vs_ema == BELOW
         - ema200_M5.closed_price_vs_ema == BELOW
         - dc_M1.dc_compressed is TRUE
-        - bb_M1.bb_squeeze is TRUE
-        - atr_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - bb20d2.0_M1.bb_squeeze is TRUE
+        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
         - dc_M1.closed_price_zone == LOWER
-        - adx_M1.closed_trend_strength in TRENDING,STRONG_TREND
+        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
@@ -195,19 +195,19 @@ rules:
       partial_tp: false       # scalp — lock in full profit at TP
       description: "BB VWAP range fade (ADX ranging + BB re-entry)"
       buy:
-        - adx_M5.closed_trend_strength == RANGING
+        - adx14_M5.closed_trend_strength == RANGING
         - rsi14_M15.closed_rsi > 45
         - rsi14_M15.closed_rsi < 55
-        - bb_M1.closed_reenter_from_below is TRUE
-        - bb_M1.bb_squeeze is_not TRUE
+        - bb20d2.0_M1.closed_reenter_from_below is TRUE
+        - bb20d2.0_M1.bb_squeeze is_not TRUE
         - vwap_M1.running_dist_pct < 3.0
         - vwap_M1.running_dist_pct > -3.0
       sell:
-        - adx_M5.closed_trend_strength == RANGING
+        - adx14_M5.closed_trend_strength == RANGING
         - rsi14_M15.closed_rsi > 45
         - rsi14_M15.closed_rsi < 55
-        - bb_M1.closed_reenter_from_above is TRUE
-        - bb_M1.bb_squeeze is_not TRUE
+        - bb20d2.0_M1.closed_reenter_from_above is TRUE
+        - bb20d2.0_M1.bb_squeeze is_not TRUE
         - vwap_M1.running_dist_pct < 3.0
         - vwap_M1.running_dist_pct > -3.0
 

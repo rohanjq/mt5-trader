@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import time
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
@@ -156,7 +157,7 @@ class SignalPanel(Static):
             lines.append(f"[bold cyan]── {tf} ──[/]")
             for name, sig in groups[tf]:
                 meta = sig.metadata
-                indicator = name.split("_")[0].upper()
+                indicator = re.match(r'[a-zA-Z]+', name).group(0).upper()
 
                 if indicator == "UTBOT":
                     bias = meta.get("closed_bias", "—")

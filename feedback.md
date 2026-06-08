@@ -80,7 +80,7 @@ Currently disabled (`signal_reversal_exit: false`), but if enabled: `SignalRever
 
 ### NOT A BUG — Verified correct
 
-- All expression signal names (`ema50_M5`, `rsi14_M1`, `adx_M5`, etc.) match GenericCSVSignal plugin names ✓
+- All expression signal names (`ema50_M5`, `rsi14_M1`, `adx14_M5`, etc.) match GenericCSVSignal plugin names ✓
 - All CSV filenames match SignalMaster output (`BTCUSDT_ema50_M5.csv`, etc.) ✓
 - All CSV field names (`closed_price_vs_ema`, `closed_hist_cross`, `volatility_state`, etc.) match SignalMaster output ✓
 - `is TRUE` operator correctly compares against `"TRUE"` string ✓

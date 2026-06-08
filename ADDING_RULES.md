@@ -244,7 +244,7 @@ Signal names include the period: `rsi14_M1`, `rsi2_M1`, `rsi14_M3`, etc.
 | `closed_zone` | str | EXTREME_OB / OVERBOUGHT / BULLISH / NEUTRAL / BEARISH / OVERSOLD / EXTREME_OS | RSI zone classification. |
 | `closed_cross` | str | CROSS_UP_30 / CROSS_DOWN_70 / CROSS_UP_50 / CROSS_DOWN_50 / CROSS_UP_52 / NONE | Level cross event on closed bar. |
 
-### Bollinger Bands Fields (`bb_{TF}`)
+### Bollinger Bands Fields (`bb{period}d{dev}_{TF}`)
 
 | Field | Type | Values | Description |
 |-------|------|--------|-------------|
@@ -253,7 +253,7 @@ Signal names include the period: `rsi14_M1`, `rsi2_M1`, `rsi14_M3`, etc.
 | `closed_reenter_from_above` | str | TRUE / FALSE | Bar opened above upper band, closed below it (bearish reversal). |
 | `band_width` | float | | Band width (squeeze detection: shrinking = breakout likely). |
 
-### ADX Fields (`adx_{TF}`)
+### ADX Fields (`adx{period}_{TF}`)
 
 | Field | Type | Values | Description |
 |-------|------|--------|-------------|
@@ -261,7 +261,7 @@ Signal names include the period: `rsi14_M1`, `rsi2_M1`, `rsi14_M3`, etc.
 | `closed_adx_rising` | str | TRUE / FALSE | ADX increasing over last 3 bars (trend strengthening). |
 | `closed_di_bias` | str | BULLISH / BEARISH | +DI vs -DI directional bias. |
 
-### MACD Fields (`macd_{TF}`)
+### MACD Fields (`macd{fast}_{slow}_{signal}_{TF}`)
 
 | Field | Type | Values | Description |
 |-------|------|--------|-------------|
@@ -269,14 +269,14 @@ Signal names include the period: `rsi14_M1`, `rsi2_M1`, `rsi14_M3`, etc.
 | `closed_zero_cross` | str | CROSS_ABOVE / CROSS_BELOW / NONE | MACD line zero-line cross. |
 | `closed_histogram` | float | | Raw histogram value (> 0 = bullish momentum). |
 
-### Stochastic Fields (`stoch_{TF}`)
+### Stochastic Fields (`stoch{k}_{d}_{slowing}_{TF}`)
 
 | Field | Type | Values | Description |
 |-------|------|--------|-------------|
 | `closed_cross` | str | BULLISH_OS / BULLISH / BEARISH_OB / BEARISH / NONE | K/D cross event. `BULLISH_OS` = strongest buy (K crosses D in oversold). |
 | `closed_zone` | str | OVERBOUGHT / OVERSOLD / NEUTRAL | Stochastic zone. |
 
-### Standalone ATR Fields (`atr_{TF}`)
+### Standalone ATR Fields (`atr{period}_{TF}`)
 
 | Field | Type | Values | Description |
 |-------|------|--------|-------------|
