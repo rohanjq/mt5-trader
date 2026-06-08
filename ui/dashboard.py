@@ -334,7 +334,8 @@ class SummaryPanel(Static):
             f"Wins: [green]{stats['wins']}[/]  │  Losses: [red]{stats['losses']}[/]  │  "
             f"Avg Win: [green]{stats['avg_profit']:+.2f}[/]  │  "
             f"Avg Loss: [red]{stats['avg_loss']:+.2f}[/]  │  "
-            f"Net P&L: [{pnl_color}]{pnl:+.2f}[/]"
+            f"Net P&L: [{pnl_color}]{pnl:+.2f}[/]  │  "
+            f"[dim]({stats.get('hours', 4):.0f}h)[/]"
         )
         label.update(text)
 

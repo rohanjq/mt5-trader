@@ -180,15 +180,14 @@ class MT5Client:
             positions = self.mt5.positions_get(symbol=symbol)
             return list(positions) if positions else []
 
-    def get_deals_by_position(self, position_id: int) -> list:
-        """Get deal history for a specific position ticket."""
+    def get_recent_deals(self, symbol: str | None = None, hours: float = 4.0) -> list:
+        """Get all deals from the last N hours for a given symbol."""
         from datetime import datetime, timedelta, timezone
+        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        now = datetime.now(timezone.utc)
+        start = now - timedelta(hours=hours)
         with self._lock:
-            # Search deals from 24h ago to now
-            now = datetime.now(timezone.utc)
-            deals = self.mt5.history_deals_get(
-                now - timedelta(days=1), now, position=position_id
-            )
+            deals = self.mt5.history_deals_get(start, now, symbol=symbol)
             return list(deals) if deals else []
 
     def modify_position(self, ticket: int, sl: float = 0.0, tp: float = 0.0,
