@@ -57,8 +57,9 @@ log = logging.getLogger(__name__)
 #   utbot_M45.consecutive_bull_bars >= 5
 #   dc_M15.closed_price_zone in LOWER,LOWER_MID
 #   dc_M15.closed_lower_wick_rej is TRUE
+#   bb20d2_M1.bb_squeeze is TRUE  (dot in signal name)
 _EXPR_RE = re.compile(
-    r"^(\w+)\.(\w+)\s+(==|!=|>=|<=|>|<|in|not_in|is|is_not)\s+(.+)$"
+    r"^([\w.]+)\.(\w+)\s+(==|!=|>=|<=|>|<|in|not_in|is|is_not)\s+(.+)$"
 )
 
 

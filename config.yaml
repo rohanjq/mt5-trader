@@ -39,7 +39,7 @@ signals:
       timeframes: [M1]
     - indicator: adx14
       timeframes: [M5]
-    - indicator: bb20d2.0
+    - indicator: bb20d2
       timeframes: [M1]
     - indicator: atr14
       timeframes: [M1]
@@ -131,10 +131,10 @@ rules:
       description: "BB range fade (ADX ranging + BB re-entry)"
       buy:
         - adx14_M5.closed_trend_strength == RANGING
-        - bb20d2.0_M1.closed_reenter_from_below is TRUE
+        - bb20d2_M1.closed_reenter_from_below is TRUE
       sell:
         - adx14_M5.closed_trend_strength == RANGING
-        - bb20d2.0_M1.closed_reenter_from_above is TRUE
+        - bb20d2_M1.closed_reenter_from_above is TRUE
 
     # Strategy C: Donchian volatility breakout (most aggressive)
     # Trending ADX + expanding ATR + DC breakout + MACD confirmation.
