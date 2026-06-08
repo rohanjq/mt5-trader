@@ -257,25 +257,43 @@ def main() -> None:
 
     cfg_dir = Path(__file__).resolve().parent / "sell_configs"
     report_path = Path(__file__).resolve().parent / "reports" / "utbot_sell_permutation_report.md"
+    live_log = Path(__file__).resolve().parent / "reports" / "sell_live_results.csv"
 
     print(f"Generating {len(candidates)} SELL candidates...")
     cfg_dir.mkdir(parents=True, exist_ok=True)
+    live_log.parent.mkdir(parents=True, exist_ok=True)
     for old in cfg_dir.glob("*.yaml"):
         old.unlink()
 
     for c in candidates:
         write_config(cfg_dir / f"{c['name']}.yaml", c)
 
-    print("Running backtests...")
+    # Write live CSV header — tail -f this file to watch progress
+    with open(live_log, "w", encoding="utf-8") as f:
+        f.write("idx,name,conds,sl,trades,win_rate,pf,net_profit,max_dd,expectancy,status\n")
+
+    print(f"Running backtests... (tail -f {live_log})")
     results: list[dict] = []
     failed = 0
     for i, candidate in enumerate(candidates, 1):
         cfg_path = cfg_dir / f"{candidate['name']}.yaml"
         metrics = run_backtest(cfg_path, args.data, args.balance)
-        if metrics is None:
-            failed += 1
-        else:
-            results.append({**candidate, **metrics})
+
+        # Write every result immediately to live log
+        with open(live_log, "a", encoding="utf-8") as f:
+            if metrics is None:
+                failed += 1
+                f.write(f"{i},{candidate['name']},{candidate['condition_count']},{candidate['sl_dollars']},,,,,,,FAIL\n")
+            else:
+                row = {**candidate, **metrics}
+                results.append(row)
+                f.write(
+                    f"{i},{row['name']},{row['condition_count']},{row['sl_dollars']},"
+                    f"{int(row.get('trades', 0))},{float(row.get('win_rate', 0)):.1f},"
+                    f"{float(row.get('pf', 0)):.2f},{float(row.get('net_profit', 0)):+.2f},"
+                    f"{float(row.get('max_dd', 0)):.1f},{float(row.get('expectancy', 0)):+.2f},OK\n"
+                )
+
         if i % 25 == 0 or i == len(candidates):
             print(f"  {i}/{len(candidates)} done | ok={len(results)} fail={failed}")
 
@@ -283,6 +301,7 @@ def main() -> None:
     write_report(report_path, results, len(candidates), failed)
 
     print(f"Done. Report: {report_path}")
+    print(f"Live log: {live_log}")
     if results:
         top = results[0]
         print(

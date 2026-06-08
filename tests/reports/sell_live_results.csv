@@ -1,0 +1,4 @@
+idx,name,conds,sl,trades,win_rate,pf,net_profit,max_dd,expectancy,status
+1,sell_0001_2c_m5_bias_sl4p0,2,4.0,184,50.0,0.95,-2032.00,50.5,-11.04,OK
+2,sell_0002_2c_m5_bias_sl5p0,2,5.0,152,49.3,0.93,-2520.00,44.2,-16.58,OK
+3,sell_0003_2c_m5_bias_sl6p0,2,6.0,137,51.8,1.02,+798.00,43.6,+5.82,OK
