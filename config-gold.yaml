@@ -24,37 +24,37 @@ signals:
   sources:
     # ── Core indicators ──
     - indicator: utbot
-      timeframes: [M1, M3, M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, M45, H1, H4]
     - indicator: dc
-      timeframes: [M1, M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, M45, H1, H4]
     # ── EMA family ──
     - indicator: ema9
-      timeframes: [M1, M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: ema21
-      timeframes: [M1, M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: ema50
-      timeframes: [M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: ema200
-      timeframes: [M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     # ── Oscillators ──
     - indicator: rsi14
-      timeframes: [M1, M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: rsi2
-      timeframes: [M1, M5, M15]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: adx14
-      timeframes: [M1, M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: macd12_26_9
-      timeframes: [M1, M5, M15]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: stoch5_3_3
-      timeframes: [M1, M5, M15]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     # ── Volatility / bands ──
     - indicator: bb20d2
-      timeframes: [M1, M5, M15]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     - indicator: atr14
-      timeframes: [M1, M5, M15, M45, H1]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
     # ── Session VWAP ──
     - indicator: vwap
-      timeframes: [M1, M5, M15]
+      timeframes: [M1, M2, M3, M5, M10, M15, M30, H1, H4]
 
 filters:
   cooldown_seconds: 30          # per-trade cooldown
