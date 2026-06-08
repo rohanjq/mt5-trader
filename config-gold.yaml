@@ -260,3 +260,23 @@ rules:
         - ema50_M5.ema_slope == FALLING
         - rsi14_M1.closed_cross == CROSS_DOWN_50
         - vwap_M1.closed_price_vs_vwap == BELOW
+
+    # ══════════════════════════════════════════════════════════
+    # Gold Strategy 7: UT Bot 1m + 15m bias (high frequency)
+    # Simple: M1 UT Bot signal aligned with M15 bias.
+    # SL: $4.00, RR 1:1.2
+    # ══════════════════════════════════════════════════════════
+    - name: "gold_utbot_m1_m15"
+      enabled: true
+      priority: 40
+      sl_dollars: 4.0
+      reward_ratio: 1.2
+      breakeven_pct: 55.0
+      partial_tp: true
+      description: "UT Bot M1 signal + M15 bias alignment"
+      buy:
+        - utbot_M1.closed_signal == BUY
+        - utbot_M15.closed_bias == BULLISH
+      sell:
+        - utbot_M1.closed_signal == SELL
+        - utbot_M15.closed_bias == BEARISH
