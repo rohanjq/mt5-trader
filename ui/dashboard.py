@@ -154,9 +154,12 @@ class SignalPanel(Static):
         sorted_tfs = sorted(groups.keys(), key=lambda t: tf_order.index(t) if t in tf_order else 99)
 
         for tf in sorted_tfs:
-            lines.append(f"[bold cyan]── {tf} ──[/]")
+            # Collect renderable indicators — skip those with no data
+            tf_lines: list[str] = []
             for name, sig in groups[tf]:
                 meta = sig.metadata
+                if not meta:
+                    continue  # CSV not available — don't show empty row
                 indicator = re.match(r'[a-zA-Z]+', name).group(0).upper()
 
                 if indicator == "UTBOT":
@@ -179,8 +182,8 @@ class SignalPanel(Static):
                     atr = meta.get("closed_atr", "—")
                     bull = meta.get("consecutive_bull_bars", "0")
                     bear = meta.get("consecutive_bear_bars", "0")
-                    lines.append(f"  UT  {bias_col}  {sig_col}")
-                    lines.append(f"  [dim]ATR={atr} Bull={bull} Bear={bear}[/]")
+                    tf_lines.append(f"  UT  {bias_col}  {sig_col}")
+                    tf_lines.append(f"  [dim]ATR={atr} Bull={bull} Bear={bear}[/]")
 
                 elif indicator == "DC":
                     zone = meta.get("closed_price_zone", "—")
@@ -202,8 +205,8 @@ class SignalPanel(Static):
 
                     upper = meta.get("upper_band", "—")
                     lower = meta.get("lower_band", "—")
-                    lines.append(f"  DC  {zone_col}  {wick}")
-                    lines.append(f"  [dim]U={upper} L={lower}[/]")
+                    tf_lines.append(f"  DC  {zone_col}  {wick}")
+                    tf_lines.append(f"  [dim]U={upper} L={lower}[/]")
 
                 elif indicator == "LIQGRAB":
                     lsig = meta.get("liq_signal", "NONE")
@@ -229,8 +232,8 @@ class SignalPanel(Static):
                     if bk_dn.upper() == "TRUE":
                         parts.append("[red]BrkDn[/]")
                     flags = " ".join(parts) if parts else "[dim]quiet[/]"
-                    lines.append(f"  LG  {sig_col}  MA={ma_trend}")
-                    lines.append(f"  [dim]{flags}[/]")
+                    tf_lines.append(f"  LG  {sig_col}  MA={ma_trend}")
+                    tf_lines.append(f"  [dim]{flags}[/]")
 
                 else:
                     # Compact 1-line rendering for filter/context indicators
@@ -239,37 +242,42 @@ class SignalPanel(Static):
                         vs = meta.get("closed_price_vs_ema", "—")
                         slope = meta.get("ema_slope", "")
                         col = "[green]" if vs == "ABOVE" else "[red]" if vs == "BELOW" else "[dim]"
-                        lines.append(f"  {tag} {col}{vs}[/] {slope}")
+                        tf_lines.append(f"  {tag} {col}{vs}[/] {slope}")
                     elif indicator.startswith("RSI"):
                         val = meta.get("closed_rsi", "—")
                         zone = meta.get("closed_zone", "—")
                         col = "[red]" if "OB" in zone else "[green]" if "OS" in zone else "[dim]"
-                        lines.append(f"  {tag} {col}{zone}[/] ({val})")
+                        tf_lines.append(f"  {tag} {col}{zone}[/] ({val})")
                     elif indicator == "ADX":
                         ts = meta.get("closed_trend_strength", "—")
                         bias = meta.get("closed_di_bias", "—")
                         col = "[green]" if bias == "BULLISH" else "[red]" if bias == "BEARISH" else "[dim]"
-                        lines.append(f"  ADX  {ts} {col}{bias}[/]")
+                        tf_lines.append(f"  ADX  {ts} {col}{bias}[/]")
                     elif indicator == "BB":
                         pct = meta.get("closed_pct_in_band", "—")
                         re_up = meta.get("closed_reenter_from_below", "FALSE")
                         re_dn = meta.get("closed_reenter_from_above", "FALSE")
                         flag = "[green]↑ReEntry[/]" if re_up.upper() == "TRUE" else "[red]↓ReEntry[/]" if re_dn.upper() == "TRUE" else ""
-                        lines.append(f"  BB   pct={pct} {flag}")
+                        tf_lines.append(f"  BB   pct={pct} {flag}")
                     elif indicator == "MACD":
                         hc = meta.get("closed_hist_cross", "NONE")
                         col = "[green]" if hc == "BULLISH_FLIP" else "[red]" if hc == "BEARISH_FLIP" else "[dim]"
-                        lines.append(f"  MACD {col}{hc}[/]")
+                        tf_lines.append(f"  MACD {col}{hc}[/]")
                     elif indicator == "STOCH":
                         cr = meta.get("closed_cross", "NONE")
                         col = "[green]" if "BULLISH" in cr else "[red]" if "BEARISH" in cr else "[dim]"
-                        lines.append(f"  STCH {col}{cr}[/]")
+                        tf_lines.append(f"  STCH {col}{cr}[/]")
                     elif indicator == "ATR":
                         vs = meta.get("volatility_state", "—")
                         col = "[yellow]" if vs in ("EXPANDING", "ABOVE_AVG") else "[dim]"
-                        lines.append(f"  ATR  {col}{vs}[/]")
+                        tf_lines.append(f"  ATR  {col}{vs}[/]")
                     else:
-                        lines.append(f"  {tag}: {sig.direction.value}")
+                        tf_lines.append(f"  {tag}: {sig.direction.value}")
+
+            # Only show TF section if at least one indicator had data
+            if tf_lines:
+                lines.append(f"[bold cyan]── {tf} ──[/]")
+                lines.extend(tf_lines)
 
         label.update("\n".join(lines))
 
