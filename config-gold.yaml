@@ -16,7 +16,7 @@ trading:
   filling: FOK
   multi_position: true
   sl_dollars: 5.0         # default SL = $5.00 move (overridable per strategy)
-  reward_ratio: 1.2        # default TP = SL × 1.2 (runners ride beyond)
+  reward_ratio: 1.0        # default TP = SL × 1.0 (1:1 risk-reward)
 
 signals:
   poll_interval: 2.0
@@ -58,16 +58,16 @@ signals:
 
 filters:
   cooldown_seconds: 30          # per-trade cooldown
-  max_consecutive_losses: 0      # disabled — no consecutive loss pause
-  pause_after_consecutive_minutes: 15
+  max_consecutive_losses: 0      # disabled
+  pause_after_consecutive_minutes: 0
   max_daily_loss: -1
   reversal_cooldown_seconds: 30  # reversal cooldown
 
 exit_rules:
   signal_reversal_exit: false
-  breakeven_pct: 0.0            # disabled — let trades ride to SL or TP
-  partial_tp: false             # disabled — no runner split
-  tp_close_pct: 100.0
+  breakeven_pct: 0.0            # disabled
+  partial_tp: false             # disabled — no runners
+  tp_close_pct: 100.0           # close 100% at TP
   trailing_stop_dollars: 0.0
 
 notifications:
@@ -78,88 +78,37 @@ notifications:
 rules:
   expressions:
     # ══════════════════════════════════════════════════════════
-    # Gold Strategy 1: VWAP Pullback Continuation (highest priority)
-    # Research: best blend of win rate (51-58%) and frequency.
-    # Enters after pullback into VWAP zone in established M5 trend.
-    # SL: $4.20 (was $3.50 — widened for XAUUSD M1 noise), RR 1:1.25
+    # Strategy 1: UT Bot multi-TF trend (best performer)
+    # Backtest: PF 1.36, WR 54%, 61 trades/week, DD 21%
     # ══════════════════════════════════════════════════════════
-    - name: "gold_vwap_pullback"
+    - name: "gold_utbot_trend"
       enabled: true
-      priority: 30
-      sl_dollars: 4.2
-      reward_ratio: 1.25
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "VWAP pullback continuation (M5 trend + M1 RSI reclaim)"
-      buy:
-        - ema200_M15.closed_price_vs_ema == ABOVE
-        - ema21_M5.closed_price_vs_ema == ABOVE
-        - ema50_M5.closed_price_vs_ema == ABOVE
-        - adx14_M5.closed_trend_strength in WEAK_TREND,TRENDING,STRONG_TREND
-        - rsi2_M1.closed_zone == EXTREME_OS
-        - ema9_M1.closed_price_vs_ema == ABOVE
-        - rsi14_M1.closed_rsi > 50
-        - vwap_M1.closed_price_vs_vwap == ABOVE
-      sell:
-        - ema200_M15.closed_price_vs_ema == BELOW
-        - ema21_M5.closed_price_vs_ema == BELOW
-        - ema50_M5.closed_price_vs_ema == BELOW
-        - adx14_M5.closed_trend_strength in WEAK_TREND,TRENDING,STRONG_TREND
-        - rsi2_M1.closed_zone == EXTREME_OB
-        - ema9_M1.closed_price_vs_ema == BELOW
-        - rsi14_M1.closed_rsi < 50
-        - vwap_M1.closed_price_vs_vwap == BELOW
-
-    # ══════════════════════════════════════════════════════════
-    # Gold Strategy 2: Session Impulse EMA ADX (trend following)
-    # Research: strongest directional quality, win rate 43-49%.
-    # All TFs aligned + ADX trending + ATR expanding + above VWAP.
-    # SL: $5.00 (wider for trend), RR 1:1.5
-    # ══════════════════════════════════════════════════════════
-    - name: "gold_session_impulse"
-      enabled: true
-      priority: 35
+      priority: 50
       sl_dollars: 5.0
-      reward_ratio: 1.5
+      reward_ratio: 1.0
       breakeven_pct: 0.0
       partial_tp: false
-      description: "Session impulse EMA ADX trend (M5 regime + M1 momentum)"
+      description: "UT Bot M1 signal + M5/M15 trend alignment + VWAP"
       buy:
-        - ema200_M5.closed_price_vs_ema == ABOVE
-        - ema50_M5.closed_price_vs_ema == ABOVE
-        - ema50_M5.ema_slope == RISING
-        - rsi14_M5.closed_rsi > 55
-        - ema9_M1.closed_price_vs_ema == ABOVE
-        - ema21_M1.closed_price_vs_ema == ABOVE
-        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
-        - adx14_M1.closed_di_bias == BULLISH
-        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
-        - bb20d2_M1.bb_squeeze is_not TRUE
+        - utbot_M1.closed_signal == BUY
+        - utbot_M5.closed_bias == BULLISH
+        - utbot_M15.closed_bias == BULLISH
         - vwap_M1.closed_price_vs_vwap == ABOVE
       sell:
-        - ema200_M5.closed_price_vs_ema == BELOW
-        - ema50_M5.closed_price_vs_ema == BELOW
-        - ema50_M5.ema_slope == FALLING
-        - rsi14_M5.closed_rsi < 45
-        - ema9_M1.closed_price_vs_ema == BELOW
-        - ema21_M1.closed_price_vs_ema == BELOW
-        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
-        - adx14_M1.closed_di_bias == BEARISH
-        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
-        - bb20d2_M1.bb_squeeze is_not TRUE
+        - utbot_M1.closed_signal == SELL
+        - utbot_M5.closed_bias == BEARISH
+        - utbot_M15.closed_bias == BEARISH
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Gold Strategy 3: Compression to Expansion Donchian Breakout
-    # Research: lower win rate (38-46%) but high RR 1:1.8.
-    # DC compressed + BB squeezed + ATR expanding + breakout.
-    # SL: $6.00 (wider for breakout), RR 1:1.8
+    # Strategy 2: DC Compression Breakout (secondary)
+    # Backtest: PF 1.10, WR 40%, 20 trades/week
     # ══════════════════════════════════════════════════════════
     - name: "gold_dc_breakout"
       enabled: true
       priority: 40
       sl_dollars: 6.0
-      reward_ratio: 1.8
+      reward_ratio: 1.0
       breakeven_pct: 0.0
       partial_tp: false
       description: "Compression breakout (DC+BB squeeze → expansion)"
@@ -180,109 +129,4 @@ rules:
         - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
         - dc_M1.closed_price_zone == LOWER
         - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
-        - vwap_M1.closed_price_vs_vwap == BELOW
-
-    # ══════════════════════════════════════════════════════════
-    # Gold Strategy 4: Bollinger VWAP Range Fade (mean reversion)
-    # Research: highest win rate (57-64%), but fragile on trend days.
-    # Only fires when ADX ranging + near VWAP + BB re-entry.
-    # SL: $3.00 (tight for range), RR 1:1.0
-    # ══════════════════════════════════════════════════════════
-    - name: "gold_bb_range_fade"
-      enabled: true
-      priority: 45
-      sl_dollars: 3.0
-      reward_ratio: 1.0
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "BB VWAP range fade (ADX ranging + BB re-entry)"
-      buy:
-        - adx14_M5.closed_trend_strength == RANGING
-        - rsi14_M15.closed_rsi > 45
-        - rsi14_M15.closed_rsi < 55
-        - bb20d2_M1.closed_reenter_from_below is TRUE
-        - bb20d2_M1.bb_squeeze is_not TRUE
-        - vwap_M1.running_dist_pct < 3.0
-        - vwap_M1.running_dist_pct > -3.0
-      sell:
-        - adx14_M5.closed_trend_strength == RANGING
-        - rsi14_M15.closed_rsi > 45
-        - rsi14_M15.closed_rsi < 55
-        - bb20d2_M1.closed_reenter_from_above is TRUE
-        - bb20d2_M1.bb_squeeze is_not TRUE
-        - vwap_M1.running_dist_pct < 3.0
-        - vwap_M1.running_dist_pct > -3.0
-
-    # ══════════════════════════════════════════════════════════
-    # Gold Strategy 5: UT Bot multi-TF trend (simple fallback)
-    # Classic UT Bot signal with higher TF alignment.
-    # SL: $5.00, RR 1:1.25
-    # ══════════════════════════════════════════════════════════
-    - name: "gold_utbot_trend"
-      enabled: true
-      priority: 50
-      sl_dollars: 5.0
-      reward_ratio: 1.25
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "UT Bot M1 signal + M5/M15 trend alignment"
-      buy:
-        - utbot_M1.closed_signal == BUY
-        - utbot_M5.closed_bias == BULLISH
-        - utbot_M15.closed_bias == BULLISH
-        - vwap_M1.closed_price_vs_vwap == ABOVE
-      sell:
-        - utbot_M1.closed_signal == SELL
-        - utbot_M5.closed_bias == BEARISH
-        - utbot_M15.closed_bias == BEARISH
-        - vwap_M1.closed_price_vs_vwap == BELOW
-
-    # ══════════════════════════════════════════════════════════
-    # Gold Strategy 6: EMA pullback with VWAP
-    # M5 trend + RSI dip recovery + above VWAP confirmation.
-    # SL: $4.00, RR 1:1.25
-    # ══════════════════════════════════════════════════════════
-    - name: "gold_ema_pullback"
-      enabled: false
-      priority: 42
-      sl_dollars: 4.0
-      reward_ratio: 1.25
-      breakeven_pct: 80.0
-      partial_tp: false
-      description: "EMA pullback + VWAP filter (M5 trend + M1 RSI)"
-      buy:
-        - ema50_M5.closed_price_vs_ema == ABOVE
-        - ema200_M5.closed_price_vs_ema == ABOVE
-        - ema50_M5.ema_slope == RISING
-        - rsi14_M1.closed_cross in CROSS_UP_50,CROSS_UP_52
-        - vwap_M1.closed_price_vs_vwap == ABOVE
-      sell:
-        - ema50_M5.closed_price_vs_ema == BELOW
-        - ema200_M5.closed_price_vs_ema == BELOW
-        - ema50_M5.ema_slope == FALLING
-        - rsi14_M1.closed_cross == CROSS_DOWN_50
-        - vwap_M1.closed_price_vs_vwap == BELOW
-
-    # ══════════════════════════════════════════════════════════
-    # Gold Strategy 7: UT Bot 1m + 15m bias (high frequency)
-    # Simple: M1 UT Bot signal aligned with M15 bias.
-    # SL: $4.00, RR 1:1.2
-    # ══════════════════════════════════════════════════════════
-    - name: "gold_utbot_m1_m15"
-      enabled: false
-      priority: 40
-      sl_dollars: 4.0
-      reward_ratio: 1.2
-      breakeven_pct: 80.0
-      partial_tp: false
-      description: "UT Bot M1 signal + M15 bias + M5 trend + VWAP"
-      buy:
-        - utbot_M1.closed_signal == BUY
-        - utbot_M15.closed_bias == BULLISH
-        - ema50_M5.closed_price_vs_ema == ABOVE
-        - vwap_M1.closed_price_vs_vwap == ABOVE
-      sell:
-        - utbot_M1.closed_signal == SELL
-        - utbot_M15.closed_bias == BEARISH
-        - ema50_M5.closed_price_vs_ema == BELOW
         - vwap_M1.closed_price_vs_vwap == BELOW
