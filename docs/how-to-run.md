@@ -48,6 +48,22 @@ uv run python tests/run_permutations.py --data sampledata/sample.csv
 
 Generates test configs in `tests/configs/`, runs each backtest, and prints a comparison table sorted by profit factor.
 
+### UT Bot SELL permutation testing
+
+```bash
+# Quick smoke test (10 candidates)
+mkdir -p /tmp/uv-cache
+UV_CACHE_DIR=/tmp/uv-cache uv run python tests/run_utbot_sell_permutations.py \
+  --data sampledata/sample.csv \
+  --limit 10
+
+# Full run (all generated combinations)
+UV_CACHE_DIR=/tmp/uv-cache uv run python tests/run_utbot_sell_permutations.py \
+  --data sampledata/sample.csv
+```
+
+See `docs/permutation-testing.md` for full details and report format.
+
 ## Adding a Strategy
 
 1. Browse `strategies/` folder for available strategy expressions
