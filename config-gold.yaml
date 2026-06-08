@@ -15,8 +15,8 @@ trading:
   deviation: 20
   filling: FOK
   multi_position: true
-  sl_dollars: 5.0         # default SL = $5.00 move from entry
-  reward_ratio: 1.25      # default TP = SL × 1.25 = $6.25 move
+  sl_dollars: 5.0         # default SL = $5.00 move (overridable per strategy)
+  reward_ratio: 1.2        # default TP = SL × 1.2 (runners ride beyond)
 
 signals:
   poll_interval: 2.0

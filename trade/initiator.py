@@ -189,7 +189,7 @@ class TradeInitiator:
         """
         fallback_volume = float(self._config.get("trading.volume", 0.001))
         sl_dollars = float(self._config.get("trading.sl_dollars", 5.0))
-        reward_ratio = float(self._config.get("trading.reward_ratio", 1.25))
+        reward_ratio = float(self._config.get("trading.reward_ratio", 1.2))
         risk_pct = float(self._config.get("trading.risk_pct", 5.0))
         max_volume = float(self._config.get("trading.max_volume", 10.0))
         min_volume = float(self._config.get("trading.min_volume", 0.01))
