@@ -259,6 +259,53 @@ class TradeManager:
 
             return trade
 
+    def _get_closed_deal_profit(self, trade: TradeRecord) -> tuple[float, float]:
+        """Get actual profit and exit price from MT5 deal history for a closed position.
+
+        Returns (profit, exit_price). Falls back to tick-based estimate if deal
+        history is unavailable.
+        """
+        try:
+            deals = self._mt5.get_deals_by_position(trade.ticket)
+            # Find the closing deal (entry=1 means out/close deal)
+            close_deals = [d for d in deals if d.entry == 1]
+            if close_deals:
+                # Sum profit from all closing deals (could be partial closes)
+                profit = sum(d.profit for d in close_deals)
+                exit_price = close_deals[-1].price
+                return profit, exit_price
+        except Exception:
+            log.debug("Could not read deal history for ticket=%s", trade.ticket, exc_info=True)
+
+        # Fallback: estimate from tick
+        tick = self._mt5.get_tick(trade.symbol)
+        if tick:
+            exit_price = tick.bid if trade.direction == TradeDirection.BUY else tick.ask
+        else:
+            exit_price = trade.entry_price
+        # Use symbol info for proper calculation
+        try:
+            info = self._mt5.get_symbol_info(trade.symbol)
+            if info:
+                tick_value = info.trade_tick_value
+                tick_size = info.trade_tick_size
+                price_diff = abs(exit_price - trade.entry_price)
+                raw_profit = (price_diff / tick_size) * tick_value * trade.volume
+                if trade.direction == TradeDirection.BUY:
+                    profit = raw_profit if exit_price > trade.entry_price else -raw_profit
+                else:
+                    profit = raw_profit if exit_price < trade.entry_price else -raw_profit
+                return profit, exit_price
+        except Exception:
+            log.debug("Could not get symbol info for %s", trade.symbol, exc_info=True)
+
+        # Last resort: simple calc (wrong for gold but better than 0)
+        if trade.direction == TradeDirection.BUY:
+            profit = (exit_price - trade.entry_price) * trade.volume
+        else:
+            profit = (trade.entry_price - exit_price) * trade.volume
+        return profit, exit_price
+
     def close_current_position(self, rule_name: str | None = None) -> TradeRecord | None:
         """Close an open position via MT5. If rule_name given, close that specific one."""
         with self._lock:
@@ -283,16 +330,7 @@ class TradeManager:
         )
 
         if result and result.retcode == 10009:
-            tick = self._mt5.get_tick(trade.symbol)
-            if tick:
-                exit_price = tick.bid if trade.direction == TradeDirection.BUY else tick.ask
-                if trade.direction == TradeDirection.BUY:
-                    profit = (exit_price - trade.entry_price) * trade.volume
-                else:
-                    profit = (trade.entry_price - exit_price) * trade.volume
-            else:
-                exit_price = trade.entry_price
-                profit = 0.0
+            profit, exit_price = self._get_closed_deal_profit(trade)
             return self.close_trade(profit, exit_price, rule_name=rule_name)
         else:
             retcode = result.retcode if result else "N/A"
@@ -313,11 +351,18 @@ class TradeManager:
         if not tick:
             return
 
+        # Build lookup of MT5 positions by ticket for real profit
+        mt5_positions = self._mt5.get_positions()
+        mt5_profit_by_ticket = {p.ticket: p.profit for p in mt5_positions}
+
         for rule_name, trade in trades:
             with self._lock:
                 if rule_name not in self._open_trades:
                     continue  # closed in the meantime
-                if trade.direction == TradeDirection.BUY:
+                # Use MT5's own profit calculation (accounts for contract size, tick value, etc.)
+                if trade.ticket in mt5_profit_by_ticket:
+                    self._open_trades[rule_name].profit = mt5_profit_by_ticket[trade.ticket]
+                elif trade.direction == TradeDirection.BUY:
                     self._open_trades[rule_name].profit = (tick.bid - trade.entry_price) * trade.volume
                 else:
                     self._open_trades[rule_name].profit = (trade.entry_price - tick.ask) * trade.volume
@@ -349,17 +394,8 @@ class TradeManager:
                 "Tracked position ticket=%s (rule=%s) no longer in MT5 — marking closed",
                 trade.ticket, rule_name,
             )
-            tick = self._mt5.get_tick(trade.symbol)
-            if tick:
-                if trade.direction == TradeDirection.BUY:
-                    exit_price = tick.bid
-                    profit = (exit_price - trade.entry_price) * trade.volume
-                else:
-                    exit_price = tick.ask
-                    profit = (trade.entry_price - exit_price) * trade.volume
-            else:
-                exit_price = trade.entry_price
-                profit = 0.0
+            # Try to get actual profit from deal history
+            profit, exit_price = self._get_closed_deal_profit(trade)
             self.close_trade(profit=profit, exit_price=exit_price, rule_name=rule_name)
 
     # ── statistics ─────────────────────────────────────────────────────────
