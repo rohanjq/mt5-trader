@@ -71,7 +71,7 @@ exit_rules:
   trailing_stop_dollars: 0.0
 
 notifications:
-  enabled: true
+  enabled: false
   pushover_user_key: ""    # set via PUSHOVER_USER env var
   pushover_app_token: ""    # set via PUSHOVER_TOKEN env var
 
