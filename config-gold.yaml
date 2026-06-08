@@ -76,17 +76,49 @@ notifications:
   pushover_app_token: ""    # set via PUSHOVER_TOKEN env var
 
 rules:
-  dc_confluence:
-    enabled: false
-  dc_wick_rejection:
-    enabled: false
-  utbot_multi_tf:
-    enabled: false
-  utbot_simple:
-    enabled: false
   expressions:
     # ══════════════════════════════════════════════════════════
-    # Strategy 1: UT Bot multi-TF trend (DISABLED — PF 0.95)
+    # Strategy 1: DC Confluence (PF 1.26, DD 10.7%, 30 trades)
+    # DC M15 zone + UT Bot M1 signal + M45 trend bars
+    # ══════════════════════════════════════════════════════════
+    - name: "dc_confluence"
+      enabled: true
+      priority: 100
+      sl_dollars: 5.0
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "DC M15 zone + UT Bot M1 signal + M45 trend (5+ bars)"
+      buy:
+        - dc_M15.closed_price_zone in LOWER,LOWER_MID
+        - utbot_M1.closed_signal == BUY
+        - utbot_M45.consecutive_bull_bars >= 5
+      sell:
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID
+        - utbot_M1.closed_signal == SELL
+        - utbot_M45.consecutive_bear_bars >= 5
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 2: DC Wick Rejection (PF 1.31, DD 30.8%, 60 trades)
+    # DC M15 wick rejection + UT Bot M3 bias
+    # ══════════════════════════════════════════════════════════
+    - name: "dc_wick_rejection"
+      enabled: true
+      priority: 110
+      sl_dollars: 5.0
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "DC M15 wick rejection + UT Bot M3 bias"
+      buy:
+        - dc_M15.closed_lower_wick_rej is TRUE
+        - utbot_M3.closed_bias == BULLISH
+      sell:
+        - dc_M15.closed_upper_wick_rej is TRUE
+        - utbot_M3.closed_bias == BEARISH
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 3: UT Bot multi-TF trend (DISABLED — PF 0.95)
     # ══════════════════════════════════════════════════════════
     - name: "gold_utbot_trend"
       enabled: false
@@ -108,7 +140,7 @@ rules:
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 2: DC Compression Breakout (DISABLED — PF 0.95)
+    # Strategy 4: DC Compression Breakout (DISABLED — PF 0.95)
     # ══════════════════════════════════════════════════════════
     - name: "gold_dc_breakout"
       enabled: false
@@ -138,7 +170,7 @@ rules:
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 3: M2 SELL 2nd Wave — EMA50 + bounce + VWAP
+    # Strategy 5: M2 SELL 2nd Wave — EMA50 + bounce + VWAP
     # Backtest: PF 1.80, WR 64.7%, DD 10.4%, 34 trades
     # ══════════════════════════════════════════════════════════
     - name: "trend_2w_m2_ema50_bounce2_vwap"
@@ -157,7 +189,7 @@ rules:
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 4: M2 SELL 2nd Wave — M15 bear + bounce + VWAP
+    # Strategy 6: M2 SELL 2nd Wave — M15 bear + bounce + VWAP
     # Backtest: PF 1.62, WR 62.5%, DD 9.7%, 24 trades
     # ══════════════════════════════════════════════════════════
     - name: "trend_2w_m2_m15bear_bounce2_vwap"
