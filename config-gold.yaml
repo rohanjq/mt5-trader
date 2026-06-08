@@ -57,15 +57,15 @@ signals:
       timeframes: [M1, M5]
 
 filters:
-  cooldown_seconds: 30
+  cooldown_seconds: 30          # per-trade cooldown
   max_consecutive_losses: 0      # disabled — no consecutive loss pause
   pause_after_consecutive_minutes: 15
   max_daily_loss: -1
-  reversal_cooldown_seconds: 30
+  reversal_cooldown_seconds: 30  # reversal cooldown
 
 exit_rules:
   signal_reversal_exit: false
-  breakeven_pct: 80.0           # move SL to entry at 80% of risk (was 60%)
+  breakeven_pct: 0.0            # disabled — let trades ride to SL or TP
   partial_tp: false             # disabled — no runner split
   tp_close_pct: 100.0
   trailing_stop_dollars: 0.0
@@ -88,7 +88,7 @@ rules:
       priority: 30
       sl_dollars: 4.2
       reward_ratio: 1.25
-      breakeven_pct: 80.0
+      breakeven_pct: 0.0
       partial_tp: false
       description: "VWAP pullback continuation (M5 trend + M1 RSI reclaim)"
       buy:
@@ -121,7 +121,7 @@ rules:
       priority: 35
       sl_dollars: 5.0
       reward_ratio: 1.5
-      breakeven_pct: 80.0
+      breakeven_pct: 0.0
       partial_tp: false
       description: "Session impulse EMA ADX trend (M5 regime + M1 momentum)"
       buy:
@@ -160,7 +160,7 @@ rules:
       priority: 40
       sl_dollars: 6.0
       reward_ratio: 1.8
-      breakeven_pct: 80.0
+      breakeven_pct: 0.0
       partial_tp: false
       description: "Compression breakout (DC+BB squeeze → expansion)"
       buy:
@@ -193,7 +193,7 @@ rules:
       priority: 45
       sl_dollars: 3.0
       reward_ratio: 1.0
-      breakeven_pct: 80.0
+      breakeven_pct: 0.0
       partial_tp: false
       description: "BB VWAP range fade (ADX ranging + BB re-entry)"
       buy:
@@ -223,7 +223,7 @@ rules:
       priority: 50
       sl_dollars: 5.0
       reward_ratio: 1.25
-      breakeven_pct: 80.0
+      breakeven_pct: 0.0
       partial_tp: false
       description: "UT Bot M1 signal + M5/M15 trend alignment"
       buy:
@@ -269,7 +269,7 @@ rules:
     # SL: $4.00, RR 1:1.2
     # ══════════════════════════════════════════════════════════
     - name: "gold_utbot_m1_m15"
-      enabled: true
+      enabled: false
       priority: 40
       sl_dollars: 4.0
       reward_ratio: 1.2
