@@ -81,12 +81,12 @@ rules:
     # Gold Strategy 1: VWAP Pullback Continuation (highest priority)
     # Research: best blend of win rate (51-58%) and frequency.
     # Enters after pullback into VWAP zone in established M5 trend.
-    # SL: $3.50 (tighter, pullback = lower noise), RR 1:1.25
+    # SL: $4.20 (was $3.50 — widened for XAUUSD M1 noise), RR 1:1.25
     # ══════════════════════════════════════════════════════════
     - name: "gold_vwap_pullback"
       enabled: true
       priority: 30
-      sl_dollars: 3.5
+      sl_dollars: 4.2
       reward_ratio: 1.25
       breakeven_pct: 55.0
       partial_tp: true
@@ -134,6 +134,7 @@ rules:
         - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
         - adx14_M1.closed_di_bias == BULLISH
         - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - bb20d2_M1.bb_squeeze is_not TRUE
         - vwap_M1.closed_price_vs_vwap == ABOVE
       sell:
         - ema200_M5.closed_price_vs_ema == BELOW
@@ -145,6 +146,7 @@ rules:
         - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
         - adx14_M1.closed_di_bias == BEARISH
         - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
+        - bb20d2_M1.bb_squeeze is_not TRUE
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
