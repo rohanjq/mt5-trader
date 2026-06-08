@@ -290,8 +290,12 @@ class TradeInitiator:
             )
             return
 
-        tick = self._mt5.get_tick(request.symbol)
-        entry_price = tick.ask if request.direction == TradeDirection.BUY else tick.bid
+        # Use fill price from order result — avoids extra rpyc call that can hang
+        entry_price = result.price if hasattr(result, 'price') and result.price else 0.0
+        if not entry_price:
+            tick = self._mt5.get_tick(request.symbol)
+            entry_price = (tick.ask if request.direction == TradeDirection.BUY else tick.bid) if tick else 0.0
+            log.warning("result.price unavailable, used get_tick: %.2f", entry_price)
 
         # Register main trade
         main_record = TradeRecord(
