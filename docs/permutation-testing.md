@@ -24,34 +24,29 @@ SELL-side permutation runner (new).
 
 ## How to run
 
-Use `UV_CACHE_DIR=/tmp/uv-cache` to avoid cache-write issues in restricted environments.
-
-### Quick smoke test (10 candidates)
+### BUY-side permutations
 
 ```bash
-cd /root/mt5-trader
-mkdir -p /tmp/uv-cache
-UV_CACHE_DIR=/tmp/uv-cache uv run python tests/run_utbot_sell_permutations.py \
-  --data sampledata/sample.csv \
-  --limit 10
+uv run python tests/run_permutations.py --data sampledata/sample.csv
 ```
 
-### Medium batch (example: 300 candidates)
+### SELL-side permutations
 
+Quick smoke test (5 candidates):
 ```bash
-cd /root/mt5-trader
-mkdir -p /tmp/uv-cache
-UV_CACHE_DIR=/tmp/uv-cache uv run python tests/run_utbot_sell_permutations.py \
-  --data sampledata/sample.csv \
-  --limit 300
+uv run python tests/run_utbot_sell_permutations.py \
+  --data sampledata/sample.csv --limit 5
 ```
 
-### Full exhaustive run
-
+Medium batch (100 candidates):
 ```bash
-cd /root/mt5-trader
-mkdir -p /tmp/uv-cache
-UV_CACHE_DIR=/tmp/uv-cache uv run python tests/run_utbot_sell_permutations.py \
+uv run python tests/run_utbot_sell_permutations.py \
+  --data sampledata/sample.csv --limit 100
+```
+
+Full exhaustive run (~3000+ candidates):
+```bash
+uv run python tests/run_utbot_sell_permutations.py \
   --data sampledata/sample.csv
 ```
 
