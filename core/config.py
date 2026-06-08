@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import logging
 import threading
 import time
@@ -61,7 +62,7 @@ class Config:
 
     def load(self) -> None:
         with self._lock:
-            base = dict(_DEFAULT_CONFIG)
+            base = copy.deepcopy(_DEFAULT_CONFIG)
             if self._path.exists():
                 with open(self._path) as f:
                     user = yaml.safe_load(f) or {}

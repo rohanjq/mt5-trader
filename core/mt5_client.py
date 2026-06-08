@@ -71,32 +71,52 @@ class MT5Client:
 
     def get_account_info(self) -> Any:
         """Get MT5 account info (balance, equity, margin, etc.)."""
-        with self._lock:
-            return self.mt5.account_info()
+        try:
+            with self._lock:
+                return self.mt5.account_info()
+        except Exception:
+            log.warning("get_account_info failed — bridge may be disconnected")
+            self._connected = False
+            return None
 
     def get_tick(self, symbol: str | None = None) -> Any:
         symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
-        with self._lock:
-            return self.mt5.symbol_info_tick(symbol)
+        try:
+            with self._lock:
+                return self.mt5.symbol_info_tick(symbol)
+        except Exception:
+            log.warning("get_tick failed for %s — bridge may be disconnected", symbol)
+            self._connected = False
+            return None
 
     def get_symbol_info(self, symbol: str | None = None) -> Any:
         symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
-        with self._lock:
-            return self.mt5.symbol_info(symbol)
+        try:
+            with self._lock:
+                return self.mt5.symbol_info(symbol)
+        except Exception:
+            log.warning("get_symbol_info failed for %s — bridge may be disconnected", symbol)
+            self._connected = False
+            return None
 
     # ── order execution ────────────────────────────────────────────────────
 
     def send_order(self, request: dict) -> Any:
-        with self._lock:
-            log.info("Sending order: %s", request)
-            result = self.mt5.order_send(request)
-            if result and result.retcode == 10009:
-                log.info("Order executed: ticket=%s", result.order)
-            else:
-                retcode = result.retcode if result else "None"
-                comment = result.comment if result else "no result"
-                log.error("Order failed: retcode=%s comment=%s", retcode, comment)
-            return result
+        try:
+            with self._lock:
+                log.info("Sending order: %s", request)
+                result = self.mt5.order_send(request)
+                if result and result.retcode == 10009:
+                    log.info("Order executed: ticket=%s", result.order)
+                else:
+                    retcode = result.retcode if result else "None"
+                    comment = result.comment if result else "no result"
+                    log.error("Order failed: retcode=%s comment=%s", retcode, comment)
+                return result
+        except Exception:
+            log.exception("send_order failed — bridge may be disconnected")
+            self._connected = False
+            return None
 
     def buy(self, volume: float | None = None, symbol: str | None = None,
              sl: float = 0.0, tp: float = 0.0) -> Any:
@@ -181,9 +201,14 @@ class MT5Client:
 
     def get_positions(self, symbol: str | None = None) -> list:
         symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
-        with self._lock:
-            positions = self.mt5.positions_get(symbol=symbol)
-            return list(positions) if positions else []
+        try:
+            with self._lock:
+                positions = self.mt5.positions_get(symbol=symbol)
+                return list(positions) if positions else []
+        except Exception:
+            log.warning("get_positions failed — bridge may be disconnected")
+            self._connected = False
+            return []
 
     def get_recent_deals(self, symbol: str | None = None, hours: float = 4.0) -> list:
         """Get all deals from the last N hours for a given symbol."""
@@ -191,27 +216,37 @@ class MT5Client:
         symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
         now = datetime.now(timezone.utc)
         start = now - timedelta(hours=hours)
-        with self._lock:
-            deals = self.mt5.history_deals_get(start, now, symbol=symbol)
-            return list(deals) if deals else []
+        try:
+            with self._lock:
+                deals = self.mt5.history_deals_get(start, now, symbol=symbol)
+                return list(deals) if deals else []
+        except Exception:
+            log.warning("get_recent_deals failed — bridge may be disconnected")
+            self._connected = False
+            return []
 
     def get_deals_by_position(self, position_id: int) -> list:
         """Get deal history for a specific position ticket."""
         from datetime import datetime, timedelta, timezone
         now = datetime.now(timezone.utc)
-        with self._lock:
-            deals = self.mt5.history_deals_get(
-                now - timedelta(hours=24), now, position=position_id
-            )
-            if not deals:
-                return []
-            # rpyc may ignore 'position' kwarg — filter client-side
-            filtered = []
-            for d in deals:
-                pos = getattr(d, 'position_id', None) or getattr(d, 'position', None)
-                if pos == position_id:
-                    filtered.append(d)
-            return filtered
+        try:
+            with self._lock:
+                deals = self.mt5.history_deals_get(
+                    now - timedelta(hours=24), now, position=position_id
+                )
+                if not deals:
+                    return []
+                # rpyc may ignore 'position' kwarg — filter client-side
+                filtered = []
+                for d in deals:
+                    pos = getattr(d, 'position_id', None) or getattr(d, 'position', None)
+                    if pos == position_id:
+                        filtered.append(d)
+                return filtered
+        except Exception:
+            log.warning("get_deals_by_position failed — bridge may be disconnected")
+            self._connected = False
+            return []
 
     def modify_position(self, ticket: int, sl: float = 0.0, tp: float = 0.0,
                         symbol: str | None = None) -> Any:
@@ -226,13 +261,18 @@ class MT5Client:
             request["sl"] = float(sl)
         if tp > 0:
             request["tp"] = float(tp)
-        with self._lock:
-            log.info("Modifying position %s: sl=%.2f tp=%.2f", ticket, sl, tp)
-            result = self.mt5.order_send(request)
-            if result and result.retcode == 10009:
-                log.info("Position %s modified successfully", ticket)
-            else:
-                retcode = result.retcode if result else "None"
-                comment = result.comment if result else "no result"
-                log.error("Position modify failed: retcode=%s comment=%s", retcode, comment)
-            return result
+        try:
+            with self._lock:
+                log.info("Modifying position %s: sl=%.2f tp=%.2f", ticket, sl, tp)
+                result = self.mt5.order_send(request)
+                if result and result.retcode == 10009:
+                    log.info("Position %s modified successfully", ticket)
+                else:
+                    retcode = result.retcode if result else "None"
+                    comment = result.comment if result else "no result"
+                    log.error("Position modify failed: retcode=%s comment=%s", retcode, comment)
+                return result
+        except Exception:
+            log.exception("modify_position failed — bridge may be disconnected")
+            self._connected = False
+            return None

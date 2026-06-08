@@ -200,6 +200,11 @@ class TradeInitiator:
         if trigger is not None and trigger.reward_ratio is not None:
             reward_ratio = trigger.reward_ratio
 
+        # Guard against zero/negative SL (would cause division by zero in sizing)
+        if sl_dollars <= 0:
+            log.warning("sl_dollars is %.2f — falling back to $5.00", sl_dollars)
+            sl_dollars = 5.0
+
         tp_dollars = sl_dollars * reward_ratio
 
         # Get current price
