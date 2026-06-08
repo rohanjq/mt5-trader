@@ -61,8 +61,8 @@ exit_rules:
 
 notifications:
   enabled: true
-  pushover_user_key: "uossifvqjkvrzm4e4766tvvhcz8aww"
-  pushover_app_token: "adxjpfvoah7n92hmhh3cbtsw7dnywq"
+  pushover_user_key: ""    # set via PUSHOVER_USER env var
+  pushover_app_token: ""    # set via PUSHOVER_TOKEN env var
 
 rules:
   # ── Expression rules (YAML only) ──
