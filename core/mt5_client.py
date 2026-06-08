@@ -195,6 +195,16 @@ class MT5Client:
             deals = self.mt5.history_deals_get(start, now, symbol=symbol)
             return list(deals) if deals else []
 
+    def get_deals_by_position(self, position_id: int) -> list:
+        """Get deal history for a specific position ticket."""
+        from datetime import datetime, timedelta, timezone
+        now = datetime.now(timezone.utc)
+        with self._lock:
+            deals = self.mt5.history_deals_get(
+                now - timedelta(hours=24), now, position=position_id
+            )
+            return list(deals) if deals else []
+
     def modify_position(self, ticket: int, sl: float = 0.0, tp: float = 0.0,
                         symbol: str | None = None) -> Any:
         """Modify SL/TP of an open position using TRADE_ACTION_SLTP."""

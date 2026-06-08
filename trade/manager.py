@@ -259,6 +259,28 @@ class TradeManager:
 
             return trade
 
+    def _get_closed_deal_profit(self, trade: TradeRecord) -> tuple[float, float]:
+        """Get actual profit and exit price from MT5 deal history."""
+        for attempt in range(3):
+            try:
+                deals = self._mt5.get_deals_by_position(trade.ticket)
+                close_deals = [d for d in deals if d.entry == 1]
+                if close_deals:
+                    profit = sum(d.profit for d in close_deals)
+                    exit_price = close_deals[-1].price
+                    log.info(
+                        "Deal history for ticket=%s: profit=%.2f exit=%.5f (%d close deals)",
+                        trade.ticket, profit, exit_price, len(close_deals),
+                    )
+                    return profit, exit_price
+            except Exception:
+                log.debug("Deal history attempt %d failed for ticket=%s", attempt + 1, trade.ticket, exc_info=True)
+            if attempt < 2:
+                time.sleep(0.5)
+
+        log.error("No deal history found for ticket=%s after 3 attempts — reporting $0", trade.ticket)
+        return 0.0, trade.entry_price
+
     def close_current_position(self, rule_name: str | None = None) -> TradeRecord | None:
         """Close an open position via MT5. If rule_name given, close that specific one."""
         with self._lock:
@@ -283,13 +305,9 @@ class TradeManager:
         )
 
         if result and result.retcode == 10009:
-            # Use last cached MT5 profit (reliable, set by update_open_position)
-            profit = trade.profit
-            tick = self._mt5.get_tick(trade.symbol)
-            if tick:
-                exit_price = tick.bid if trade.direction == TradeDirection.BUY else tick.ask
-            else:
-                exit_price = trade.entry_price
+            # Small delay to let MT5 record the deal, then read actual profit
+            time.sleep(0.3)
+            profit, exit_price = self._get_closed_deal_profit(trade)
             return self.close_trade(profit, exit_price, rule_name=rule_name)
         else:
             retcode = result.retcode if result else "N/A"
@@ -353,19 +371,8 @@ class TradeManager:
                 "Tracked position ticket=%s (rule=%s) no longer in MT5 — marking closed",
                 trade.ticket, rule_name,
             )
-            # Use last cached MT5 profit (set by update_open_position from MT5 position data).
-            # Deal history through rpyc is unreliable, cached profit is read directly from MT5.
-            profit = trade.profit
-            # Estimate exit price from the profit and trade direction
-            tick = self._mt5.get_tick(trade.symbol)
-            if tick:
-                exit_price = tick.bid if trade.direction == TradeDirection.BUY else tick.ask
-            else:
-                exit_price = trade.entry_price
-            log.info(
-                "Using cached MT5 profit for ticket=%s: %.2f (exit_price≈%.2f)",
-                trade.ticket, profit, exit_price,
-            )
+            # Get actual close profit from MT5 deal history
+            profit, exit_price = self._get_closed_deal_profit(trade)
             self.close_trade(profit=profit, exit_price=exit_price, rule_name=rule_name)
 
     # ── statistics ─────────────────────────────────────────────────────────
