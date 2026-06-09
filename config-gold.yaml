@@ -206,3 +206,29 @@ rules:
         - utbot_M15.closed_bias == BEARISH
         - utbot_M5.consecutive_bull_bars >= 2
         - vwap_M1.closed_price_vs_vwap == BELOW
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 7: M2 + M15 + M45 alignment (fresh M15 bias)
+    # Fires frequently — M2 signal aligns with M15 + M45 bias
+    # M15 bias must be fresh (≤ 7 candles old)
+    # ══════════════════════════════════════════════════════════
+    - name: "m2_triple_align"
+      enabled: true
+      priority: 60
+      sl_dollars: 7.5
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "M2 signal + M15 + M45 bias aligned (fresh M15 ≤7 bars)"
+      buy:
+        - utbot_M2.closed_signal == BUY
+        - utbot_M15.closed_bias == BULLISH
+        - utbot_M15.consecutive_bull_bars <= 7
+        - utbot_M45.closed_bias == BULLISH
+        - vwap_M1.closed_price_vs_vwap == ABOVE
+      sell:
+        - utbot_M2.closed_signal == SELL
+        - utbot_M15.closed_bias == BEARISH
+        - utbot_M15.consecutive_bear_bars <= 7
+        - utbot_M45.closed_bias == BEARISH
+        - vwap_M1.closed_price_vs_vwap == BELOW
