@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import fnmatch
 import re
 import subprocess
 import sys
@@ -44,7 +45,7 @@ from itertools import product
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATA = ROOT / "sampledata" / "XAUUSD_M1_60d.csv"
+DEFAULT_DATA = ROOT / "sampledata" / "sample.csv"
 
 _BASE = {
     "mt5": {"host": "localhost", "port": 8001},
@@ -96,7 +97,7 @@ def load_strategies(strat_dir: Path, only: list[str] | None = None) -> list[dict
     strategies = []
     for f in sorted(strat_dir.glob("*.yaml")):
         strat = yaml.safe_load(f.read_text())
-        if only and strat["name"] not in only:
+        if only and not any(fnmatch.fnmatch(strat["name"], pat) for pat in only):
             continue
         strategies.append(strat)
     return strategies

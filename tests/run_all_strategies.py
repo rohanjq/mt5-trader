@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import fnmatch
 import re
 import subprocess
 import sys
@@ -99,7 +100,7 @@ def load_strategies(
     strategies = []
     for f in sorted(STRATEGIES_DIR.glob("*.yaml")):
         strat = yaml.safe_load(f.read_text())
-        if only and strat["name"] not in only:
+        if only and not any(fnmatch.fnmatch(strat["name"], pat) for pat in only):
             continue
         if not include_disabled and not strat.get("enabled", True):
             continue
