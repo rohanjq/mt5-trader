@@ -15,7 +15,7 @@ from exits.base import discover_exit_rules
 from filters.base import BaseFilter, FilterChain, discover_filters
 from filters.manual_switch import ManualSwitchFilter
 from rules.base import discover_rules
-from rules.expression import ExpressionRule
+from rules.expression import ExpressionRule, validate_expression_rules
 from signals.base import BaseSignal, build_signal_plugins
 from trade.initiator import TradeInitiator
 from trade.manager import TradeManager
@@ -80,6 +80,11 @@ class Engine:
         # Discover trigger rules
         rules = discover_rules(self.config)
         self.trade_initiator.set_rules(rules)
+
+        # Validate rule references against configured signal sources
+        warnings = validate_expression_rules(self.config, rules)
+        for w in warnings:
+            log.warning("Config validation: %s", w)
 
         # When a trade closes, reset signal tracking so the next signal is acted on
         self.trade_manager.on_trade_closed(

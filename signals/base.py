@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 import csv
 import logging
+import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -19,8 +20,12 @@ class BaseSignal(abc.ABC):
 
     name: str = "unnamed"
 
+    # Max file age in seconds before logging a warning (default 5 minutes)
+    _STALE_THRESHOLD_S: float = 300.0
+
     def __init__(self, config: Config) -> None:
         self.config = config
+        self._stale_warned: dict[str, float] = {}  # path → last warn time
 
     @abc.abstractmethod
     def read(self) -> Signal:
@@ -36,6 +41,19 @@ class BaseSignal(abc.ABC):
         p = Path(path)
         if not p.exists():
             return {}
+
+        # Warn if the file hasn't been updated recently
+        try:
+            age = time.time() - p.stat().st_mtime
+            if age > self._STALE_THRESHOLD_S:
+                now = time.time()
+                last_warn = self._stale_warned.get(str(p), 0)
+                if now - last_warn > 60:  # throttle to once per minute
+                    log.warning("Stale signal file %s (%.0fs old)", p.name, age)
+                    self._stale_warned[str(p)] = now
+        except OSError:
+            pass
+
         for encoding in ("utf-8-sig", "utf-16", "latin-1"):
             try:
                 with open(p, newline="", encoding=encoding) as f:

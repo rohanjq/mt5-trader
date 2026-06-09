@@ -328,3 +328,30 @@ def load_expression_rules(config: Config) -> list[BaseRule]:
         )
 
     return expr_rules
+
+
+def validate_expression_rules(config: Config, rules: list[BaseRule]) -> list[str]:
+    """Validate that all signal references in expression rules match configured sources.
+
+    Returns a list of warning strings for any unresolvable references.
+    """
+    # Build set of configured signal names: e.g. {"utbot_M1", "dc_M15", "ema50_H1"}
+    configured: set[str] = set()
+    for src in config.get("signals.sources", []):
+        indicator = src.get("indicator", "")
+        for tf in src.get("timeframes", []):
+            configured.add(f"{indicator}_{tf}")
+
+    if not configured:
+        return []
+
+    warnings: list[str] = []
+    for rule in rules:
+        if not isinstance(rule, ExpressionRule):
+            continue
+        for cond in rule._buy_conditions + rule._sell_conditions:
+            if cond.signal not in configured:
+                msg = f"Rule '{rule.name}': references '{cond.signal}' which is not in signals.sources"
+                warnings.append(msg)
+
+    return warnings
