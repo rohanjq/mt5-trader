@@ -17,14 +17,13 @@ trader-*.log
 eval_snapshot_*.json
 
 # Backtest data + output (CSV files can be large)
-data/*.csv
+data/*
+!data/.gitkeep
 output/
 
 # Docker runtime data
 docker/.env
-docker/config/
-docker/data/
-data/signals/
+config/
 *.ex5
 
 # MQL5 compiled files
