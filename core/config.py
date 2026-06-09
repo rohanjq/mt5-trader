@@ -17,7 +17,7 @@ _DEFAULT_CONFIG: dict[str, Any] = {
         "port": 8001,
     },
     "trading": {
-        "symbol": "BTCUSDT",
+        "symbol": "XAUUSD",
         "volume": 0.001,
         "magic": 100,
         "deviation": 20,

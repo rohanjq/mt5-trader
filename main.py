@@ -2,7 +2,7 @@
 """MT5 Auto-Trader — entry point.
 
 Starts the engine, connects to MT5, and launches the TUI dashboard.
-Usage: python main.py --config config-btc.yaml
+Usage: python main.py --config config-gold.yaml
        python main.py --config config-gold.yaml
 """
 from __future__ import annotations
@@ -34,7 +34,7 @@ def main() -> None:
     parser.add_argument(
         "--config", "-c",
         default="config.yaml",
-        help="Path to config file (e.g. config-btc.yaml, config-gold.yaml)",
+        help="Path to config file (e.g. config-gold.yaml)",
     )
     args = parser.parse_args()
 

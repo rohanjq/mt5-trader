@@ -11,7 +11,7 @@ trading:
   risk_pct: 5.0          # risk 5% of account balance per trade (hot-reloadable)
   max_volume: 10.0       # safety cap
   min_volume: 0.01       # broker minimum
-  magic: 200             # separate magic from BTC (100)
+  magic: 200
   deviation: 20
   filling: FOK
   multi_position: false
@@ -84,29 +84,9 @@ notifications:
 rules:
   expressions:
     # ══════════════════════════════════════════════════════════
-    # Strategy 1: DC Confluence (PF 1.26, DD 10.7%, 30 trades)
-    # DC M15 zone + UT Bot M1 signal + M45 trend bars
-    # ══════════════════════════════════════════════════════════
-    - name: "dc_confluence"
-      enabled: false
-      priority: 100
-      sl_dollars: 5.0
-      reward_ratio: 1.0
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "DC M15 zone + UT Bot M1 signal + M45 trend (5+ bars)"
-      buy:
-        - dc_M15.closed_price_zone in LOWER,LOWER_MID
-        - utbot_M1.closed_signal == BUY
-        - utbot_M45.consecutive_bull_bars >= 5
-      sell:
-        - dc_M15.closed_price_zone in UPPER,UPPER_MID
-        - utbot_M1.closed_signal == SELL
-        - utbot_M45.consecutive_bear_bars >= 5
-
-    # ══════════════════════════════════════════════════════════
-    # Strategy 2: DC Wick Rejection (PF 1.31, DD 30.8%, 60 trades)
+    # Strategy 1: DC Wick Rejection (PF 1.31, DD 30.8%, 60 trades)
     # DC M15 wick rejection + UT Bot M3 bias
+    # Live: 3 wins in session 2026-06-09
     # ══════════════════════════════════════════════════════════
     - name: "dc_wick_rejection"
       enabled: true
@@ -124,59 +104,7 @@ rules:
         - utbot_M3.closed_bias == BEARISH
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 3: UT Bot multi-TF trend (DISABLED — PF 0.95)
-    # ══════════════════════════════════════════════════════════
-    - name: "gold_utbot_trend"
-      enabled: false
-      priority: 50
-      sl_dollars: 5.0
-      reward_ratio: 1.0
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "UT Bot M1 signal + M5/M15 trend alignment + VWAP"
-      buy:
-        - utbot_M1.closed_signal == BUY
-        - utbot_M5.closed_bias == BULLISH
-        - utbot_M15.closed_bias == BULLISH
-        - vwap_M1.closed_price_vs_vwap == ABOVE
-      sell:
-        - utbot_M1.closed_signal == SELL
-        - utbot_M5.closed_bias == BEARISH
-        - utbot_M15.closed_bias == BEARISH
-        - vwap_M1.closed_price_vs_vwap == BELOW
-
-    # ══════════════════════════════════════════════════════════
-    # Strategy 4: DC Compression Breakout (DISABLED — PF 0.95)
-    # ══════════════════════════════════════════════════════════
-    - name: "gold_dc_breakout"
-      enabled: false
-      priority: 40
-      sl_dollars: 6.0
-      reward_ratio: 1.0
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "Compression breakout (DC+BB squeeze → expansion)"
-      buy:
-        - ema50_M5.closed_price_vs_ema == ABOVE
-        - ema200_M5.closed_price_vs_ema == ABOVE
-        - dc_M1.dc_compressed is TRUE
-        - bb20d2_M1.bb_squeeze is TRUE
-        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
-        - dc_M1.closed_price_zone == UPPER
-        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
-        - vwap_M1.closed_price_vs_vwap == ABOVE
-      sell:
-        - ema50_M5.closed_price_vs_ema == BELOW
-        - ema200_M5.closed_price_vs_ema == BELOW
-        - dc_M1.dc_compressed is TRUE
-        - bb20d2_M1.bb_squeeze is TRUE
-        - atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
-        - dc_M1.closed_price_zone == LOWER
-        - adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
-        - vwap_M1.closed_price_vs_vwap == BELOW
-
-    # ══════════════════════════════════════════════════════════
-    # Strategy 5: M2 SELL 2nd Wave — EMA50 + bounce + VWAP
+    # Strategy 2: M2 SELL 2nd Wave — EMA50 + bounce + VWAP
     # Backtest: PF 1.80, WR 64.7%, DD 10.4%, 34 trades
     # ══════════════════════════════════════════════════════════
     - name: "trend_2w_m2_ema50_bounce2_vwap"
@@ -195,7 +123,7 @@ rules:
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 6: M2 SELL 2nd Wave — M15 bear + bounce + VWAP
+    # Strategy 3: M2 SELL 2nd Wave — M15 bear + bounce + VWAP
     # Backtest: PF 1.62, WR 62.5%, DD 9.7%, 24 trades
     # ══════════════════════════════════════════════════════════
     - name: "trend_2w_m2_m15bear_bounce2_vwap"
@@ -214,33 +142,7 @@ rules:
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 7: M2 + M15 + M45 alignment (fresh M15 bias)
-    # Fires frequently — M2 signal aligns with M15 + M45 bias
-    # M15 bias must be fresh (≤ 7 candles old)
-    # ══════════════════════════════════════════════════════════
-    - name: "m2_triple_align"
-      enabled: false
-      priority: 60
-      sl_dollars: 7.5
-      reward_ratio: 1.0
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "M2 signal + M15 + M45 bias aligned (fresh M15 ≤7 bars)"
-      buy:
-        - utbot_M2.closed_signal == BUY
-        - utbot_M15.closed_bias == BULLISH
-        - utbot_M15.consecutive_bull_bars <= 7
-        - utbot_M45.closed_bias == BULLISH
-        - vwap_M1.closed_price_vs_vwap == ABOVE
-      sell:
-        - utbot_M2.closed_signal == SELL
-        - utbot_M15.closed_bias == BEARISH
-        - utbot_M15.consecutive_bear_bars <= 7
-        - utbot_M45.closed_bias == BEARISH
-        - vwap_M1.closed_price_vs_vwap == BELOW
-
-    # ══════════════════════════════════════════════════════════
-    # Strategy 8: DC Second Wave — M45 bear + DC M15 upper pullback
+    # Strategy 4: DC Second Wave — M45 bear + DC M15 upper pullback
     # Backtest 60d: PF 1.29, WR 57.6%, 59 trades, DD 30.6%
     # M3 SELL + M45 bearish + price in DC M15 UPPER zone + VWAP below
     # ══════════════════════════════════════════════════════════
@@ -260,7 +162,7 @@ rules:
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 9: BUY — Hammer 2nd Wave at DC Lower
+    # Strategy 5: BUY — Hammer 2nd Wave at DC Lower
     # Backtest 60d: PF 1.20, WR 55.6%, 18 trades, DD 10.3%
     # M3 hammer + M5 pullback 2+ bars + M15 bullish + DC lower
     # ══════════════════════════════════════════════════════════
@@ -280,26 +182,7 @@ rules:
       sell: []
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 10: BUY — Hammer Deep 2nd Wave
-    # Backtest 60d: PF 1.12, WR 54.4%, 57 trades, DD 24.2%
-    # M3 hammer + M5 deep pullback 3+ bars + M15 bullish
-    # ══════════════════════════════════════════════════════════
-    - name: "hammer_deep_2w_m15"
-      enabled: true
-      priority: 50
-      sl_dollars: 7.5
-      reward_ratio: 1.0
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "M3 hammer + M5 deep pullback 3+ bars + M15 bull"
-      buy:
-        - candle_M3.closed_candle_type == HAMMER
-        - utbot_M5.consecutive_bear_bars >= 3
-        - utbot_M15.closed_bias == BULLISH
-      sell: []
-
-    # ══════════════════════════════════════════════════════════
-    # Strategy 11: SELL — Doji at DC Upper
+    # Strategy 6: SELL — Doji at DC Upper
     # Backtest 60d: PF 1.31, WR 58.5%, 53 trades, DD 18.6%
     # M3 doji at DC M15 upper zone + M15 bearish bias
     # ══════════════════════════════════════════════════════════
@@ -318,7 +201,7 @@ rules:
         - utbot_M15.closed_bias == BEARISH
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 12: SELL — Shooting Star M5 + M15 Bearish
+    # Strategy 7: SELL — Shooting Star M5 + M15 Bearish
     # Backtest 60d: PF 1.29, WR 57.8%, 187 trades, DD 33.9%
     # M5 shooting star candle + M15 bearish bias
     # ══════════════════════════════════════════════════════════
@@ -336,7 +219,7 @@ rules:
         - utbot_M15.closed_bias == BEARISH
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 13: SELL — Wick 2x + DC Upper + M45 Bear + VWAP
+    # Strategy 8: SELL — Wick 2x + DC Upper + M45 Bear + VWAP
     # Backtest 60d: PF 1.32, WR 58.5%, 82 trades, DD 26.8%
     # M3 upper wick >=2x body + DC upper + M45 bearish + VWAP below
     # ══════════════════════════════════════════════════════════
@@ -357,7 +240,7 @@ rules:
         - vwap_M1.closed_price_vs_vwap == BELOW
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 14: BUY — DC M5 Mid Hammer 2nd Wave
+    # Strategy 9: BUY — DC M5 Mid Hammer 2nd Wave
     # Backtest 60d: PF 1.75, WR 66.7%, 15 trades, DD 14.4%
     # M3 hammer + DC M5 mid zone + M5 pullback + M15 bullish
     # ══════════════════════════════════════════════════════════
@@ -377,7 +260,7 @@ rules:
       sell: []
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 15: SELL — DC M5 Mid ShStar 2nd Wave
+    # Strategy 10: SELL — DC M5 Mid ShStar 2nd Wave
     # Backtest 60d: PF 1.72, WR 63.6%, 22 trades, DD 9.7%
     # M3 shooting star + DC M5 mid zone + M5 bounce + M15 bearish
     # ══════════════════════════════════════════════════════════
@@ -397,7 +280,7 @@ rules:
         - utbot_M15.closed_bias == BEARISH
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 16: BUY — DC M5 Lower-Mid Hammer 2nd Wave
+    # Strategy 11: BUY — DC M5 Lower-Mid Hammer 2nd Wave
     # Backtest 60d: PF 1.27, WR 57.5%, 40 trades, DD 14.9%
     # M3 hammer + DC M5 lower-mid/mid + M5 pullback + M15 bullish
     # ══════════════════════════════════════════════════════════
@@ -417,7 +300,7 @@ rules:
       sell: []
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 17: SELL — DC M5 Upper-Mid ShStar 2nd Wave
+    # Strategy 12: SELL — DC M5 Upper-Mid ShStar 2nd Wave
     # Backtest 60d: PF 1.23, WR 56.0%, 50 trades, DD 27.0%
     # M3 shstar + DC M5 upper-mid/mid + M5 bounce + M15 bearish
     # ══════════════════════════════════════════════════════════
@@ -437,28 +320,9 @@ rules:
         - utbot_M15.closed_bias == BEARISH
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 18: BUY — RSI2 Mean Reversion + EMA200 + ADX
-    # Backtest 60d: PF 1.41, WR 50.7%, 67 trades, DD 24.0%
-    # RSI(2) extreme oversold dip in M5 uptrend (Connors style)
-    # ══════════════════════════════════════════════════════════
-    - name: "rsi2_mean_rev_ema200_adx"
-      enabled: true
-      priority: 100
-      sl_dollars: 3.0
-      reward_ratio: 1.5
-      breakeven_pct: 0.0
-      partial_tp: false
-      description: "RSI2 M5 extreme OS + EMA200 above + ADX trending"
-      buy:
-        - rsi2_M5.closed_zone == EXTREME_OS
-        - ema200_M15.closed_price_vs_ema == ABOVE
-        - adx14_M15.closed_trend_strength in STRONG_TREND,TRENDING
-      sell: []
-
-    # ══════════════════════════════════════════════════════════
-    # Strategy 19: BUY — RSI2 + EMA200 + ADX + UT Bot H1
+    # Strategy 13: BUY — RSI2 + EMA200 + ADX + UT Bot H1
     # Backtest 60d: PF 1.40, WR 50.8%, 61 trades, DD 15.8%
-    # Same as 18 but adds H1 bullish bias for extra filtering
+    # Same RSI2 mean reversion but adds H1 bullish bias for extra filtering
     # ══════════════════════════════════════════════════════════
     - name: "rsi2_mean_rev_full"
       enabled: true
@@ -476,7 +340,7 @@ rules:
       sell: []
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 20: BUY — EMA50 Rising + DC Wick Rej + H1 Bullish
+    # Strategy 14: BUY — EMA50 Rising + DC Wick Rej + H1 Bullish
     # Backtest 60d: PF 1.88, WR 50.0%, 32 trades, DD 22.6%
     # Best structural bounce strategy found
     # ══════════════════════════════════════════════════════════
@@ -495,7 +359,7 @@ rules:
       sell: []
 
     # ══════════════════════════════════════════════════════════
-    # Strategy 21: BUY — RSI2 + DC Wick Rej (high PF, fewer trades)
+    # Strategy 15: BUY — RSI2 + DC Wick Rej (high PF, fewer trades)
     # Backtest 60d: PF 4.27, WR 80.0%, 15 trades, DD 9.7%
     # Confluence of RSI2 oversold + structural wick rejection
     # ══════════════════════════════════════════════════════════

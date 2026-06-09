@@ -80,7 +80,7 @@ class MT5Client:
             return None
 
     def get_tick(self, symbol: str | None = None) -> Any:
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         try:
             with self._lock:
                 return self.mt5.symbol_info_tick(symbol)
@@ -90,7 +90,7 @@ class MT5Client:
             return None
 
     def get_symbol_info(self, symbol: str | None = None) -> Any:
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         try:
             with self._lock:
                 return self.mt5.symbol_info(symbol)
@@ -120,7 +120,7 @@ class MT5Client:
 
     def buy(self, volume: float | None = None, symbol: str | None = None,
              sl: float = 0.0, tp: float = 0.0) -> Any:
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         volume = volume or self._config.get("trading.volume", 0.001)
         tick = self.get_tick(symbol)
         if not tick:
@@ -146,7 +146,7 @@ class MT5Client:
 
     def sell(self, volume: float | None = None, symbol: str | None = None,
               sl: float = 0.0, tp: float = 0.0) -> Any:
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         volume = volume or self._config.get("trading.volume", 0.001)
         tick = self.get_tick(symbol)
         if not tick:
@@ -171,7 +171,7 @@ class MT5Client:
         return self.send_order(request)
 
     def close_position(self, ticket: int, volume: float, direction: str, symbol: str | None = None) -> Any:
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         tick = self.get_tick(symbol)
         if not tick:
             log.error("Cannot get tick for close")
@@ -200,7 +200,7 @@ class MT5Client:
         return self.send_order(request)
 
     def get_positions(self, symbol: str | None = None) -> list:
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         try:
             with self._lock:
                 positions = self.mt5.positions_get(symbol=symbol)
@@ -213,7 +213,7 @@ class MT5Client:
     def get_recent_deals(self, symbol: str | None = None, hours: float = 4.0) -> list:
         """Get all deals from the last N hours for a given symbol."""
         from datetime import datetime, timedelta, timezone
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         now = datetime.now(timezone.utc)
         start = now - timedelta(hours=hours)
         try:
@@ -251,7 +251,7 @@ class MT5Client:
     def modify_position(self, ticket: int, sl: float = 0.0, tp: float = 0.0,
                         symbol: str | None = None) -> Any:
         """Modify SL/TP of an open position using TRADE_ACTION_SLTP."""
-        symbol = symbol or self._config.get("trading.symbol", "BTCUSDT")
+        symbol = symbol or self._config.get("trading.symbol", "XAUUSD")
         request = {
             "action": self.mt5.TRADE_ACTION_SLTP,
             "symbol": symbol,

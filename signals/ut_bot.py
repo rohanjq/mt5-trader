@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 class UTBotSignal(BaseSignal):
     """Reads UT Bot signal from SignalMaster CSV.
 
-    File: ``<SYMBOL>_utbot_<TF>.csv`` (e.g. ``BTCUSDT_utbot_M1.csv``)
+    File: ``<SYMBOL>_utbot_<TF>.csv`` (e.g. ``XAUUSD_utbot_M1.csv``)
 
     Uses closed bar data for confirmed signals:
       - closed_bias=BULLISH + closed_signal=BUY → BUY
@@ -30,7 +30,7 @@ class UTBotSignal(BaseSignal):
 
     def read(self) -> Signal:
         csv_dir = self.config.get("signals.csv_dir", "../MetaTrader5-Docker/data/signals")
-        symbol = self.config.get("trading.symbol", "BTCUSDT")
+        symbol = self.config.get("trading.symbol", "XAUUSD")
         path = Path(csv_dir) / f"{symbol}_utbot_{self._timeframe}.csv"
         data = self._read_csv(path)
 

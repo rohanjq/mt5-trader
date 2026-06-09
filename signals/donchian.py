@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 class DonchianSignal(BaseSignal):
     """Reads Donchian Channel signal from SignalMaster CSV.
 
-    File: ``<SYMBOL>_dc_<TF>.csv`` (e.g. ``BTCUSDT_dc_M15.csv``)
+    File: ``<SYMBOL>_dc_<TF>.csv`` (e.g. ``XAUUSD_dc_M15.csv``)
 
     Uses closed bar data for confirmed signals:
       - closed_lower_wick_rej=TRUE → BUY
@@ -30,7 +30,7 @@ class DonchianSignal(BaseSignal):
 
     def read(self) -> Signal:
         csv_dir = self.config.get("signals.csv_dir", "../MetaTrader5-Docker/data/signals")
-        symbol = self.config.get("trading.symbol", "BTCUSDT")
+        symbol = self.config.get("trading.symbol", "XAUUSD")
         path = Path(csv_dir) / f"{symbol}_dc_{self._timeframe}.csv"
         data = self._read_csv(path)
 

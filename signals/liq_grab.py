@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 class LiqGrabSignal(BaseSignal):
     """Reads Liquidity Grab signal from SignalMaster CSV.
 
-    File: ``<SYMBOL>_liqgrab_<TF>.csv`` (e.g. ``BTCUSDT_liqgrab_M15.csv``)
+    File: ``<SYMBOL>_liqgrab_<TF>.csv`` (e.g. ``XAUUSD_liqgrab_M15.csv``)
 
     Uses the composite ``liq_signal`` field for direction:
       - liq_signal=BUY → BUY (rejection up + breakout up + above MA)
@@ -30,7 +30,7 @@ class LiqGrabSignal(BaseSignal):
 
     def read(self) -> Signal:
         csv_dir = self.config.get("signals.csv_dir", "../MetaTrader5-Docker/data/signals")
-        symbol = self.config.get("trading.symbol", "BTCUSDT")
+        symbol = self.config.get("trading.symbol", "XAUUSD")
         path = Path(csv_dir) / f"{symbol}_liqgrab_{self._timeframe}.csv"
         data = self._read_csv(path)
 

@@ -6,7 +6,7 @@ mt5:
   port: 8001
 
 trading:
-  symbol: BTCUSDT
+  symbol: XAUUSD
   volume: 0.75         # fallback if risk sizing fails
   risk_pct: 5.0        # risk 5% of account balance per trade (hot-reloadable)
   max_volume: 10.0     # safety cap

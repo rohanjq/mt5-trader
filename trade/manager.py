@@ -125,7 +125,7 @@ class TradeManager:
         if not self._mt5.connected:
             return
 
-        symbol = self._config.get("trading.symbol", "BTCUSDT")
+        symbol = self._config.get("trading.symbol", "XAUUSD")
         magic = self._config.get("trading.magic", 100)
         positions = self._mt5.get_positions(symbol)
         breakeven_pct = float(self._config.get("exit_rules.breakeven_pct", 0.0))

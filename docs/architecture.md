@@ -26,7 +26,6 @@ A companion backtester module replays historical M1 OHLC data through the same s
 mt5-trader/
 ├── main.py                     # Entry point: Config → Engine → TUI
 ├── config-gold.yaml            # XAUUSD trading config (primary)
-├── config-btc.yaml             # BTCUSDT trading config
 ├── config.yaml                 # Default/fallback config
 ├── pyproject.toml              # Dependencies, project metadata
 │

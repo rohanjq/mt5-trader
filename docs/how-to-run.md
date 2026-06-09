@@ -10,10 +10,7 @@ git pull && uv sync
 # 2. Start trading with gold config
 uv run python main.py --config config-gold.yaml
 
-# 3. Or use BTC config
-uv run python main.py --config config-btc.yaml
-
-# 4. Or use default config
+# 3. Or use default config
 uv run python main.py
 ```
 

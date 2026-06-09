@@ -123,7 +123,7 @@ class TradeInitiator:
                     return  # Single mode: only one trade per cycle
 
     def _initiate_trade(self, trigger: TriggerResult, signals: dict[str, Signal]) -> None:
-        symbol = self._config.get("trading.symbol", "BTCUSDT")
+        symbol = self._config.get("trading.symbol", "XAUUSD")
         sl, tp, volume, sl_dollars = self._calculate_risk(trigger.direction, trigger)
 
         # Per-rule breakeven % (fall back to global config)
@@ -225,7 +225,7 @@ class TradeInitiator:
         volume = fallback_volume
         try:
             account = self._mt5.get_account_info()
-            symbol = self._config.get("trading.symbol", "BTCUSDT")
+            symbol = self._config.get("trading.symbol", "XAUUSD")
             info = self._mt5.get_symbol_info(symbol)
             if account and info and sl_dollars > 0:
                 risk_amount = account.balance * (risk_pct / 100.0)
@@ -388,7 +388,7 @@ class TradeInitiator:
                 self._events.warn("Manual trade rejected — manual position already open")
                 return False
 
-            symbol = self._config.get("trading.symbol", "BTCUSDT")
+            symbol = self._config.get("trading.symbol", "XAUUSD")
             sl, tp, volume, sl_dollars = self._calculate_risk(direction)
 
             source_signal = Signal(

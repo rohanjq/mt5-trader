@@ -578,7 +578,7 @@ class TradingDashboard(App):
     CSS = DASHBOARD_CSS
 
     TITLE = "MT5 Auto-Trader"
-    SUB_TITLE = "BTCUSDT"
+    SUB_TITLE = "XAUUSD"
 
     BINDINGS = [
         Binding("b", "manual_buy", "Manual Buy"),
