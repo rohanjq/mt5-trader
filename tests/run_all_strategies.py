@@ -131,7 +131,7 @@ def build_config(strat: dict, sources: list[dict], overrides: dict) -> dict:
 
     cfg["signals"] = {
         "poll_interval": 2.0,
-        "csv_dir": "../MetaTrader5-Docker/data/signals",
+        "csv_dir": "data/signals",
         "sources": sources,
     }
 

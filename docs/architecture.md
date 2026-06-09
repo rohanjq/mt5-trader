@@ -2,7 +2,7 @@
 
 ## Overview
 
-mt5-trader is a plugin-based automated trading system for MetaTrader 5. It runs on a remote Linux machine, connecting to MT5 via an rpyc bridge. The system reads indicator signals from CSV files (written by an MQL5 Expert Advisor), evaluates YAML-defined trading strategies, applies risk filters, and executes orders through the MT5 API.
+mt5-trader is a monorepo containing an automated trading system for MetaTrader 5 plus its Docker container infrastructure and the MQL5 Expert Advisor source. It runs on a remote Linux machine, connecting to MT5 via an rpyc bridge. The system reads indicator signals from CSV files (written by the SignalMaster EA), evaluates YAML-defined trading strategies, applies risk filters, and executes orders through the MT5 API.
 
 A companion backtester module replays historical M1 OHLC data through the same strategy engine, simulating order fills without requiring an MT5 connection.
 
@@ -27,6 +27,19 @@ mt5-trader/
 ├── config-btc.yaml             # BTCUSDT trading config
 ├── config.yaml                 # Default/fallback config
 ├── pyproject.toml              # Dependencies, project metadata
+│
+├── MQL5/                       # MQL5 Expert Advisor source (TOP LEVEL)
+│   └── Experts/
+│       └── SignalMaster.mq5    # EA that computes all indicators → CSV
+│
+├── docker/                     # Docker infrastructure
+│   ├── Dockerfile              # MT5 container image (Wine + KasmVNC)
+│   ├── docker-compose.yaml     # Container orchestration
+│   ├── .env.example            # Environment variable template
+│   ├── Metatrader/
+│   │   └── start.sh            # Container startup (install, compile, run)
+│   └── root/
+│       └── defaults/           # KasmVNC autostart + menu
 │
 ├── core/                       # Core infrastructure
 │   ├── config.py               # Thread-safe YAML config with hot-reload
@@ -78,7 +91,7 @@ mt5-trader/
 │   ├── data_loader.py          # OHLC CSV loading + normalisation
 │   ├── indicators.py           # Vectorised indicator computation
 │   ├── runner.py               # Bar-by-bar strategy replay
-│   ├── simulator.py            # Order fill simulation (SL/TP/BE)
+│   ├── simulator.py            # Order fill simulation (SL/TP/BE/trailing)
 │   ├── filters.py              # Backtest-specific filter chain
 │   └── stats.py                # Performance statistics + reporting
 │
@@ -87,16 +100,23 @@ mt5-trader/
 │
 ├── tests/
 │   ├── backtest_runner.py      # Shared reusable backtest runner
+│   ├── run_combos.py           # Strategy combo tester (--trailing, --multi)
 │   └── run_*.py                # Strategy variant test scripts
 │
 ├── strategies/
-│   └── *.yaml                  # All strategy rules (synced from config)
+│   └── buy/*.yaml              # All BUY strategy rules
+│
+├── tools/                      # MT5 utility scripts
+│   ├── account_info.py         # Query MT5 account info
+│   ├── buy_btc.py              # Manual BTC buy via rpyc
+│   └── ticker_info.py          # Query symbol/ticker info
 │
 ├── sampledata/
-│   └── XAUUSD_M1_60d.csv      # 60-day XAUUSD M1 data for backtesting
+│   ├── XAUUSD_M1_60d.csv      # 60-day XAUUSD M1 data for backtesting
+│   └── sample.csv              # 1-week sample data
 │
 ├── data/
-│   └── README.md               # Data format documentation
+│   └── signals/                # EA-written CSV signal files (runtime)
 │
 └── docs/                       # Documentation (this folder)
 ```

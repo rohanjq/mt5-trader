@@ -45,7 +45,7 @@ Defines which indicators and timeframes to monitor. Each entry creates a signal 
 ```yaml
 signals:
   poll_interval: 2.0              # Seconds between signal reads
-  csv_dir: ../MetaTrader5-Docker/data/signals   # Where EA writes CSVs
+  csv_dir: data/signals   # Where EA writes CSVs
   sources:
     - indicator: utbot            # UT Bot Alert
       timeframes: [M1, M3, M5, M15]

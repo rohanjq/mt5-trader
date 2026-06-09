@@ -19,3 +19,13 @@ eval_snapshot_*.json
 # Backtest data + output (CSV files can be large)
 data/*.csv
 output/
+
+# Docker runtime data
+docker/.env
+docker/config/
+docker/data/
+data/signals/
+*.ex5
+
+# MQL5 compiled files
+MQL5/**/*.ex5

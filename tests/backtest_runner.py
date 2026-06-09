@@ -123,7 +123,7 @@ class StrategyRunner:
         cfg["trading"]["sl_dollars"] = sl
         cfg["signals"] = {
             "poll_interval": 2.0,
-            "csv_dir": "../MetaTrader5-Docker/data/signals",
+            "csv_dir": "data/signals",
             "sources": self.sources,
         }
         rule = {

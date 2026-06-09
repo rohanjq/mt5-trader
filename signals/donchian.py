@@ -29,7 +29,7 @@ class DonchianSignal(BaseSignal):
         self.name = f"dc_{timeframe}"
 
     def read(self) -> Signal:
-        csv_dir = self.config.get("signals.csv_dir", "../MetaTrader5-Docker/data/signals")
+        csv_dir = self.config.get("signals.csv_dir", "data/signals")
         symbol = self.config.get("trading.symbol", "BTCUSDT")
         path = Path(csv_dir) / f"{symbol}_dc_{self._timeframe}.csv"
         data = self._read_csv(path)

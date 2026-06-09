@@ -7,7 +7,7 @@ BASE = {
     "trading": {"symbol": "XAUUSD", "volume": 0.25, "risk_pct": 5.0, "max_volume": 10.0,
                 "min_volume": 0.01, "magic": 300, "deviation": 20, "filling": "FOK",
                 "multi_position": True, "sl_dollars": 5.0, "reward_ratio": 1.0},
-    "signals": {"poll_interval": 2.0, "csv_dir": "../MetaTrader5-Docker/data/signals", "sources": [
+    "signals": {"poll_interval": 2.0, "csv_dir": "data/signals", "sources": [
         {"indicator": "utbot", "timeframes": ["M1","M2","M3","M5","M10","M15","M30","M45","H1","H4"]},
         {"indicator": "dc", "timeframes": ["M1","M2","M3","M5","M10","M15","M30","M45","H1","H4"]},
         {"indicator": "ema9", "timeframes": ["M1","M2","M5","M15"]},

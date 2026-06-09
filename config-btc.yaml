@@ -20,7 +20,7 @@ trading:
 
 signals:
   poll_interval: 2.0   # seconds between signal reads
-  csv_dir: ../MetaTrader5-Docker/data/signals
+  csv_dir: data/signals
   sources:
     - indicator: utbot
       timeframes: [M1, M3, M15, M45]
