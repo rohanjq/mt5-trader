@@ -31,6 +31,11 @@ Usage:
 
     # Set breakeven:
     uv run python tests/run_combos.py --breakeven_pct 0.5
+
+    # Run expressions directly from CLI (no files needed):
+    uv run python tests/run_combos.py \\
+        --expr "macd12_26_9_M15.closed_hist_cross == BULLISH_FLIP" \\
+        --expr "ema50_M15.ema_slope == RISING"
 """
 from __future__ import annotations
 
@@ -165,6 +170,8 @@ def main():
                         help="Extra condition ANDed to all strategies (repeatable)")
     parser.add_argument("--only", type=str, default=None,
                         help="Comma-separated strategy names to run")
+    parser.add_argument("--expr", action="append", default=[],
+                        help="Buy expression to test directly (repeatable, each is a separate strategy)")
     parser.add_argument("--breakeven_pct", type=float, default=0.0)
 
     args = parser.parse_args()
@@ -175,7 +182,18 @@ def main():
     only = args.only.split(",") if args.only else None
     extra_filters = args.filter
 
-    strategies = load_strategies(strat_dir, only=only)
+    # Build strategy list: from --expr flags or from files
+    if args.expr:
+        strategies = []
+        for expr in args.expr:
+            # Auto-name from expression: "ema50_M15.ema_slope == RISING" -> "ema50_M15_ema_slope_RISING"
+            name = expr.replace(".", "_").replace(" ", "_")
+            for ch in ">=<!":
+                name = name.replace(ch, "")
+            name = name.replace("__", "_").strip("_")
+            strategies.append({"name": name, "description": expr, "buy": [expr]})
+    else:
+        strategies = load_strategies(strat_dir, only=only)
     if not strategies:
         print(f"No strategies found in {strat_dir}")
         sys.exit(1)
@@ -196,7 +214,10 @@ def main():
     # Header
     filter_str = " AND ".join(extra_filters) if extra_filters else "none"
     print(f"\nData: {data}")
-    print(f"Strategies: {len(strategies)} from {strat_dir}/")
+    if args.expr:
+        print(f"Strategies: {len(strategies)} from --expr")
+    else:
+        print(f"Strategies: {len(strategies)} from {strat_dir}/")
     print(f"SL values: {sl_values}")
     print(f"RR values: {rr_values}")
     print(f"Extra filters: {filter_str}")
