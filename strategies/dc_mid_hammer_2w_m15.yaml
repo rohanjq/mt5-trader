@@ -1,0 +1,14 @@
+name: dc_mid_hammer_2w_m15
+enabled: true
+priority: 55
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: DC M5 mid zone + M5 pullback + M3 hammer + M15 bull
+buy:
+- dc_M5.closed_price_zone == MIDDLE
+- utbot_M5.consecutive_bear_bars >= 2
+- candle_M3.closed_candle_type == HAMMER
+- utbot_M15.closed_bias == BULLISH
+sell: []

@@ -1,0 +1,14 @@
+name: dc2w_m3_m45bear_dcupper_vwap
+enabled: true
+priority: 55
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: M3 SELL + M45 bearish + DC M15 upper pullback + VWAP
+buy: []
+sell:
+- utbot_M3.closed_signal == SELL
+- utbot_M45.closed_bias == BEARISH
+- dc_M15.closed_price_zone in UPPER,UPPER_MID
+- vwap_M1.closed_price_vs_vwap == BELOW

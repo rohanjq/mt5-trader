@@ -86,14 +86,14 @@ mt5-trader/
 │   └── download_ohlc.py        # Fetch historical data from MT5
 │
 ├── tests/
-│   ├── run_permutations.py     # Strategy permutation testing framework
-│   └── configs/                # Auto-generated test configs
+│   ├── backtest_runner.py      # Shared reusable backtest runner
+│   └── run_*.py                # Strategy variant test scripts
 │
-├── mql5/
-│   └── DC_Channels.mq5         # MQL5 EA for Donchian Channel signals
+├── strategies/
+│   └── *.yaml                  # All strategy rules (synced from config)
 │
 ├── sampledata/
-│   └── sample.csv              # 1-week XAUUSD M1 data for backtesting
+│   └── XAUUSD_M1_60d.csv      # 60-day XAUUSD M1 data for backtesting
 │
 ├── data/
 │   └── README.md               # Data format documentation

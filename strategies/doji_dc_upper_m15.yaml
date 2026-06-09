@@ -1,0 +1,13 @@
+name: doji_dc_upper_m15
+enabled: true
+priority: 55
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: M3 doji at DC upper + M15 bearish
+buy: []
+sell:
+- candle_M3.closed_candle_type == DOJI
+- dc_M15.closed_price_zone in UPPER,UPPER_MID
+- utbot_M15.closed_bias == BEARISH

@@ -1,0 +1,16 @@
+name: dc_confluence
+enabled: false
+priority: 100
+sl_dollars: 5.0
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: DC M15 zone + UT Bot M1 signal + M45 trend (5+ bars)
+buy:
+- dc_M15.closed_price_zone in LOWER,LOWER_MID
+- utbot_M1.closed_signal == BUY
+- utbot_M45.consecutive_bull_bars >= 5
+sell:
+- dc_M15.closed_price_zone in UPPER,UPPER_MID
+- utbot_M1.closed_signal == SELL
+- utbot_M45.consecutive_bear_bars >= 5

@@ -1,0 +1,14 @@
+name: trend_2w_m2_ema50_bounce2_vwap
+enabled: true
+priority: 50
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: M2 SELL + EMA50 M5 below + M5 bounced 2+ bars + VWAP (no M15)
+buy: []
+sell:
+- utbot_M2.closed_signal == SELL
+- ema50_M5.closed_price_vs_ema == BELOW
+- utbot_M5.consecutive_bull_bars >= 2
+- vwap_M1.closed_price_vs_vwap == BELOW

@@ -1,0 +1,12 @@
+name: shstar_m5_m15
+enabled: true
+priority: 50
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: M5 shooting star + M15 bearish
+buy: []
+sell:
+- candle_M5.closed_candle_type == SHOOTING_STAR
+- utbot_M15.closed_bias == BEARISH

@@ -1,0 +1,14 @@
+name: dc_wick_rejection
+enabled: true
+priority: 110
+sl_dollars: 5.0
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: DC M15 wick rejection + UT Bot M3 bias
+buy:
+- dc_M15.closed_lower_wick_rej is TRUE
+- utbot_M3.closed_bias == BULLISH
+sell:
+- dc_M15.closed_upper_wick_rej is TRUE
+- utbot_M3.closed_bias == BEARISH

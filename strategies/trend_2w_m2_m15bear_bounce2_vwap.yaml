@@ -1,0 +1,14 @@
+name: trend_2w_m2_m15bear_bounce2_vwap
+enabled: true
+priority: 50
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: M2 SELL + M15 bearish + M5 bounced 2+ bars + VWAP
+buy: []
+sell:
+- utbot_M2.closed_signal == SELL
+- utbot_M15.closed_bias == BEARISH
+- utbot_M5.consecutive_bull_bars >= 2
+- vwap_M1.closed_price_vs_vwap == BELOW

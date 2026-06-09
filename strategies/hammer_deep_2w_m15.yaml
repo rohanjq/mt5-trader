@@ -1,0 +1,13 @@
+name: hammer_deep_2w_m15
+enabled: true
+priority: 50
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: M3 hammer + M5 deep pullback 3+ bars + M15 bull
+buy:
+- candle_M3.closed_candle_type == HAMMER
+- utbot_M5.consecutive_bear_bars >= 3
+- utbot_M15.closed_bias == BULLISH
+sell: []

@@ -1,0 +1,15 @@
+name: wick2x_dc_m45_vwap_sell
+enabled: true
+priority: 55
+sl_dollars: 7.5
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: M3 wick>=2x + DC upper + M45 bear + VWAP below
+buy: []
+sell:
+- candle_M3.closed_upper_wick_ratio >= 2
+- candle_M3.closed_is_bearish is TRUE
+- dc_M15.closed_price_zone in UPPER,UPPER_MID
+- utbot_M45.closed_bias == BEARISH
+- vwap_M1.closed_price_vs_vwap == BELOW

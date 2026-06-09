@@ -1,0 +1,26 @@
+name: gold_dc_breakout
+enabled: false
+priority: 40
+sl_dollars: 6.0
+reward_ratio: 1.0
+breakeven_pct: 0.0
+partial_tp: false
+description: "Compression breakout (DC+BB squeeze \u2192 expansion)"
+buy:
+- ema50_M5.closed_price_vs_ema == ABOVE
+- ema200_M5.closed_price_vs_ema == ABOVE
+- dc_M1.dc_compressed is TRUE
+- bb20d2_M1.bb_squeeze is TRUE
+- atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
+- dc_M1.closed_price_zone == UPPER
+- adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
+- vwap_M1.closed_price_vs_vwap == ABOVE
+sell:
+- ema50_M5.closed_price_vs_ema == BELOW
+- ema200_M5.closed_price_vs_ema == BELOW
+- dc_M1.dc_compressed is TRUE
+- bb20d2_M1.bb_squeeze is TRUE
+- atr14_M1.volatility_state in EXPANDING,ABOVE_AVG
+- dc_M1.closed_price_zone == LOWER
+- adx14_M1.closed_trend_strength in TRENDING,STRONG_TREND
+- vwap_M1.closed_price_vs_vwap == BELOW
