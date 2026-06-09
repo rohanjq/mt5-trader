@@ -1,0 +1,4 @@
+name: rsi14_m5_cross_up_30
+description: RSI14 M5 cross up 30
+buy:
+- rsi14_M5.closed_cross == CROSS_UP_30

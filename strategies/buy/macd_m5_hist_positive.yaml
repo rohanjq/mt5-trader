@@ -1,0 +1,4 @@
+name: macd_m5_hist_positive
+description: MACD M5 histogram > 0
+buy:
+- macd12_26_9_M5.closed_histogram > 0

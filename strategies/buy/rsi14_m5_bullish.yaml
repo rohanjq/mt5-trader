@@ -1,0 +1,4 @@
+name: rsi14_m5_bullish
+description: RSI14 M5 bullish zone
+buy:
+- rsi14_M5.closed_zone == BULLISH

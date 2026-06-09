@@ -1,0 +1,4 @@
+name: atr_m5_contracting
+description: ATR M5 contracting volatility
+buy:
+- atr14_M5.volatility_state == CONTRACTING

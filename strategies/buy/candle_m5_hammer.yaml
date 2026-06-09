@@ -1,0 +1,4 @@
+name: candle_m5_hammer
+description: M5 hammer candle
+buy:
+- candle_M5.closed_candle_type == HAMMER

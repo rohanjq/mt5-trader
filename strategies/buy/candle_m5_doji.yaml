@@ -1,0 +1,4 @@
+name: candle_m5_doji
+description: M5 doji candle
+buy:
+- candle_M5.closed_candle_type == DOJI

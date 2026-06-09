@@ -1,0 +1,4 @@
+name: rsi14_m5_extreme_os
+description: RSI14 M5 extreme oversold
+buy:
+- rsi14_M5.closed_zone == EXTREME_OS

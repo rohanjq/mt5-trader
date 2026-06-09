@@ -1,0 +1,4 @@
+name: rsi14_m5_oversold
+description: RSI14 M5 oversold zone
+buy:
+- rsi14_M5.closed_zone == OVERSOLD

@@ -1,0 +1,4 @@
+name: bb_m5_reenter_below
+description: BB M5 re-enter from below lower band
+buy:
+- bb20d2_M5.closed_reenter_from_below is TRUE

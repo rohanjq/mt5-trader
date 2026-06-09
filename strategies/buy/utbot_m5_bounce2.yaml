@@ -1,0 +1,4 @@
+name: utbot_m5_bounce2
+description: M5 bear bounce 2+ bars
+buy:
+- utbot_M5.consecutive_bear_bars >= 2

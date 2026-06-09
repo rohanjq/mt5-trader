@@ -1,0 +1,4 @@
+name: dc_m5_lower
+description: DC M5 in LOWER zone
+buy:
+- dc_M5.closed_price_zone == LOWER

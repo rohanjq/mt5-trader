@@ -1,0 +1,4 @@
+name: macd_m5_bull_flip
+description: MACD M5 bullish histogram flip
+buy:
+- macd12_26_9_M5.closed_hist_cross == BULLISH_FLIP

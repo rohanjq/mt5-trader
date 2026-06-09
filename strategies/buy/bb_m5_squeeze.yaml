@@ -1,0 +1,4 @@
+name: bb_m5_squeeze
+description: BB M5 squeeze
+buy:
+- bb20d2_M5.bb_squeeze is TRUE

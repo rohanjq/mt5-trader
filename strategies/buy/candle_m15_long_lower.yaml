@@ -1,0 +1,4 @@
+name: candle_m15_long_lower
+description: M15 long lower wick
+buy:
+- candle_M15.closed_has_long_lower is TRUE

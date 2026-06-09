@@ -1,0 +1,4 @@
+name: ema50_m5_above
+description: Price above EMA50 M5
+buy:
+- ema50_M5.closed_price_vs_ema == ABOVE

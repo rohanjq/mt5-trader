@@ -1,0 +1,4 @@
+name: adx_m5_bullish
+description: ADX M5 DI+ bullish
+buy:
+- adx14_M5.closed_di_bias == BULLISH

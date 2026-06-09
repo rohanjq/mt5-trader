@@ -1,0 +1,4 @@
+name: rsi14_m5_below_40
+description: RSI14 M5 < 40
+buy:
+- rsi14_M5.closed_rsi < 40

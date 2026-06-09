@@ -1,0 +1,4 @@
+name: vwap_m1_above
+description: Price above VWAP
+buy:
+- vwap_M1.closed_price_vs_vwap == ABOVE

@@ -1,0 +1,4 @@
+name: utbot_m5_buy
+description: UT Bot M5 BUY signal
+buy:
+- utbot_M5.closed_signal == BUY

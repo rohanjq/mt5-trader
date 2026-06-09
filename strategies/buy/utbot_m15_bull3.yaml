@@ -1,0 +1,4 @@
+name: utbot_m15_bull3
+description: M15 bull run 3+ bars
+buy:
+- utbot_M15.consecutive_bull_bars >= 3

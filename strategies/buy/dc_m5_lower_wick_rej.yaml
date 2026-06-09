@@ -1,0 +1,4 @@
+name: dc_m5_lower_wick_rej
+description: DC M5 lower wick rejection
+buy:
+- dc_M5.closed_lower_wick_rej is TRUE

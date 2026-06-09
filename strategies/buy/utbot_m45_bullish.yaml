@@ -1,0 +1,4 @@
+name: utbot_m45_bullish
+description: UT Bot M45 BULLISH bias
+buy:
+- utbot_M45.closed_bias == BULLISH

@@ -1,0 +1,4 @@
+name: rsi2_m5_oversold
+description: RSI2 M5 oversold
+buy:
+- rsi2_M5.closed_zone == OVERSOLD

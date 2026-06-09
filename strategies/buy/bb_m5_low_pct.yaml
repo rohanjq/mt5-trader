@@ -1,0 +1,4 @@
+name: bb_m5_low_pct
+description: BB M5 near lower band
+buy:
+- bb20d2_M5.closed_pct_in_band < 20

@@ -1,0 +1,4 @@
+name: adx_m5_strong
+description: ADX M5 strong trend
+buy:
+- adx14_M5.closed_trend_strength == STRONG_TREND

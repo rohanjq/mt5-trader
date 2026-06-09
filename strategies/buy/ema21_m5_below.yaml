@@ -1,0 +1,4 @@
+name: ema21_m5_below
+description: Price below EMA21 M5 (pullback)
+buy:
+- ema21_M5.closed_price_vs_ema == BELOW

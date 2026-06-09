@@ -1,0 +1,4 @@
+name: atr_m5_expanding
+description: ATR M5 expanding volatility
+buy:
+- atr14_M5.volatility_state == EXPANDING

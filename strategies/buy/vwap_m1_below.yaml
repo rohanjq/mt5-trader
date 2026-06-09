@@ -1,0 +1,4 @@
+name: vwap_m1_below
+description: Price below VWAP (pullback)
+buy:
+- vwap_M1.closed_price_vs_vwap == BELOW

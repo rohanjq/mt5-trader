@@ -1,0 +1,4 @@
+name: candle_m5_bullish
+description: M5 bullish candle
+buy:
+- candle_M5.closed_is_bullish is TRUE

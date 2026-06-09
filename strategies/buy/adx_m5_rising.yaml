@@ -1,0 +1,4 @@
+name: adx_m5_rising
+description: ADX M5 rising
+buy:
+- adx14_M5.closed_adx_rising is TRUE

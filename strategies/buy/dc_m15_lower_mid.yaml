@@ -1,0 +1,4 @@
+name: dc_m15_lower_mid
+description: DC M15 in LOWER_MID zone
+buy:
+- dc_M15.closed_price_zone == LOWER_MID

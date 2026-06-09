@@ -1,0 +1,4 @@
+name: dc_m45_lower_zones
+description: DC M45 in LOWER or LOWER_MID
+buy:
+- dc_M45.closed_price_zone in LOWER,LOWER_MID

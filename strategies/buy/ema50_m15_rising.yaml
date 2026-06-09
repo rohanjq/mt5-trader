@@ -1,0 +1,4 @@
+name: ema50_m15_rising
+description: EMA50 M15 slope rising
+buy:
+- ema50_M15.ema_slope == RISING

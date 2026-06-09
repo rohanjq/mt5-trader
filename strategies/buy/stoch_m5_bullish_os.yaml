@@ -1,0 +1,4 @@
+name: stoch_m5_bullish_os
+description: Stoch M5 bullish cross in oversold
+buy:
+- stoch5_3_3_M5.closed_cross == BULLISH_OS

@@ -1,0 +1,4 @@
+name: stoch_m5_oversold
+description: Stoch M5 oversold zone
+buy:
+- stoch5_3_3_M5.closed_zone == OVERSOLD

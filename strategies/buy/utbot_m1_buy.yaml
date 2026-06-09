@@ -1,0 +1,4 @@
+name: utbot_m1_buy
+description: UT Bot M1 BUY signal
+buy:
+- utbot_M1.closed_signal == BUY

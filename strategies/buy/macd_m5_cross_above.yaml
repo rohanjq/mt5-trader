@@ -1,0 +1,4 @@
+name: macd_m5_cross_above
+description: MACD M5 cross above zero
+buy:
+- macd12_26_9_M5.closed_zero_cross == CROSS_ABOVE
