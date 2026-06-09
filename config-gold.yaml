@@ -352,3 +352,83 @@ rules:
         - dc_M15.closed_price_zone in UPPER,UPPER_MID
         - utbot_M45.closed_bias == BEARISH
         - vwap_M1.closed_price_vs_vwap == BELOW
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 14: BUY — DC M5 Mid Hammer 2nd Wave
+    # Backtest 60d: PF 1.75, WR 66.7%, 15 trades, DD 14.4%
+    # M3 hammer + DC M5 mid zone + M5 pullback + M15 bullish
+    # ══════════════════════════════════════════════════════════
+    - name: "dc_mid_hammer_2w_m15"
+      enabled: true
+      priority: 55
+      sl_dollars: 7.5
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "DC M5 mid zone + M5 pullback + M3 hammer + M15 bull"
+      buy:
+        - dc_M5.closed_price_zone == MIDDLE
+        - utbot_M5.consecutive_bear_bars >= 2
+        - candle_M3.closed_candle_type == HAMMER
+        - utbot_M15.closed_bias == BULLISH
+      sell: []
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 15: SELL — DC M5 Mid ShStar 2nd Wave
+    # Backtest 60d: PF 1.72, WR 63.6%, 22 trades, DD 9.7%
+    # M3 shooting star + DC M5 mid zone + M5 bounce + M15 bearish
+    # ══════════════════════════════════════════════════════════
+    - name: "dc_mid_shstar_2w_m15"
+      enabled: true
+      priority: 55
+      sl_dollars: 7.5
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "DC M5 mid zone + M5 bounce + M3 shstar + M15 bear"
+      buy: []
+      sell:
+        - dc_M5.closed_price_zone == MIDDLE
+        - utbot_M5.consecutive_bull_bars >= 2
+        - candle_M3.closed_candle_type == SHOOTING_STAR
+        - utbot_M15.closed_bias == BEARISH
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 16: BUY — DC M5 Lower-Mid Hammer 2nd Wave
+    # Backtest 60d: PF 1.27, WR 57.5%, 40 trades, DD 14.9%
+    # M3 hammer + DC M5 lower-mid/mid + M5 pullback + M15 bullish
+    # ══════════════════════════════════════════════════════════
+    - name: "dc_lowmid_hammer_2w_m15"
+      enabled: true
+      priority: 50
+      sl_dollars: 7.5
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "DC M5 lower-mid + M5 pullback + M3 hammer + M15 bull"
+      buy:
+        - dc_M5.closed_price_zone in LOWER_MID,MIDDLE
+        - utbot_M5.consecutive_bear_bars >= 2
+        - candle_M3.closed_candle_type == HAMMER
+        - utbot_M15.closed_bias == BULLISH
+      sell: []
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 17: SELL — DC M5 Upper-Mid ShStar 2nd Wave
+    # Backtest 60d: PF 1.23, WR 56.0%, 50 trades, DD 27.0%
+    # M3 shstar + DC M5 upper-mid/mid + M5 bounce + M15 bearish
+    # ══════════════════════════════════════════════════════════
+    - name: "dc_upmid_shstar_2w_m15"
+      enabled: true
+      priority: 50
+      sl_dollars: 7.5
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "DC M5 upper-mid + M5 bounce + M3 shstar + M15 bear"
+      buy: []
+      sell:
+        - dc_M5.closed_price_zone in UPPER_MID,MIDDLE
+        - utbot_M5.consecutive_bull_bars >= 2
+        - candle_M3.closed_candle_type == SHOOTING_STAR
+        - utbot_M15.closed_bias == BEARISH
