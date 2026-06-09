@@ -1,0 +1,307 @@
+# BTC Scalping Strategies for MT5 Expert Advisors
+
+## Executive summary
+
+BTC remains liquid enough for scalping, but the current market still demands wider and more disciplined stops than many retail “ultra-tight” crypto scalpers use. As of today’s market snapshots, BTC is trading around USD 61.7k, with roughly USD 4.67bn of spot volume, about USD 59.74bn of futures volume, and open interest near USD 45.15bn. Recent volatility norms are also still large by traditional macro or FX standards: Deribit’s 15-day historical volatility is about 32.65% annualised, while CME’s real-time 30-day implied volatility index is about 45.40%. citeturn18search1turn18search2turn4search0turn2search1
+
+Those volatility numbers imply that BTC’s “normal” noise on short horizons is not trivial. A rough square-root-of-time conversion gives about 0.35% to 0.49% for a one-hour one-sigma move and roughly 0.10% to 0.14% for a five-minute one-sigma move. In practice, that means stops materially tighter than about 0.08% are often brittle unless your spread is very small and execution is excellent. The four strategies below therefore aim for aggressive-but-practical stop bands, use regime filters, and assume account size is **unspecified**, so all sizing is expressed as a percentage of equity rather than fixed lots. citeturn16calculator1turn16calculator2turn17calculator0turn17calculator1turn4search0turn2search1
+
+The framework is intentionally regime-based. The strongest research anchors here are that Bitcoin has shown exploitable intraday mean-reversion tendencies on some horizons, trading-range breakout rules have shown forecasting power in Bitcoin, and large technical-rule universes can still beat buy-and-hold on a risk-adjusted out-of-sample basis — but higher-frequency profitability becomes much more vulnerable to costs. That is why the strategy set below includes one trend pullback model, one range-fade model, one volatility breakout model, and one trend re-entry model, each with explicit spread and slippage safeguards. citeturn14view2turn12search1turn26view0
+
+## Market context and assumptions
+
+Recent market structure is heavily derivatives-led. CoinGlass’s current BTC snapshot shows futures volume far exceeding spot volume and open interest still elevated, which is consistent with a market where liquidation cascades and momentum bursts can still matter intraday. Separately, recent research using one-minute BTC/USDT data highlights volatility clustering and heavy tails in minute-level Bitcoin behaviour, which is one reason ATR-based or structure-plus-ATR stops are more robust than fixed tiny tick stops. citeturn18search2turn11view2
+
+For MT5 implementation, the key unit is **points**, not “pips”. MetaTrader exposes the symbol point value through symbol properties, along with spread, tick size, tick value, and minimum stop distances. The exact point size therefore depends on your broker’s BTC symbol specification. The examples in this report assume a **0.01 point** quotation **only for illustration**. At BTC 61,657.4, a 0.10% move is about USD 61.66, which equals roughly 6,166 points if `SYMBOL_POINT = 0.01`; a 0.20% move is about USD 123.31, or roughly 12,331 points under the same assumption. Use the general conversion  
+`price_distance = entry_price × percentage` and `points = price_distance / SYMBOL_POINT`. citeturn28search1turn21search7turn18search1turn22calculator1turn23calculator1
+
+I also favour **bar-close entry confirmation** on M1, M3 or M5 rather than pure tick-chasing. Bitcoin intraday research finds microstructure effects at very short horizons and more meaningful mean-reversion structure at higher intraday intervals; meanwhile, cost-aware studies show higher trading frequency is the area most likely to lose robustness once transaction costs rise. In MT5 terms, that means your EA can use `OnTick()` for order placement and trade management, but the actual signal engine should usually be gated by a completed-bar check on the entry timeframe. citeturn11view1turn14view2turn26view0turn7search1
+
+## Strategy comparison
+
+| Strategy | Indicators | Timeframe | SL method | TP method | RR | Risk % |
+|---|---|---|---|---|---|---|
+| EMA pullback continuation | EMA50/200, EMA9/21, RSI14, ATR14 | M5 regime, M1 trigger | Pullback swing or 0.9×ATR | Fixed 1.5R | 1:1.5 | 0.35–0.60 |
+| Bollinger range fade | Bollinger 20,2, RSI2, ADX14, EMA50, ATR14 | M5 regime, M1 trigger | Signal extreme + ATR + spread floor | Bollinger midline | 1:0.8–1.3 | 0.25–0.40 |
+| Donchian volatility breakout | ADX14, Donchian 20, ATR14, MACD | M5 regime, M1 trigger | Breakout-bar low/high or 1.0×ATR | Fixed 1.8R | 1:1.8 | 0.35–0.60 |
+| MACD-Stochastic re-entry | EMA50/200, EMA20, MACD 12/26/9, Stoch 5/3/3, ATR14 | M15 regime, M3 trigger | Re-entry swing or 0.75×ATR | 1.5R or nearest M15 resistance/support | 1:1.5–1.6 | 0.30–0.50 |
+
+The stop and target bands in the detailed playbook below are calibrated to the current BTC price zone and recent realised/implied volatility rather than arbitrary round numbers. Again, the points examples assume BTC near 61,657.4 and `SYMBOL_POINT = 0.01`; if your broker quotes in 0.1 or 1.0 increments, scale the point counts accordingly. citeturn18search1turn4search0turn2search1turn28search1turn21search7
+
+## Strategy playbook
+
+The strategy design below is grounded in a simple research view of Bitcoin microstructure. Trend-following can work in Bitcoin, especially trading-range breakout logic; intraday mean reversion also exists, especially after outsized moves; and cost-aware studies show technical trading can remain useful out-of-sample but gets more fragile as turnover rises. That is why these models are regime-specific and explicitly reject trades whenever the spread or stop geometry is unfavourable. All four are EA-friendly because they use native MT5 indicators, or in the case of the Donchian channel, a rolling highest-high/lowest-low built from standard time-series functions. citeturn12search1turn14view2turn26view0turn6search0turn6search1turn6search2turn8search0turn8search1turn8search2turn8search3turn25search0turn25search1
+
+![Illustrative BTC scalping indicator setup mockup](sandbox:/mnt/data/btc_scalping_indicator_mockup.png)
+
+This synthetic mock-up is not live BTC data. It is included purely to show how the four signal families appear on-chart in an MT5-style setup.
+
+**EMA pullback continuation**
+
+This is the most balanced starting strategy. It assumes BTC is already trending and waits for a shallow pullback before rejoining the move. Long regime filter: on **M5**, `EMA50 > EMA200`, the last completed M5 close is above EMA50, and EMA50 has a positive slope over the last three completed M5 bars. Long trigger: on **M1**, at least one of the last three completed lows touched or dipped below EMA21; then the latest completed M1 bar has `EMA9 > EMA21`, `RSI14` crossing **up through 52** from below, and a close above the previous bar’s high. Shorts use the exact mirror image. The reliance on MA, RSI and ATR is fully native to MT5, while the cost-aware, bar-close approach is consistent with the evidence that technical-rule edge in Bitcoin is real but more fragile at the highest turnover levels. citeturn6search0turn6search1turn6search2turn26view0
+
+Use a stop that is the **wider** of the pullback swing and `0.9 × ATR14(M1)`, then add a spread buffer. In notation:  
+`SL distance = max(entry - pullback_swing_low + spread, 0.9 × ATR14)`.  
+Reject the trade if the resulting stop is below **0.12%** or above **0.20%** of entry. Set TP at **1.5R**. At BTC 61,657.4 and `SYMBOL_POINT = 0.01`, that means a practical SL band of about **7,399 to 12,331 points** and a TP band of roughly **11,098 to 18,497 points**, corresponding to around **0.12% to 0.20% SL** and **0.18% to 0.30% TP**. Risk **0.35% to 0.60%** of equity per trade. Expected win-rate range: **44% to 52%**. Spread sensitivity is **moderate**; I would skip the trade if spread is above about **12% of the planned stop distance**. As an optional regime filter, this model is usually cleaner during the broker’s most liquid Europe/US window, which fits the intraday evidence that Bitcoin activity and volatility tend to peak during US trading hours. citeturn22calculator2turn23calculator0turn23calculator1turn24calculator0turn28search1turn14view0
+
+```mql5
+// Strategy A: EMA pullback continuation
+if (NewClosedBar(PERIOD_M1))
+{
+    bool trendLong =
+        ema50_m5[1] > ema200_m5[1] &&
+        close_m5[1] > ema50_m5[1] &&
+        ema50_m5[1] > ema50_m5[4];
+
+    bool pullbackTouched =
+        (low_m1[1] <= ema21_m1[1]) ||
+        (low_m1[2] <= ema21_m1[2]) ||
+        (low_m1[3] <= ema21_m1[3]);
+
+    bool triggerLong =
+        ema9_m1[1] > ema21_m1[1] &&
+        rsi14_m1[2] < 52 && rsi14_m1[1] >= 52 &&
+        close_m1[1] > high_m1[2];
+
+    if (trendLong && pullbackTouched && triggerLong)
+    {
+        double entry = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+        double spread = (double)SymbolInfoInteger(_Symbol, SYMBOL_SPREAD) * _Point;
+        double swingLow = MathMin(low_m1[1], MathMin(low_m1[2], low_m1[3]));
+        double slDist = MathMax((entry - swingLow) + spread, 0.9 * atr14_m1[1]);
+
+        if (slDist >= 0.0012 * entry &&
+            slDist <= 0.0020 * entry &&
+            SymbolInfoInteger(_Symbol, SYMBOL_SPREAD) <= 0.12 * (slDist / _Point))
+        {
+            double sl = entry - slDist;
+            double tp = entry + 1.5 * slDist;
+            double lots = SizeByRisk(entry, sl, 0.005); // 0.5% example
+            SendBuy(lots, sl, tp);
+        }
+    }
+}
+```
+
+```mermaid
+flowchart TD
+    A[New closed M1 bar] --> B{M5 EMA50 > EMA200 and close > EMA50?}
+    B -- No --> Z[No trade]
+    B -- Yes --> C{Touched EMA21 in last 3 M1 bars?}
+    C -- No --> Z
+    C -- Yes --> D{EMA9 > EMA21 and RSI14 cross above 52 and close > prev high?}
+    D -- No --> Z
+    D -- Yes --> E[Compute SL from swing or 0.9 ATR]
+    E --> F{Spread <= 12% of SL and SL within 0.12%-0.20%?}
+    F -- No --> Z
+    F -- Yes --> G[Place long with TP = 1.5R]
+```
+
+**Bollinger range fade**
+
+This is the highest win-rate model in the set, but also the most spread-sensitive. It is only for quiet, range-like conditions. Range filter: on **M5**, `ADX14 < 18` and the 50-EMA is flat enough that `abs(EMA50[1] - EMA50[6]) / Close[1] < 0.05%`. Long trigger: on **M1**, the bar before the trigger closes below the lower Bollinger Band (`Bands 20, 2.0`) and `RSI2 < 8`; then the latest completed bar closes **back inside** the band, closes bullish, and RSI2 turns higher versus the previous bar. Shorts are the mirror image with `RSI2 > 92` and a close back inside the upper band. The logic is directly aligned with the intraday evidence that larger directional moves in Bitcoin tend to be followed by stronger reversals on some horizons. citeturn8search0turn6search2turn6search1turn8search1turn14view2
+
+Set the stop using the **widest** of four guards: the signal extreme, `0.6 × ATR14(M1)`, `1.5 × spread`, and an absolute floor of **0.08%** of entry. Reject the trade if the resulting stop exceeds **0.14%** of entry. Exit fully at the **Bollinger midline**, but only take the trade if the distance from entry to the midline is between **0.8R and 1.3R**. That produces a practical stop band of roughly **4,933 to 8,632 points** and a typical TP band around **4,933 to 9,865 points** under the illustrative point assumption, equivalent to around **0.08% to 0.14% SL** and often **0.08% to 0.16% TP**. Risk **0.25% to 0.40%** of equity. Expected win-rate range: **58% to 68%**. Spread/slippage sensitivity is **high**; I would generally reject the setup if spread exceeds **15% of the planned stop** or if the broker’s stop level forces an unattractive RR. citeturn22calculator0turn24calculator2turn30calculator0turn28search1turn21search1turn21search5
+
+```mql5
+// Strategy B: Bollinger range fade
+if (NewClosedBar(PERIOD_M1))
+{
+    bool rangeMarket =
+        adx14_m5[1] < 18 &&
+        MathAbs(ema50_m5[1] - ema50_m5[6]) / close_m5[1] < 0.0005;
+
+    bool oversoldSetup =
+        close_m1[2] < bbLower_m1[2] &&
+        rsi2_m1[2] < 8;
+
+    bool reEntryLong =
+        close_m1[1] > bbLower_m1[1] &&
+        close_m1[1] > open_m1[1] &&
+        rsi2_m1[1] > rsi2_m1[2];
+
+    if (rangeMarket && oversoldSetup && reEntryLong)
+    {
+        double entry = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+        double spread = (double)SymbolInfoInteger(_Symbol, SYMBOL_SPREAD) * _Point;
+        double slDist = MathMax((entry - low_m1[1]) + spread,
+                         MathMax(0.6 * atr14_m1[1],
+                         MathMax(1.5 * spread, 0.0008 * entry)));
+        double tp = bbMid_m1[1];
+
+        if (slDist <= 0.0014 * entry &&
+            (tp - entry) >= 0.8 * slDist &&
+            (tp - entry) <= 1.3 * slDist)
+        {
+            double sl = entry - slDist;
+            double lots = SizeByRisk(entry, sl, 0.003); // 0.3% example
+            SendBuy(lots, sl, tp);
+        }
+    }
+}
+```
+
+```mermaid
+flowchart TD
+    A[New closed M1 bar] --> B{M5 ADX < 18 and EMA50 flat?}
+    B -- No --> Z[No trade]
+    B -- Yes --> C{Previous M1 close outside lower band and RSI2 < 8?}
+    C -- No --> Z
+    C -- Yes --> D{Latest M1 close back inside band and bullish?}
+    D -- No --> Z
+    D -- Yes --> E[Compute SL from extreme, ATR, spread floor]
+    E --> F{Mid-band target gives 0.8R to 1.3R?}
+    F -- No --> Z
+    F -- Yes --> G[Place long, TP = Bollinger midline]
+```
+
+**Donchian volatility breakout**
+
+This is the most aggressive strategy and the most exposed to adverse slippage, so it should only be live in expansion regimes. Regime filter: on **M5**, `ADX14 > 22` and rising over the last three completed bars. Volatility trigger: on **M1**, `ATR14 > 1.10 × SMA20(ATR14)`. Breakout trigger: the latest completed M1 close exceeds the **highest high of the prior 20 completed M1 bars** by at least `0.05 × ATR14`, and `MACD histogram > 0`. Shorts use the rolling lowest low and a negative histogram. This is essentially a Donchian or trading-range breakout implementation, which has good support in the Bitcoin literature relative to many other trend rules. citeturn8search1turn8search2turn6search1turn25search0turn25search1turn12search1
+
+Set the stop as the wider of the breakout-bar extreme and `1.0 × ATR14(M1)`, then reject the trade if the stop is below **0.18%** or above **0.30%** of entry. The default TP is **1.8R**, with a break-even stop move after **+1R**. Under the illustrative point assumption that translates to about **11,098 to 18,497 points of SL** and roughly **19,730 to 33,295 points of TP**, or about **0.18% to 0.30% SL** and **0.32% to 0.54% TP**. Risk **0.35% to 0.60%** of equity. Expected win-rate range: **34% to 45%**. Spread sensitivity is only **moderate**, but **slippage sensitivity is high** because bad fills happen precisely when the breakout is most explosive. If your broker offers DOM data, this is the strategy that benefits most from a pre-trade liquidity check. It also benefits from being limited to the broker’s most liquid Europe/US window, which is consistent with the academic evidence on higher activity and lower spreads during US hours. citeturn23calculator0turn24calculator0turn30calculator3turn31calculator2turn9search1turn9search5turn14view0
+
+```mql5
+// Strategy C: Donchian volatility breakout
+if (NewClosedBar(PERIOD_M1))
+{
+    bool trendExpansion =
+        adx14_m5[1] > 22 &&
+        adx14_m5[1] > adx14_m5[2] &&
+        adx14_m5[2] > adx14_m5[3] &&
+        atr14_m1[1] > 1.10 * atr14_sma20_m1[1];
+
+    int hhIdx = iHighest(_Symbol, PERIOD_M1, MODE_HIGH, 20, 2);
+    double breakoutHigh = iHigh(_Symbol, PERIOD_M1, hhIdx);
+
+    bool breakoutLong =
+        close_m1[1] > breakoutHigh + 0.05 * atr14_m1[1] &&
+        macdHist_m1[1] > 0;
+
+    if (trendExpansion && breakoutLong)
+    {
+        double entry = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+        double spread = (double)SymbolInfoInteger(_Symbol, SYMBOL_SPREAD) * _Point;
+        double slDist = MathMax((entry - low_m1[1]) + spread, 1.0 * atr14_m1[1]);
+
+        if (slDist >= 0.0018 * entry && slDist <= 0.0030 * entry)
+        {
+            double sl = entry - slDist;
+            double tp = entry + 1.8 * slDist;
+            double lots = SizeByRisk(entry, sl, 0.0045); // 0.45% example
+            SendBuy(lots, sl, tp);
+        }
+    }
+}
+```
+
+```mermaid
+flowchart TD
+    A[New closed M1 bar] --> B{M5 ADX > 22 and rising?}
+    B -- No --> Z[No trade]
+    B -- Yes --> C{M1 ATR > 1.10 x ATR SMA20?}
+    C -- No --> Z
+    C -- Yes --> D{Close breaks 20-bar high by 0.05 ATR and MACD hist > 0?}
+    D -- No --> Z
+    D -- Yes --> E[Compute SL from breakout bar low or 1.0 ATR]
+    E --> F{SL within 0.18%-0.30% and spread acceptable?}
+    F -- No --> Z
+    F -- Yes --> G[Place long, TP = 1.8R]
+```
+
+**MACD-Stochastic re-entry**
+
+This is the best “secondary continuation” strategy when the market is trending but not clean enough for pure breakout logic. Long regime filter: on **M15**, the latest close is above EMA200, `EMA50 > EMA200`, and EMA200 slope is positive. Long trigger: on **M3**, the latest completed bar closes above EMA20, `MACD histogram` flips from negative to positive, the MACD main line is still below zero or just around the zero-line, `Stochastic 5,3,3` has `%K` crossing above `%D` from below **25**, and the signal candle closes in the top 40% of its range. Shorts are mirrored. This uses only standard MT5 indicators and leans on the broad result that moving average, filter and related continuation rules can add value in Bitcoin, though their effectiveness varies by period and cost environment. citeturn8search2turn8search3turn6search1turn6search0turn26view0
+
+Use the wider of the local re-entry swing and `0.75 × ATR14(M3)` as the stop, but reject the trade if that stop is below **0.14%** or above **0.24%** of entry. Target **1.5R** by default, but if the nearest **M15 swing high** offers less than **1.2R**, skip the trade; if it offers between **1.2R and 1.6R**, use that structural target instead of a pure multiple. Under the same illustrative point assumption, the stop band is about **8,632 to 14,798 points**, and the practical TP band is around **12,948 to 23,430 points**, matching roughly **0.14% to 0.24% SL** and **0.21% to 0.38% TP**. Risk **0.30% to 0.50%** of equity. Expected win-rate range: **46% to 55%**. Spread sensitivity is **moderate**, and slippage sensitivity is lower than the breakout model because the entry is on a pullback resumption rather than a fresh range expansion. citeturn24calculator2turn23calculator3turn30calculator2turn31calculator1turn28search1
+
+```mql5
+// Strategy D: MACD-Stochastic re-entry
+if (NewClosedBar(PERIOD_M3))
+{
+    bool trendLong =
+        close_m15[1] > ema200_m15[1] &&
+        ema50_m15[1] > ema200_m15[1] &&
+        ema200_m15[1] > ema200_m15[4];
+
+    bool triggerLong =
+        close_m3[1] > ema20_m3[1] &&
+        macdHist_m3[2] <= 0 && macdHist_m3[1] > 0 &&
+        stochK_m3[2] <= stochD_m3[2] &&
+        stochK_m3[1] > stochD_m3[1] &&
+        stochK_m3[1] < 25 &&
+        (close_m3[1] - low_m3[1]) / MathMax(high_m3[1] - low_m3[1], _Point) >= 0.60;
+
+    if (trendLong && triggerLong)
+    {
+        double entry = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+        double spread = (double)SymbolInfoInteger(_Symbol, SYMBOL_SPREAD) * _Point;
+        double swingLow = MathMin(low_m3[1], low_m3[2]);
+        double slDist = MathMax((entry - swingLow) + spread, 0.75 * atr14_m3[1]);
+
+        if (slDist >= 0.0014 * entry && slDist <= 0.0024 * entry)
+        {
+            double structuralTarget = NearestM15Resistance(entry);
+            if ((structuralTarget - entry) >= 1.2 * slDist)
+            {
+                double sl = entry - slDist;
+                double tp = MathMin(entry + 1.5 * slDist, structuralTarget);
+                double lots = SizeByRisk(entry, sl, 0.004); // 0.4% example
+                SendBuy(lots, sl, tp);
+            }
+        }
+    }
+}
+```
+
+```mermaid
+flowchart TD
+    A[New closed M3 bar] --> B{M15 close > EMA200 and EMA50 > EMA200?}
+    B -- No --> Z[No trade]
+    B -- Yes --> C{M3 close > EMA20?}
+    C -- No --> Z
+    C -- Yes --> D{MACD hist flips positive and Stoch K crosses above D below 25?}
+    D -- No --> Z
+    D -- Yes --> E[Compute SL from swing or 0.75 ATR]
+    E --> F{Nearest M15 resistance >= 1.2R?}
+    F -- No --> Z
+    F -- Yes --> G[Place long, TP = min 1.5R or M15 resistance]
+```
+
+## Automation and optimisation
+
+For MT5 EAs, the cleanest architecture is usually: **signal evaluation on completed bars, execution and management on ticks**. The platform’s `OnTick()` event is designed for new-quote handling; bar and tick data are available through the standard series access in MQL5 and through the MetaTrader5 Python package via functions such as `copy_rates_from_pos`, `copy_ticks_range`, `symbol_info_tick`, and `positions_get`. The Python integration also stores bar/tick times in UTC, which matters if you add a session filter or if you evaluate performance by hour-of-day. citeturn7search1turn7search2turn9search3turn9search2turn7search3turn7search6
+
+For position sizing, avoid hard-coding BTC lot math. MT5 already provides pre-trade valuation tools. In MQL5 you can use `OrderCalcProfit()` and `OrderCalcMargin()`, and in Python their analogues are `order_calc_profit()` and `order_calc_margin()`. That is safer than assuming a universal tick value for every BTC symbol because broker specifications differ. A robust pattern is: calculate the loss for **1.0 lot** between entry and stop, divide your allowed risk cash by that one-lot loss, and then round down to the broker’s volume step. Use `order_check()` before `order_send()` in Python, or the MQL5 equivalents, to catch margin or trade-parameter errors early. citeturn29search1turn29search3turn21search6turn21search2turn9search0turn6search3turn9search4
+
+For cost control, your EA should query **spread**, **minimum stop level**, and if available **DOM depth** before sending an order. MT5 exposes spread in points and the broker’s minimum stop level through symbol information and the standard library; depth-of-market subscriptions are available through `MarketBookAdd()` in MQL5 and `market_book_add()` in Python when the broker supplies book data. If you are on a **netting** account, remember that MT5 permits only one position per symbol, so these strategies should be run through a single BTC portfolio controller rather than four independent EAs fighting one another. citeturn21search0turn21search1turn21search5turn9search1turn9search5turn32search0
+
+For optimisation, keep the search narrow and interpretable. MT5’s Strategy Tester supports testing and optimisation, and MQL5 also lets you process optimisation results programmatically. I would not optimise raw net profit alone. A more robust objective for BTC scalping is a composite such as **expectancy per trade adjusted for max drawdown, spread deterioration, and slippage penalty**. Then confirm on forward periods or a walk-forward process. The cost-aware Bitcoin literature is very clear that frequency and transaction costs interact strongly, so your optimisation must explicitly include spread/slippage stress rather than assuming ideal fills. citeturn20search1turn20search12turn20search2turn26view0
+
+Useful optimisation bands, without overfitting, are these:
+
+- **EMA pullback continuation:** fast EMA **8–12**, slow EMA **18–24**, RSI trigger **50–55**, ATR stop multiple **0.8–1.1**.
+- **Bollinger range fade:** band deviation **1.8–2.3**, RSI2 extreme **5–10** and **90–95**, ADX cap **16–20**.
+- **Donchian volatility breakout:** channel length **15–30**, ADX floor **20–28**, ATR expansion threshold **1.05–1.25**.
+- **MACD-Stochastic re-entry:** Stochastic trigger **20–30**, ATR multiple **0.7–0.95**, higher-timeframe trend MA around **150–250**.
+
+A practical Python/MT5 risk-sizing pattern looks like this:
+
+```python
+# illustrative Python sizing logic
+risk_cash = equity * risk_pct
+one_lot_loss = abs(mt5.order_calc_profit(
+    mt5.ORDER_TYPE_BUY, symbol, 1.0, entry_price, stop_price
+))
+raw_volume = risk_cash / one_lot_loss
+volume = floor_to_step(raw_volume, volume_step)
+volume = min(max(volume, volume_min), volume_max)
+```
+
+That pattern is robust precisely because it respects the broker’s symbol settings instead of assuming a universal BTC contract model. citeturn29search0turn29search3turn21search2turn28search2
+
+## Risk controls and deployment priorities
+
+Because account size is unspecified, the most stable control variable is **risk as a percentage of equity**. I would keep the live per-trade risk inside the strategy bands above, cap total daily realised loss at about **1.5% to 2.0%**, and stop trading for the session after **three consecutive losses** or after a significant spread regime worsening. That discipline matters because the cost-aware Bitcoin evidence shows higher-frequency technical trading is precisely where performance becomes more vulnerable to small increases in transaction costs. On an MT5 netting account, that discipline should extend to portfolio structure as well: only one live BTC position per symbol, controlled centrally. citeturn26view0turn32search0turn21search1
+
+If I had to prioritise deployment, I would start with **EMA pullback continuation** and **Bollinger range fade** as the core pair, because together they cover both trend and range conditions with more manageable slippage. I would then add **Donchian volatility breakout** only in clear expansion regimes, and treat **MACD-Stochastic re-entry** as the secondary continuation model for choppier trends. The win-rate ranges in this report are engineering estimates, not broker-specific backtest results. Before live risk, they should be validated in MT5 Strategy Tester, then on forward periods, then on a demo or very small live allocation with full logging of fill quality, spread, and realised slippage by hour and by strategy. citeturn4search0turn2search1turn20search1turn20search2turn20search12
