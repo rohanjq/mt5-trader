@@ -50,7 +50,7 @@ from itertools import product
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATA = ROOT / "sampledata" / "sample.csv"
+DEFAULT_DATA = ROOT / "sampledata" / "XAUUSD_M1_60d.csv"
 
 _BASE = {
     "mt5": {"host": "localhost", "port": 8001},
