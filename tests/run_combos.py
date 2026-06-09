@@ -236,17 +236,6 @@ def main():
     profitable = sum(1 for r in results if r[6] > 0)
     print(f"\n    {profitable}/{len(results)} combos profitable, total net: {total_net:+.2f}")
 
-    # Top combos by PF (min 10 trades)
-    ranked = sorted(
-        [r for r in results if r[3] >= 10],
-        key=lambda r: r[5], reverse=True,
-    )
-    if ranked:
-        print(f"\n    Top 10 by PF (≥10 trades):")
-        for r in ranked[:10]:
-            print(f"      {r[0]:<34} SL={r[1]:<5.1f} RR={r[2]:<4.1f}  "
-                  f"PF {r[5]:>5.2f}  ({r[3]} trades, {r[6]:>+.2f})")
-
 
 if __name__ == "__main__":
     main()

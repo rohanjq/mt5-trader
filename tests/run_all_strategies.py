@@ -272,16 +272,6 @@ def main():
           f"{'':>5}  {'':>5}  {total_net:>+10.2f}")
     print(f"\n    {profitable}/{len(results)} strategies profitable")
 
-    # Top strategies by PF (min 10 trades)
-    ranked = sorted(
-        [r for r in results if r[4] >= 10],
-        key=lambda r: r[6], reverse=True,
-    )
-    if ranked:
-        print(f"\n    Top by PF (≥10 trades):")
-        for r in ranked[:5]:
-            print(f"      {r[0]:<36} PF {r[6]:>5.2f}  ({r[4]} trades, {r[7]:>+.2f})")
-
 
 if __name__ == "__main__":
     main()
