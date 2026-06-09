@@ -29,7 +29,7 @@ class UTBotSignal(BaseSignal):
         self.name = f"utbot_{timeframe}"
 
     def read(self) -> Signal:
-        csv_dir = self.config.get("signals.csv_dir", "data/signals")
+        csv_dir = self.config.get("signals.csv_dir", "../MetaTrader5-Docker/data/signals")
         symbol = self.config.get("trading.symbol", "BTCUSDT")
         path = Path(csv_dir) / f"{symbol}_utbot_{self._timeframe}.csv"
         data = self._read_csv(path)

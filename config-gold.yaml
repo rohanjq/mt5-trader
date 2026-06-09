@@ -20,7 +20,7 @@ trading:
 
 signals:
   poll_interval: 2.0
-  csv_dir: data/signals
+  csv_dir: ../MetaTrader5-Docker/data/signals
   sources:
     # ── Core indicators ──
     - indicator: utbot

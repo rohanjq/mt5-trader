@@ -1,28 +1,5 @@
 # How to Run
 
-## Docker Setup (Remote Server)
-
-```bash
-# 1. Navigate to docker directory
-cd docker
-
-# 2. Copy and edit environment file
-cp .env.example .env
-# Edit .env: set MT5_LOGIN, MT5_PASSWORD, MT5_SERVER
-
-# 3. Build and start container
-docker compose up -d --build
-
-# 4. Access MT5 via browser
-# Open http://<server-ip>:3000 in your browser
-# Login with CUSTOM_USER/PASSWORD from .env
-
-# 5. Rebuild after EA changes
-docker compose up -d --build
-```
-
-The container auto-installs MT5 via Wine, compiles `SignalMaster.mq5`, and starts the EA on the configured symbol.
-
 ## Live Trading
 
 ```bash
@@ -102,15 +79,14 @@ uv run python tests/run_utbot_sell_permutations.py \
 
 See `docs/permutation-testing.md` for full details and report format.
 
-## MT5 Utility Tools
+## Download OHLC Data
 
 ```bash
-# Query account info (balance, equity, margin)
-uv run python tools/account_info.py
-
-# Query symbol/ticker info
-uv run python tools/ticker_info.py
+# Requires MT5 connection via rpyc bridge
+uv run python scripts/download_ohlc.py
 ```
+
+Downloads M1 OHLC data from MT5 and saves to `data/XAUUSD_M1.csv`.
 
 ## Adding a Strategy
 

@@ -30,7 +30,7 @@ main.py --config config-gold.yaml
 The SignalMaster EA (running inside MT5) writes CSV files to a shared directory:
 
 ```
-data/signals/
+../MetaTrader5-Docker/data/signals/
 ├── XAUUSD_utbot_M1.csv
 ├── XAUUSD_utbot_M5.csv
 ├── XAUUSD_utbot_M15.csv

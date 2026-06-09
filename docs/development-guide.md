@@ -57,12 +57,14 @@ rules:
 
 ### Step 6: Rebuild Docker container
 
+In the companion [MetaTrader5-Docker](https://github.com/rohanjq/MetaTrader5-Docker) repo:
+
 ```bash
-cd docker
+cd ../MetaTrader5-Docker
 docker compose up -d --build
 ```
 
-The startup script auto-compiles all `.mq5` files in `MQL5/Experts/`.
+The Dockerfile copies `MQL5/` from `../mt5-trader/MQL5` and the startup script auto-compiles all `.mq5` files.
 
 ## Field Naming Conventions
 
@@ -85,51 +87,24 @@ This means the first few bars of each session may have stale higher-TF values un
 
 ## Docker Workflow
 
-### Container Architecture
+Docker infrastructure lives in the companion repo [MetaTrader5-Docker](https://github.com/rohanjq/MetaTrader5-Docker). Both repos should be cloned as siblings:
 
 ```
-Host (macOS/Linux)
-  └── docker compose up
-        └── Container (Debian + Wine + KasmVNC)
-              ├── Wine → MT5 Terminal → SignalMaster EA
-              ├── rpyc bridge (port 8001)
-              └── KasmVNC web UI (port 3000)
+repos/
+├── mt5-trader/           ← this repo (EA source + Python trader)
+└── MetaTrader5-Docker/   ← Docker container (builds with ../mt5-trader/MQL5)
 ```
-
-### Key Paths Inside Container
-
-| Container Path | Purpose |
-|----------------|---------|
-| `/Metatrader/start.sh` | Startup script |
-| `/Metatrader/MQL5/` | MQL5 source files (copied at build) |
-| `/data/signals/` | EA CSV output (mounted from host) |
-| `/data/wine/` | Wine prefix (MT5 installation) |
-| `/config/` | Container config (mounted from host) |
 
 ### Rebuilding After EA Changes
 
 ```bash
-# Edit MQL5/Experts/SignalMaster.mq5
-# Then rebuild:
-cd docker
+# 1. Edit MQL5/Experts/SignalMaster.mq5 in mt5-trader
+# 2. Rebuild container:
+cd ../MetaTrader5-Docker
 docker compose up -d --build
 ```
 
-The `start.sh` script detects changed `.mq5` files and auto-compiles them using MetaEditor64.
-
-### Environment Variables
-
-See `docker/.env.example` for all available settings:
-
-| Variable | Description |
-|----------|-------------|
-| `MT5_LOGIN` | MT5 account number |
-| `MT5_PASSWORD` | MT5 account password |
-| `MT5_SERVER` | MT5 broker server |
-| `MT5_STARTUP_EA` | EA to auto-attach (default: SignalMaster) |
-| `MT5_STARTUP_SYMBOL` | Chart symbol (default: XAUUSD) |
-| `MT5_STARTUP_PERIOD` | Chart timeframe (default: M1) |
-| `MT5_RPYC_PORT` | rpyc bridge port (default: 8001) |
+The Dockerfile copies `../mt5-trader/MQL5` into the container, and `start.sh` auto-compiles using MetaEditor64.
 
 ## Testing a New Indicator
 

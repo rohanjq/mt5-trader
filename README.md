@@ -1,6 +1,6 @@
 # mt5-trader
 
-Monorepo for automated MetaTrader 5 trading: Docker container, MQL5 Expert Advisor, Python trading engine, and signal-replay backtester.
+Automated trading system for MetaTrader 5 with YAML-defined strategies and a signal-replay backtester.
 
 ## Features
 
@@ -12,20 +12,8 @@ Monorepo for automated MetaTrader 5 trading: Docker container, MQL5 Expert Advis
 - **Signal-replay backtester** — test strategies against historical OHLC data
 - **TUI dashboard** — live terminal UI with signals, positions, and trade log
 - **Strategy permutation testing** — automated search for optimal indicator combinations
-- **Docker container** — MT5 runs in Wine/KasmVNC container on Linux
-- **SignalMaster EA** — single EA computes all indicators across all timeframes → CSV
 
 ## Quick Start
-
-### Docker Setup (Remote Server)
-
-```bash
-cd docker
-cp .env.example .env
-# Edit .env with your MT5 credentials
-docker compose up -d --build
-# Access MT5 via browser at http://<host>:3000
-```
 
 ### Live Trading
 
@@ -37,6 +25,7 @@ uv run python main.py --config config-gold.yaml
 ```
 
 Requires MT5 running with the SignalMaster EA and rpyc bridge on localhost:8001.
+Docker setup is in the companion repo [MetaTrader5-Docker](https://github.com/rohanjq/MetaTrader5-Docker).
 
 ### Backtesting
 
@@ -62,8 +51,6 @@ No MT5 connection needed for backtesting.
 | [Backtester](docs/backtester.md) | Backtester usage, how it works, limitations |
 | [Config Reference](docs/config-reference.md) | Complete YAML config key reference |
 | [Indicators](docs/indicators.md) | All indicator fields and expression examples |
-| [Signal Reference](docs/SIGNAL_REFERENCE.md) | EA signal CSV file format and all fields |
-| [Signal Changes](docs/SIGNAL_CHANGES.md) | Latest EA signal additions (VWAP, BB squeeze, DC compression) |
 | [Strategy Findings](docs/buy-strategy-findings.md) | BUY strategy research results and winners |
 | [Expression Reference](docs/expression-reference.md) | All expression operators and examples |
 | [Development Guide](docs/development-guide.md) | How to add indicators to EA + backtester |
@@ -72,8 +59,7 @@ No MT5 connection needed for backtesting.
 ## Project Structure
 
 ```
-MQL5/       — SignalMaster EA source (MQL5 Expert Advisor)
-docker/     — Dockerfile, compose, startup scripts
+MQL5/       — SignalMaster EA source (single source of truth)
 core/       — Config, engine, MT5 client, models
 signals/    — Signal source plugins (CSV readers)
 rules/      — Trade trigger rules (YAML expressions + Python)
@@ -84,7 +70,6 @@ ui/         — Textual TUI dashboard
 backtest/   — Signal-replay backtester
 scripts/    — Utility scripts (OHLC download)
 tests/      — Strategy permutation testing
-tools/      — MT5 utility scripts (account info, ticker info)
 docs/       — Documentation
 ```
 
@@ -93,4 +78,3 @@ docs/       — Documentation
 - Python 3.12+
 - uv package manager
 - MT5 terminal with rpyc bridge (for live trading only)
-- Docker (for running MT5 on Linux)
