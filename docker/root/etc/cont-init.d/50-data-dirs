@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+# Create data subdirectories with correct ownership before start.sh runs
+mkdir -p /data/{downloads,experts,indicators,scripts,signals,logs}
+chown -R abc:abc /data
