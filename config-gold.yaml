@@ -58,6 +58,9 @@ signals:
     # ── Candle analysis ──
     - indicator: candle
       timeframes: [M1, M2, M3, M5, M10, M15, M30]
+    # ── Liquidity Grab ──
+    - indicator: liqgrab
+      timeframes: [M3, M5, M15, H1]
 
 filters:
   cooldown_seconds: 30          # per-trade cooldown
@@ -432,3 +435,80 @@ rules:
         - utbot_M5.consecutive_bull_bars >= 2
         - candle_M3.closed_candle_type == SHOOTING_STAR
         - utbot_M15.closed_bias == BEARISH
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 18: BUY — RSI2 Mean Reversion + EMA200 + ADX
+    # Backtest 60d: PF 1.41, WR 50.7%, 67 trades, DD 24.0%
+    # RSI(2) extreme oversold dip in M5 uptrend (Connors style)
+    # ══════════════════════════════════════════════════════════
+    - name: "rsi2_mean_rev_ema200_adx"
+      enabled: true
+      priority: 100
+      sl_dollars: 3.0
+      reward_ratio: 1.5
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "RSI2 M5 extreme OS + EMA200 above + ADX trending"
+      buy:
+        - rsi2_M5.closed_zone == EXTREME_OS
+        - ema200_M15.closed_price_vs_ema == ABOVE
+        - adx14_M15.closed_trend_strength in STRONG_TREND,TRENDING
+      sell: []
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 19: BUY — RSI2 + EMA200 + ADX + UT Bot H1
+    # Backtest 60d: PF 1.40, WR 50.8%, 61 trades, DD 15.8%
+    # Same as 18 but adds H1 bullish bias for extra filtering
+    # ══════════════════════════════════════════════════════════
+    - name: "rsi2_mean_rev_full"
+      enabled: true
+      priority: 110
+      sl_dollars: 3.0
+      reward_ratio: 1.5
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "RSI2 M5 extreme OS + EMA200 + ADX trending + H1 bullish"
+      buy:
+        - rsi2_M5.closed_zone == EXTREME_OS
+        - ema200_M15.closed_price_vs_ema == ABOVE
+        - adx14_M15.closed_trend_strength in STRONG_TREND,TRENDING
+        - utbot_H1.closed_bias == BULLISH
+      sell: []
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 20: BUY — EMA50 Rising + DC Wick Rej + H1 Bullish
+    # Backtest 60d: PF 1.88, WR 50.0%, 32 trades, DD 22.6%
+    # Best structural bounce strategy found
+    # ══════════════════════════════════════════════════════════
+    - name: "ema50_dc_wick_h1"
+      enabled: true
+      priority: 110
+      sl_dollars: 3.0
+      reward_ratio: 2.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "EMA50 M15 rising + DC M15 wick rej + H1 bullish"
+      buy:
+        - ema50_M15.ema_slope == RISING
+        - dc_M15.closed_lower_wick_rej is TRUE
+        - utbot_H1.closed_bias == BULLISH
+      sell: []
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 21: BUY — RSI2 + DC Wick Rej (high PF, fewer trades)
+    # Backtest 60d: PF 4.27, WR 80.0%, 15 trades, DD 9.7%
+    # Confluence of RSI2 oversold + structural wick rejection
+    # ══════════════════════════════════════════════════════════
+    - name: "rsi2_dc_wick"
+      enabled: true
+      priority: 120
+      sl_dollars: 3.0
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "RSI2 M5 extreme OS + EMA200 above + DC M15 wick rej"
+      buy:
+        - rsi2_M5.closed_zone == EXTREME_OS
+        - ema200_M15.closed_price_vs_ema == ABOVE
+        - dc_M15.closed_lower_wick_rej is TRUE
+      sell: []
