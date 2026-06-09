@@ -2,7 +2,7 @@
 
 Computes all indicators needed by mt5-trader expression rules:
   utbot, dc, ema{9,21,50,200}, rsi{14,2}, adx14, macd12_26_9,
-  stoch5_3_3, bb20d2, atr14, vwap
+  stoch5_3_3, bb20d2, atr14, vwap, candle
 
 Each compute_* function returns a DataFrame with the same index as input,
 containing all fields that the EA would write to CSV.
@@ -81,6 +81,129 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
     result["running_bias"] = bias
     result["running_signal"] = signal
     result["running_atr"] = atr_vals
+    return result
+
+
+# ── Candle Pattern (comprehensive candle analysis) ─────────────────────────────
+
+def compute_candle(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute comprehensive candle analysis fields.
+
+    Matches SignalMaster EA WriteCandleBarFields exactly.
+
+    Size fields (price units):
+        body_size, upper_wick_size, lower_wick_size, total_range
+
+    Percentage fields (% of total range):
+        body_pct, upper_wick_pct, lower_wick_pct
+
+    Ratio fields (wick / body):
+        upper_wick_ratio, lower_wick_ratio
+
+    Direction & type:
+        candle_dir: UP / DOWN / DOJI
+        candle_type: MARUBOZU / HAMMER / SHOOTING_STAR / DOJI / SPINNING_TOP / NORMAL
+
+    Boolean flags:
+        has_long_upper: upper_wick >= 2x body
+        has_long_lower: lower_wick >= 2x body
+        is_bullish: close > open
+        is_bearish: close < open
+    """
+    o = df["open"].values
+    h = df["high"].values
+    l = df["low"].values
+    c = df["close"].values
+
+    body_top = np.maximum(o, c)
+    body_bottom = np.minimum(o, c)
+    body_size = body_top - body_bottom
+    upper_wick = h - body_top
+    lower_wick = body_bottom - l
+    total_range = h - l
+
+    # Safe divisors
+    eps = 1e-10
+    range_safe = np.where(total_range > eps, total_range, eps)
+    body_safe = np.where(body_size > eps, body_size, eps)
+
+    # Percentages
+    body_pct = np.round(body_size / range_safe * 100, 1)
+    upper_wick_pct = np.round(upper_wick / range_safe * 100, 1)
+    lower_wick_pct = np.round(lower_wick / range_safe * 100, 1)
+
+    # Ratios (wick / body) — 0 if doji
+    has_body = body_size > eps
+    upper_wick_ratio = np.where(has_body, np.round(upper_wick / body_safe, 2), 0.0)
+    lower_wick_ratio = np.where(has_body, np.round(lower_wick / body_safe, 2), 0.0)
+
+    # Direction
+    candle_dir = np.where(c > o, "UP", np.where(c < o, "DOWN", "DOJI"))
+
+    # Boolean flags
+    has_range = total_range > eps
+    has_long_upper = np.where((upper_wick >= 2.0 * body_safe) & has_range, "TRUE", "FALSE")
+    has_long_lower = np.where((lower_wick >= 2.0 * body_safe) & has_range, "TRUE", "FALSE")
+    is_bullish = np.where(c > o, "TRUE", "FALSE")
+    is_bearish = np.where(c < o, "TRUE", "FALSE")
+
+    # Candle type classification (matches EA logic exactly)
+    candle_type = np.full(len(c), "NORMAL", dtype=object)
+    # DOJI: no range or body < 10% of range
+    candle_type = np.where(~has_range, "DOJI", candle_type)
+    candle_type = np.where(has_range & (body_pct < 10.0), "DOJI", candle_type)
+    # MARUBOZU: body > 80% of range
+    candle_type = np.where(has_range & (body_pct >= 80.0), "MARUBOZU", candle_type)
+    # HAMMER: lower_wick >= 2x body AND upper_wick < body
+    is_hammer = has_range & (body_pct >= 10.0) & (body_pct < 80.0) & \
+                (lower_wick >= 2.0 * body_safe) & (upper_wick < body_safe)
+    candle_type = np.where(is_hammer, "HAMMER", candle_type)
+    # SHOOTING_STAR: upper_wick >= 2x body AND lower_wick < body
+    is_shooting = has_range & (body_pct >= 10.0) & (body_pct < 80.0) & \
+                  (upper_wick >= 2.0 * body_safe) & (lower_wick < body_safe)
+    candle_type = np.where(is_shooting, "SHOOTING_STAR", candle_type)
+    # SPINNING_TOP: body 10-40%, both wicks > 0.5x body
+    is_spinning = has_range & (body_pct >= 10.0) & (body_pct < 40.0) & \
+                  (upper_wick > 0.5 * body_safe) & (lower_wick > 0.5 * body_safe) & \
+                  ~is_hammer & ~is_shooting
+    candle_type = np.where(is_spinning, "SPINNING_TOP", candle_type)
+
+    result = pd.DataFrame(index=df.index)
+
+    # Closed fields
+    result["closed_body_size"] = np.round(body_size, 5)
+    result["closed_upper_wick_size"] = np.round(upper_wick, 5)
+    result["closed_lower_wick_size"] = np.round(lower_wick, 5)
+    result["closed_total_range"] = np.round(total_range, 5)
+    result["closed_body_pct"] = body_pct
+    result["closed_upper_wick_pct"] = upper_wick_pct
+    result["closed_lower_wick_pct"] = lower_wick_pct
+    result["closed_upper_wick_ratio"] = upper_wick_ratio
+    result["closed_lower_wick_ratio"] = lower_wick_ratio
+    result["closed_candle_dir"] = candle_dir
+    result["closed_candle_type"] = candle_type
+    result["closed_has_long_upper"] = has_long_upper
+    result["closed_has_long_lower"] = has_long_lower
+    result["closed_is_bullish"] = is_bullish
+    result["closed_is_bearish"] = is_bearish
+
+    # Running fields (same as closed in backtester — we only see closed bars)
+    result["running_body_size"] = result["closed_body_size"]
+    result["running_upper_wick_size"] = result["closed_upper_wick_size"]
+    result["running_lower_wick_size"] = result["closed_lower_wick_size"]
+    result["running_total_range"] = result["closed_total_range"]
+    result["running_body_pct"] = result["closed_body_pct"]
+    result["running_upper_wick_pct"] = result["closed_upper_wick_pct"]
+    result["running_lower_wick_pct"] = result["closed_lower_wick_pct"]
+    result["running_upper_wick_ratio"] = result["closed_upper_wick_ratio"]
+    result["running_lower_wick_ratio"] = result["closed_lower_wick_ratio"]
+    result["running_candle_dir"] = result["closed_candle_dir"]
+    result["running_candle_type"] = result["closed_candle_type"]
+    result["running_has_long_upper"] = result["closed_has_long_upper"]
+    result["running_has_long_lower"] = result["closed_has_long_lower"]
+    result["running_is_bullish"] = result["closed_is_bullish"]
+    result["running_is_bearish"] = result["closed_is_bearish"]
+
     return result
 
 
@@ -686,6 +809,8 @@ def compute_all_indicators(
                 ind_df = compute_atr(df_tf, period)
             elif indicator == "vwap":
                 ind_df = compute_vwap(df_tf)
+            elif indicator == "candle":
+                ind_df = compute_candle(df_tf)
             else:
                 log.warning("Unknown indicator: %s — skipping", indicator)
                 continue

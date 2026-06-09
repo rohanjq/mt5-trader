@@ -1,0 +1,726 @@
+15:41:13 [INFO] core.config: Config loaded from /Users/rohan.arora/repos/mt5-trader/config-gold.yaml
+15:41:14 [INFO] backtest.data_loader: Loaded 57725 bars from XAUUSD_M1_60d.csv (2026-04-09 19:22:00 to 2026-06-08 19:21:00)
+15:41:14 [INFO] rules.expression: Expression rule dc_confluence is disabled — skipping
+15:41:14 [INFO] rules.expression: Loaded expression rule: dc_wick_rejection (priority=110, buy=2 conds, sell=2 conds)
+15:41:14 [INFO] rules.expression: Expression rule gold_utbot_trend is disabled — skipping
+15:41:14 [INFO] rules.expression: Expression rule gold_dc_breakout is disabled — skipping
+15:41:14 [INFO] rules.expression: Loaded expression rule: trend_2w_m2_ema50_bounce2_vwap (priority=50, buy=0 conds, sell=4 conds)
+15:41:14 [INFO] rules.expression: Loaded expression rule: trend_2w_m2_m15bear_bounce2_vwap (priority=50, buy=0 conds, sell=4 conds)
+15:41:14 [INFO] rules.expression: Expression rule m2_triple_align is disabled — skipping
+15:41:14 [INFO] rules.expression: Loaded expression rule: dc2w_m3_m45bear_dcupper_vwap (priority=55, buy=0 conds, sell=4 conds)
+15:41:14 [INFO] backtest.runner: Computing indicators for 14 sources across 57725 M1 bars...
+15:41:14 [INFO] backtest.indicators: Resampled to M45: 1300 bars
+15:41:14 [INFO] backtest.indicators: Resampled to M1: 57725 bars
+15:41:14 [INFO] backtest.indicators: Resampled to M5: 11563 bars
+15:41:14 [INFO] backtest.indicators: Resampled to M2: 28865 bars
+15:41:14 [INFO] backtest.indicators: Resampled to M15: 3855 bars
+15:41:14 [INFO] backtest.indicators: Resampled to H4: 262 bars
+15:41:14 [INFO] backtest.indicators: Resampled to M3: 19270 bars
+15:41:14 [INFO] backtest.indicators: Resampled to M30: 1928 bars
+15:41:14 [INFO] backtest.indicators: Resampled to H1: 965 bars
+15:41:14 [INFO] backtest.indicators: Resampled to M10: 5782 bars
+15:41:14 [INFO] backtest.indicators: Computing utbot_M1 (57725 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M1: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_M2 (28865 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M2: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_M3 (19270 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M3: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_M5 (11563 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M5: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_M10 (5782 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M10: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_M15 (3855 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M15: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_M30 (1928 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M30: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_M45 (1300 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_M45: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_H1 (965 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_H1: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing utbot_H4 (262 bars)
+15:41:14 [INFO] backtest.indicators:   → utbot_H4: 57725 rows, 9 fields
+15:41:14 [INFO] backtest.indicators: Computing dc_M1 (57725 bars)
+15:41:14 [INFO] backtest.indicators:   → dc_M1: 57725 rows, 10 fields
+15:41:14 [INFO] backtest.indicators: Computing dc_M2 (28865 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_M2: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_M3 (19270 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_M3: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_M5 (11563 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_M5: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_M10 (5782 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_M10: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_M15 (3855 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_M15: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_M30 (1928 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_M30: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_M45 (1300 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_M45: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_H1 (965 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_H1: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing dc_H4 (262 bars)
+15:41:15 [INFO] backtest.indicators:   → dc_H4: 57725 rows, 10 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_M1 (57725 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_M1: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_M2 (28865 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_M2: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_M3 (19270 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_M3: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_M5 (11563 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_M5: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_M10 (5782 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_M10: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_M15 (3855 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_M15: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_M30 (1928 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_M30: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_H1 (965 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_H1: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema9_H4 (262 bars)
+15:41:15 [INFO] backtest.indicators:   → ema9_H4: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema21_M1 (57725 bars)
+15:41:15 [INFO] backtest.indicators:   → ema21_M1: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema21_M2 (28865 bars)
+15:41:15 [INFO] backtest.indicators:   → ema21_M2: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema21_M3 (19270 bars)
+15:41:15 [INFO] backtest.indicators:   → ema21_M3: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema21_M5 (11563 bars)
+15:41:15 [INFO] backtest.indicators:   → ema21_M5: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema21_M10 (5782 bars)
+15:41:15 [INFO] backtest.indicators:   → ema21_M10: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema21_M15 (3855 bars)
+15:41:15 [INFO] backtest.indicators:   → ema21_M15: 57725 rows, 3 fields
+15:41:15 [INFO] backtest.indicators: Computing ema21_M30 (1928 bars)
+15:41:16 [INFO] backtest.indicators:   → ema21_M30: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema21_H1 (965 bars)
+15:41:16 [INFO] backtest.indicators:   → ema21_H1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema21_H4 (262 bars)
+15:41:16 [INFO] backtest.indicators:   → ema21_H4: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_M1 (57725 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_M1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_M2 (28865 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_M2: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_M3 (19270 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_M3: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_M5 (11563 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_M5: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_M10 (5782 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_M10: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_M15 (3855 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_M15: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_M30 (1928 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_M30: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_H1 (965 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_H1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema50_H4 (262 bars)
+15:41:16 [INFO] backtest.indicators:   → ema50_H4: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_M1 (57725 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_M1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_M2 (28865 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_M2: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_M3 (19270 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_M3: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_M5 (11563 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_M5: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_M10 (5782 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_M10: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_M15 (3855 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_M15: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_M30 (1928 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_M30: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_H1 (965 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_H1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing ema200_H4 (262 bars)
+15:41:16 [INFO] backtest.indicators:   → ema200_H4: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_M1 (57725 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_M1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_M2 (28865 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_M2: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_M3 (19270 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_M3: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_M5 (11563 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_M5: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_M10 (5782 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_M10: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_M15 (3855 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_M15: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_M30 (1928 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_M30: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_H1 (965 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_H1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi14_H4 (262 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi14_H4: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_M1 (57725 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_M1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_M2 (28865 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_M2: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_M3 (19270 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_M3: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_M5 (11563 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_M5: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_M10 (5782 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_M10: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_M15 (3855 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_M15: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_M30 (1928 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_M30: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_H1 (965 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_H1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing rsi2_H4 (262 bars)
+15:41:16 [INFO] backtest.indicators:   → rsi2_H4: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing adx14_M1 (57725 bars)
+15:41:16 [INFO] backtest.indicators:   → adx14_M1: 57725 rows, 3 fields
+15:41:16 [INFO] backtest.indicators: Computing adx14_M2 (28865 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_M2: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing adx14_M3 (19270 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_M3: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing adx14_M5 (11563 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_M5: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing adx14_M10 (5782 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_M10: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing adx14_M15 (3855 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_M15: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing adx14_M30 (1928 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_M30: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing adx14_H1 (965 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_H1: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing adx14_H4 (262 bars)
+15:41:17 [INFO] backtest.indicators:   → adx14_H4: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_M1 (57725 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_M1: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_M2 (28865 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_M2: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_M3 (19270 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_M3: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_M5 (11563 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_M5: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_M10 (5782 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_M10: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_M15 (3855 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_M15: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_M30 (1928 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_M30: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_H1 (965 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_H1: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing macd12_26_9_H4 (262 bars)
+15:41:17 [INFO] backtest.indicators:   → macd12_26_9_H4: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_M1 (57725 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_M1: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_M2 (28865 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_M2: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_M3 (19270 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_M3: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_M5 (11563 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_M5: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_M10 (5782 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_M10: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_M15 (3855 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_M15: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_M30 (1928 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_M30: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_H1 (965 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_H1: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing stoch5_3_3_H4 (262 bars)
+15:41:17 [INFO] backtest.indicators:   → stoch5_3_3_H4: 57725 rows, 2 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_M1 (57725 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_M1: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_M2 (28865 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_M2: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_M3 (19270 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_M3: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_M5 (11563 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_M5: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_M10 (5782 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_M10: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_M15 (3855 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_M15: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_M30 (1928 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_M30: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_H1 (965 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_H1: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing bb20d2_H4 (262 bars)
+15:41:17 [INFO] backtest.indicators:   → bb20d2_H4: 57725 rows, 5 fields
+15:41:17 [INFO] backtest.indicators: Computing atr14_M1 (57725 bars)
+15:41:17 [INFO] backtest.indicators:   → atr14_M1: 57725 rows, 3 fields
+15:41:17 [INFO] backtest.indicators: Computing atr14_M2 (28865 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_M2: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing atr14_M3 (19270 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_M3: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing atr14_M5 (11563 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_M5: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing atr14_M10 (5782 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_M10: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing atr14_M15 (3855 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_M15: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing atr14_M30 (1928 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_M30: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing atr14_H1 (965 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_H1: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing atr14_H4 (262 bars)
+15:41:18 [INFO] backtest.indicators:   → atr14_H4: 57725 rows, 3 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_M1 (57725 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_M1: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_M2 (28865 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_M2: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_M3 (19270 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_M3: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_M5 (11563 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_M5: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_M10 (5782 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_M10: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_M15 (3855 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_M15: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_M30 (1928 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_M30: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_H1 (965 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_H1: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.indicators: Computing vwap_H4 (262 bars)
+15:41:18 [INFO] backtest.indicators:   → vwap_H4: 57725 rows, 2 fields
+15:41:18 [INFO] backtest.runner: Indicators computed: ['utbot_M1', 'utbot_M2', 'utbot_M3', 'utbot_M5', 'utbot_M10', 'utbot_M15', 'utbot_M30', 'utbot_M45', 'utbot_H1', 'utbot_H4', 'dc_M1', 'dc_M2', 'dc_M3', 'dc_M5', 'dc_M10', 'dc_M15', 'dc_M30', 'dc_M45', 'dc_H1', 'dc_H4', 'ema9_M1', 'ema9_M2', 'ema9_M3', 'ema9_M5', 'ema9_M10', 'ema9_M15', 'ema9_M30', 'ema9_H1', 'ema9_H4', 'ema21_M1', 'ema21_M2', 'ema21_M3', 'ema21_M5', 'ema21_M10', 'ema21_M15', 'ema21_M30', 'ema21_H1', 'ema21_H4', 'ema50_M1', 'ema50_M2', 'ema50_M3', 'ema50_M5', 'ema50_M10', 'ema50_M15', 'ema50_M30', 'ema50_H1', 'ema50_H4', 'ema200_M1', 'ema200_M2', 'ema200_M3', 'ema200_M5', 'ema200_M10', 'ema200_M15', 'ema200_M30', 'ema200_H1', 'ema200_H4', 'rsi14_M1', 'rsi14_M2', 'rsi14_M3', 'rsi14_M5', 'rsi14_M10', 'rsi14_M15', 'rsi14_M30', 'rsi14_H1', 'rsi14_H4', 'rsi2_M1', 'rsi2_M2', 'rsi2_M3', 'rsi2_M5', 'rsi2_M10', 'rsi2_M15', 'rsi2_M30', 'rsi2_H1', 'rsi2_H4', 'adx14_M1', 'adx14_M2', 'adx14_M3', 'adx14_M5', 'adx14_M10', 'adx14_M15', 'adx14_M30', 'adx14_H1', 'adx14_H4', 'macd12_26_9_M1', 'macd12_26_9_M2', 'macd12_26_9_M3', 'macd12_26_9_M5', 'macd12_26_9_M10', 'macd12_26_9_M15', 'macd12_26_9_M30', 'macd12_26_9_H1', 'macd12_26_9_H4', 'stoch5_3_3_M1', 'stoch5_3_3_M2', 'stoch5_3_3_M3', 'stoch5_3_3_M5', 'stoch5_3_3_M10', 'stoch5_3_3_M15', 'stoch5_3_3_M30', 'stoch5_3_3_H1', 'stoch5_3_3_H4', 'bb20d2_M1', 'bb20d2_M2', 'bb20d2_M3', 'bb20d2_M5', 'bb20d2_M10', 'bb20d2_M15', 'bb20d2_M30', 'bb20d2_H1', 'bb20d2_H4', 'atr14_M1', 'atr14_M2', 'atr14_M3', 'atr14_M5', 'atr14_M10', 'atr14_M15', 'atr14_M30', 'atr14_H1', 'atr14_H4', 'vwap_M1', 'vwap_M2', 'vwap_M3', 'vwap_M5', 'vwap_M10', 'vwap_M15', 'vwap_M30', 'vwap_H1', 'vwap_H4']
+15:41:18 [INFO] backtest.runner: Starting bar-by-bar replay (57725 bars)...
+15:41:18 [INFO] backtest.runner: [2026-04-09 20:27] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4769.72 SL=4777.22 TP=4762.22 vol=0.66 (main)
+15:41:19 [INFO] backtest.runner: [2026-04-10 09:04] OPEN BUY dc_wick_rejection @ 4744.91 SL=4739.91 TP=4749.91 vol=1.04 (main)
+15:41:19 [INFO] backtest.runner: [2026-04-10 10:39] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4754.11 SL=4761.61 TP=4746.61 vol=0.73 (main)
+15:41:19 [INFO] backtest.runner: [2026-04-10 12:25] OPEN SELL dc_wick_rejection @ 4760.27 SL=4765.27 TP=4755.27 vol=1.04 (main)
+15:41:19 [INFO] backtest.runner: [2026-04-10 12:49] OPEN SELL dc_wick_rejection @ 4764.17 SL=4769.17 TP=4759.17 vol=0.99 (main)
+15:41:20 [INFO] backtest.runner: [2026-04-10 14:43] OPEN SELL dc_wick_rejection @ 4775.14 SL=4780.14 TP=4770.14 vol=0.94 (main)
+15:41:20 [INFO] backtest.runner: [2026-04-10 14:49] OPEN SELL dc_wick_rejection @ 4777.15 SL=4782.15 TP=4772.15 vol=0.89 (main)
+15:41:20 [INFO] backtest.runner: [2026-04-10 16:16] OPEN BUY dc_wick_rejection @ 4763.67 SL=4758.67 TP=4768.67 vol=0.94 (main)
+15:41:21 [INFO] backtest.runner: [2026-04-13 06:49] OPEN SELL dc_wick_rejection @ 4722.35 SL=4727.35 TP=4717.35 vol=0.89 (main)
+15:41:21 [INFO] backtest.runner: [2026-04-13 10:37] OPEN BUY dc_wick_rejection @ 4715.83 SL=4710.83 TP=4720.83 vol=0.85 (main)
+15:41:21 [INFO] backtest.runner: [2026-04-13 12:13] OPEN BUY dc_wick_rejection @ 4718.16 SL=4713.16 TP=4723.16 vol=0.89 (main)
+15:41:21 [INFO] backtest.runner: [2026-04-13 14:04] OPEN SELL dc_wick_rejection @ 4721.58 SL=4726.58 TP=4716.58 vol=0.84 (main)
+15:41:22 [INFO] backtest.runner: Progress: 2886/57725 (5%) | Trades: 12 | Balance: $8072.50
+15:41:22 [INFO] backtest.runner: [2026-04-13 23:22] OPEN SELL dc_wick_rejection @ 4758.01 SL=4763.01 TP=4753.01 vol=0.80 (main)
+15:41:22 [INFO] backtest.runner: [2026-04-14 03:10] OPEN SELL dc_wick_rejection @ 4768.88 SL=4773.88 TP=4763.88 vol=0.84 (main)
+15:41:22 [INFO] backtest.runner: [2026-04-14 05:52] OPEN BUY dc_wick_rejection @ 4765.67 SL=4760.67 TP=4770.67 vol=0.80 (main)
+15:41:22 [INFO] backtest.runner: [2026-04-14 07:25] OPEN SELL dc_wick_rejection @ 4772.67 SL=4777.67 TP=4767.67 vol=0.76 (main)
+15:41:23 [INFO] backtest.runner: [2026-04-14 14:46] OPEN SELL dc_wick_rejection @ 4797.64 SL=4802.64 TP=4792.64 vol=0.72 (main)
+15:41:23 [INFO] backtest.runner: [2026-04-14 22:19] OPEN SELL dc_wick_rejection @ 4840.97 SL=4845.97 TP=4835.97 vol=0.69 (main)
+15:41:24 [INFO] backtest.runner: [2026-04-15 01:22] OPEN SELL dc_wick_rejection @ 4848.10 SL=4853.10 TP=4843.10 vol=0.72 (main)
+15:41:24 [INFO] backtest.runner: [2026-04-15 12:47] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4808.94 SL=4816.44 TP=4801.44 vol=0.50 (main)
+15:41:25 [INFO] backtest.runner: [2026-04-15 14:34] OPEN SELL dc_wick_rejection @ 4819.44 SL=4824.44 TP=4814.44 vol=0.72 (main)
+15:41:25 [INFO] backtest.runner: [2026-04-15 22:04] OPEN BUY dc_wick_rejection @ 4796.93 SL=4791.93 TP=4801.93 vol=0.76 (main)
+15:41:25 [INFO] backtest.runner: [2026-04-16 00:28] OPEN SELL dc_wick_rejection @ 4824.59 SL=4829.59 TP=4819.59 vol=0.72 (main)
+15:41:25 [INFO] backtest.runner: Progress: 5772/57725 (10%) | Trades: 23 | Balance: $6862.50
+15:41:26 [INFO] backtest.runner: [2026-04-16 10:58] OPEN BUY dc_wick_rejection @ 4815.51 SL=4810.51 TP=4820.51 vol=0.68 (main)
+15:41:26 [INFO] backtest.runner: [2026-04-16 12:11] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4814.76 SL=4822.26 TP=4807.26 vol=0.48 (main)
+15:41:26 [INFO] backtest.runner: [2026-04-16 13:09] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4815.59 SL=4823.09 TP=4808.09 vol=0.45 (main)
+15:41:26 [INFO] backtest.runner: [2026-04-16 13:43] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4816.82 SL=4824.32 TP=4809.32 vol=0.43 (main)
+15:41:26 [INFO] backtest.runner: [2026-04-16 13:52] OPEN SELL dc_wick_rejection @ 4806.44 SL=4811.44 TP=4801.44 vol=0.68 (main)
+15:41:26 [INFO] backtest.runner: [2026-04-16 16:23] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4800.44 SL=4807.94 TP=4792.94 vol=0.47 (main)
+15:41:27 [INFO] backtest.runner: [2026-04-16 22:31] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4792.32 SL=4799.82 TP=4784.82 vol=0.50 (main)
+15:41:27 [INFO] backtest.runner: [2026-04-17 01:01] OPEN SELL dc_wick_rejection @ 4793.53 SL=4798.53 TP=4788.53 vol=0.71 (main)
+15:41:27 [INFO] backtest.runner: [2026-04-17 02:55] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4788.08 SL=4795.58 TP=4780.58 vol=0.50 (main)
+15:41:27 [INFO] backtest.runner: [2026-04-17 08:01] OPEN BUY dc_wick_rejection @ 4787.25 SL=4782.25 TP=4792.25 vol=0.71 (main)
+15:41:28 [INFO] backtest.runner: [2026-04-17 13:22] OPEN SELL dc_wick_rejection @ 4855.47 SL=4860.47 TP=4850.47 vol=0.67 (main)
+15:41:29 [INFO] backtest.runner: Progress: 8658/57725 (15%) | Trades: 34 | Balance: $6435.00
+15:41:29 [INFO] backtest.runner: [2026-04-20 07:31] OPEN SELL dc_wick_rejection @ 4793.39 SL=4798.39 TP=4788.39 vol=0.64 (main)
+15:41:29 [INFO] backtest.runner: [2026-04-20 12:28] OPEN SELL dc_wick_rejection @ 4804.14 SL=4809.14 TP=4799.14 vol=0.61 (main)
+15:41:30 [INFO] backtest.runner: [2026-04-20 14:43] OPEN SELL dc_wick_rejection @ 4811.67 SL=4816.67 TP=4806.67 vol=0.58 (main)
+15:41:31 [INFO] backtest.runner: [2026-04-21 07:13] OPEN BUY dc_wick_rejection @ 4785.02 SL=4780.02 TP=4790.02 vol=0.61 (main)
+15:41:31 [INFO] backtest.runner: [2026-04-21 07:59] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4785.13 SL=4792.63 TP=4777.63 vol=0.42 (main)
+15:41:31 [INFO] backtest.runner: [2026-04-21 11:09] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4785.56 SL=4793.06 TP=4778.06 vol=0.44 (main)
+15:41:31 [INFO] backtest.runner: [2026-04-21 12:17] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4790.48 SL=4797.98 TP=4782.98 vol=0.42 (main)
+15:41:31 [INFO] backtest.runner: [2026-04-21 12:21] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4780.76 SL=4788.26 TP=4773.26 vol=0.44 (main)
+15:41:31 [INFO] backtest.runner: [2026-04-21 12:37] OPEN BUY dc_wick_rejection @ 4789.38 SL=4784.38 TP=4794.38 vol=0.70 (main)
+15:41:32 [INFO] backtest.runner: [2026-04-21 17:43] OPEN BUY dc_wick_rejection @ 4715.81 SL=4710.81 TP=4720.81 vol=0.66 (main)
+15:41:32 [INFO] backtest.runner: [2026-04-21 18:37] OPEN BUY dc_wick_rejection @ 4702.67 SL=4697.67 TP=4707.67 vol=0.63 (main)
+15:41:32 [INFO] backtest.runner: [2026-04-22 02:49] OPEN SELL dc_wick_rejection @ 4751.76 SL=4756.76 TP=4746.76 vol=0.66 (main)
+15:41:32 [INFO] backtest.runner: [2026-04-22 03:55] OPEN SELL dc_wick_rejection @ 4757.85 SL=4762.85 TP=4752.85 vol=0.63 (main)
+15:41:32 [INFO] backtest.runner: Progress: 11544/57725 (20%) | Trades: 47 | Balance: $6655.00
+15:41:32 [INFO] backtest.runner: [2026-04-22 06:01] OPEN SELL dc_wick_rejection @ 4763.11 SL=4768.11 TP=4758.11 vol=0.66 (main)
+15:41:32 [INFO] backtest.runner: [2026-04-22 07:16] OPEN SELL dc_wick_rejection @ 4764.62 SL=4769.62 TP=4759.62 vol=0.63 (main)
+15:41:33 [INFO] backtest.runner: [2026-04-22 10:22] OPEN BUY dc_wick_rejection @ 4755.10 SL=4750.10 TP=4760.10 vol=0.66 (main)
+15:41:33 [INFO] backtest.runner: [2026-04-22 13:37] OPEN BUY dc_wick_rejection @ 4748.36 SL=4743.36 TP=4753.36 vol=0.63 (main)
+15:41:33 [INFO] backtest.runner: [2026-04-22 14:03] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4749.90 SL=4757.40 TP=4742.40 vol=0.44 (main)
+15:41:33 [INFO] backtest.runner: [2026-04-22 14:09] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4742.54 SL=4750.04 TP=4735.04 vol=0.46 (main)
+15:41:33 [INFO] backtest.runner: [2026-04-22 18:17] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4734.05 SL=4741.55 TP=4726.55 vol=0.44 (main)
+15:41:33 [INFO] backtest.runner: [2026-04-22 18:57] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4739.80 SL=4747.30 TP=4732.30 vol=0.41 (main)
+15:41:34 [INFO] backtest.runner: [2026-04-23 00:19] OPEN BUY dc_wick_rejection @ 4714.02 SL=4709.02 TP=4719.02 vol=0.65 (main)
+15:41:34 [INFO] backtest.runner: [2026-04-23 05:34] OPEN BUY dc_wick_rejection @ 4705.85 SL=4700.85 TP=4710.85 vol=0.69 (main)
+15:41:34 [INFO] backtest.runner: [2026-04-23 06:17] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4709.55 SL=4717.05 TP=4702.05 vol=0.48 (main)
+15:41:34 [INFO] backtest.runner: [2026-04-23 07:01] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4709.66 SL=4717.16 TP=4702.16 vol=0.45 (main)
+15:41:34 [INFO] backtest.runner: [2026-04-23 08:31] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4714.79 SL=4722.29 TP=4707.29 vol=0.43 (main)
+15:41:35 [INFO] backtest.runner: [2026-04-23 13:07] OPEN SELL dc_wick_rejection @ 4728.11 SL=4733.11 TP=4723.11 vol=0.68 (main)
+15:41:35 [INFO] backtest.runner: [2026-04-23 17:55] OPEN BUY dc_wick_rejection @ 4696.07 SL=4691.07 TP=4701.07 vol=0.65 (main)
+15:41:35 [INFO] backtest.runner: [2026-04-23 18:49] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4707.70 SL=4715.20 TP=4700.20 vol=0.45 (main)
+15:41:35 [INFO] backtest.runner: [2026-04-24 00:05] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4691.64 SL=4699.14 TP=4684.14 vol=0.48 (main)
+15:41:36 [INFO] backtest.runner: [2026-04-24 04:46] OPEN BUY dc_wick_rejection @ 4668.73 SL=4663.73 TP=4673.73 vol=0.68 (main)
+15:41:36 [INFO] backtest.runner: Progress: 14430/57725 (25%) | Trades: 65 | Balance: $7185.00
+15:41:36 [INFO] backtest.runner: [2026-04-24 08:34] OPEN SELL dc_wick_rejection @ 4686.99 SL=4691.99 TP=4681.99 vol=0.71 (main)
+15:41:36 [INFO] backtest.runner: [2026-04-24 09:46] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4685.90 SL=4693.40 TP=4678.40 vol=0.45 (main)
+15:41:37 [INFO] backtest.runner: [2026-04-27 04:58] OPEN SELL dc_wick_rejection @ 4723.32 SL=4728.32 TP=4718.32 vol=0.71 (main)
+15:41:38 [INFO] backtest.runner: [2026-04-27 08:49] OPEN BUY dc_wick_rejection @ 4713.19 SL=4708.19 TP=4718.19 vol=0.75 (main)
+15:41:38 [INFO] backtest.runner: [2026-04-27 12:29] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4703.91 SL=4711.41 TP=4696.41 vol=0.47 (main)
+15:41:39 [INFO] backtest.runner: [2026-04-27 18:59] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4681.09 SL=4688.59 TP=4673.59 vol=0.50 (main)
+15:41:39 [INFO] backtest.runner: [2026-04-28 00:28] OPEN SELL dc_wick_rejection @ 4693.30 SL=4698.30 TP=4688.30 vol=0.71 (main)
+15:41:39 [INFO] backtest.runner: [2026-04-28 02:07] OPEN BUY dc_wick_rejection @ 4675.53 SL=4670.53 TP=4680.53 vol=0.74 (main)
+15:41:39 [INFO] backtest.runner: [2026-04-28 05:25] OPEN BUY dc_wick_rejection @ 4658.83 SL=4653.83 TP=4663.83 vol=0.71 (main)
+15:41:39 [INFO] backtest.runner: [2026-04-28 06:07] OPEN BUY dc_wick_rejection @ 4639.18 SL=4634.18 TP=4644.18 vol=0.67 (main)
+15:41:40 [INFO] backtest.runner: Progress: 17316/57725 (30%) | Trades: 75 | Balance: $6420.00
+15:41:40 [INFO] backtest.runner: [2026-04-28 12:13] OPEN BUY dc_wick_rejection @ 4577.24 SL=4572.24 TP=4582.24 vol=0.64 (main)
+15:41:40 [INFO] backtest.runner: [2026-04-28 12:31] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4574.40 SL=4581.90 TP=4566.90 vol=0.44 (main)
+15:41:40 [INFO] backtest.runner: [2026-04-28 13:05] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4583.70 SL=4591.20 TP=4576.20 vol=0.42 (main)
+15:41:40 [INFO] backtest.runner: [2026-04-28 13:55] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4581.08 SL=4588.58 TP=4573.58 vol=0.44 (main)
+15:41:41 [INFO] backtest.runner: [2026-04-28 23:55] OPEN BUY dc_wick_rejection @ 4592.27 SL=4587.27 TP=4597.27 vol=0.70 (main)
+15:41:41 [INFO] backtest.runner: [2026-04-29 00:22] OPEN SELL dc_wick_rejection @ 4600.72 SL=4605.72 TP=4595.72 vol=0.74 (main)
+15:41:41 [INFO] backtest.runner: [2026-04-29 05:19] OPEN SELL dc_wick_rejection @ 4600.62 SL=4605.62 TP=4595.62 vol=0.77 (main)
+15:41:41 [INFO] backtest.runner: [2026-04-29 08:46] OPEN BUY dc_wick_rejection @ 4569.42 SL=4564.42 TP=4574.42 vol=0.81 (main)
+15:41:41 [INFO] backtest.runner: [2026-04-29 09:25] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4571.86 SL=4579.36 TP=4564.36 vol=0.57 (main)
+15:41:41 [INFO] backtest.runner: [2026-04-29 10:10] OPEN BUY dc_wick_rejection @ 4564.93 SL=4559.93 TP=4569.93 vol=0.89 (main)
+15:41:41 [INFO] backtest.runner: [2026-04-29 10:43] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4567.83 SL=4575.33 TP=4560.33 vol=0.62 (main)
+15:41:42 [INFO] backtest.runner: [2026-04-29 13:58] OPEN BUY dc_wick_rejection @ 4526.04 SL=4521.04 TP=4531.04 vol=0.99 (main)
+15:41:42 [INFO] backtest.runner: [2026-04-29 15:15] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4537.99 SL=4545.49 TP=4530.49 vol=0.62 (main)
+15:41:42 [INFO] backtest.runner: [2026-04-29 16:37] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4548.73 SL=4556.23 TP=4541.23 vol=0.59 (main)
+15:41:42 [INFO] backtest.runner: [2026-04-30 00:04] OPEN SELL dc_wick_rejection @ 4558.13 SL=4563.13 TP=4553.13 vol=0.93 (main)
+15:41:42 [INFO] backtest.runner: [2026-04-30 01:10] OPEN SELL dc_wick_rejection @ 4565.45 SL=4570.45 TP=4560.45 vol=0.89 (main)
+15:41:43 [INFO] backtest.runner: Progress: 20202/57725 (35%) | Trades: 91 | Balance: $8475.00
+15:41:43 [INFO] backtest.runner: [2026-04-30 14:04] OPEN BUY dc_wick_rejection @ 4623.62 SL=4618.62 TP=4628.62 vol=0.84 (main)
+15:41:44 [INFO] backtest.runner: [2026-04-30 17:04] OPEN BUY dc_wick_rejection @ 4614.96 SL=4609.96 TP=4619.96 vol=0.80 (main)
+15:41:44 [INFO] backtest.runner: [2026-04-30 19:22] OPEN SELL dc_wick_rejection @ 4619.76 SL=4624.76 TP=4614.76 vol=0.84 (main)
+15:41:44 [INFO] backtest.runner: [2026-04-30 23:58] OPEN SELL dc_wick_rejection @ 4627.07 SL=4632.07 TP=4622.07 vol=0.88 (main)
+15:41:44 [INFO] backtest.runner: [2026-05-01 01:43] OPEN BUY dc_wick_rejection @ 4621.55 SL=4616.55 TP=4626.55 vol=0.93 (main)
+15:41:44 [INFO] backtest.runner: [2026-05-01 02:43] OPEN SELL dc_wick_rejection @ 4624.96 SL=4629.96 TP=4619.96 vol=0.97 (main)
+15:41:44 [INFO] backtest.runner: [2026-05-01 05:22] OPEN BUY dc_wick_rejection @ 4614.89 SL=4609.89 TP=4619.89 vol=1.02 (main)
+15:41:45 [INFO] backtest.runner: [2026-05-01 12:43] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4591.95 SL=4599.45 TP=4584.45 vol=0.65 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-03 22:23] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4615.91 SL=4623.41 TP=4608.41 vol=0.61 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-03 22:56] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4619.70 SL=4627.20 TP=4612.20 vol=0.58 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-04 00:16] OPEN BUY dc_wick_rejection @ 4613.42 SL=4608.42 TP=4618.42 vol=0.92 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-04 02:13] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4606.52 SL=4614.02 TP=4599.02 vol=0.58 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-04 02:46] OPEN BUY dc_wick_rejection @ 4604.45 SL=4599.45 TP=4609.45 vol=0.92 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-04 03:39] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4604.60 SL=4612.10 TP=4597.10 vol=0.64 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-04 04:23] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4608.73 SL=4616.23 TP=4601.23 vol=0.61 (main)
+15:41:46 [INFO] backtest.runner: [2026-05-04 10:34] OPEN BUY dc_wick_rejection @ 4555.31 SL=4550.31 TP=4560.31 vol=0.96 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-04 11:31] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4560.58 SL=4568.08 TP=4553.08 vol=0.67 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-04 12:01] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4559.69 SL=4567.19 TP=4552.19 vol=0.70 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-04 12:34] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4565.93 SL=4573.43 TP=4558.43 vol=0.67 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-04 13:01] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4563.51 SL=4571.01 TP=4556.01 vol=0.64 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-04 13:16] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4566.43 SL=4573.93 TP=4558.93 vol=0.60 (main)
+15:41:47 [INFO] backtest.runner: Progress: 23088/57725 (40%) | Trades: 112 | Balance: $9582.50
+15:41:47 [INFO] backtest.runner: [2026-05-04 14:58] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4566.23 SL=4573.73 TP=4558.73 vol=0.63 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-04 15:31] OPEN BUY dc_wick_rejection @ 4536.23 SL=4531.23 TP=4541.23 vol=1.00 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-04 22:25] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4519.76 SL=4527.26 TP=4512.26 vol=0.63 (main)
+15:41:47 [INFO] backtest.runner: [2026-05-05 00:21] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4520.85 SL=4528.35 TP=4513.35 vol=0.60 (main)
+15:41:48 [INFO] backtest.runner: [2026-05-05 02:58] OPEN SELL dc_wick_rejection @ 4540.79 SL=4545.79 TP=4535.79 vol=0.86 (main)
+15:41:48 [INFO] backtest.runner: [2026-05-05 05:58] OPEN SELL dc_wick_rejection @ 4543.58 SL=4548.58 TP=4538.58 vol=0.90 (main)
+15:41:48 [INFO] backtest.runner: [2026-05-05 06:16] OPEN SELL dc_wick_rejection @ 4543.09 SL=4548.09 TP=4538.09 vol=0.86 (main)
+15:41:48 [INFO] backtest.runner: [2026-05-05 07:46] OPEN SELL dc_wick_rejection @ 4549.20 SL=4554.20 TP=4544.20 vol=0.90 (main)
+15:41:48 [INFO] backtest.runner: [2026-05-05 12:04] OPEN SELL dc_wick_rejection @ 4554.60 SL=4559.60 TP=4549.60 vol=0.94 (main)
+15:41:49 [INFO] backtest.runner: [2026-05-05 17:22] OPEN BUY dc_wick_rejection @ 4560.27 SL=4555.27 TP=4565.27 vol=0.90 (main)
+15:41:49 [INFO] backtest.runner: [2026-05-05 22:55] OPEN BUY dc_wick_rejection @ 4558.57 SL=4553.57 TP=4563.57 vol=0.94 (main)
+15:41:49 [INFO] backtest.runner: [2026-05-06 02:31] OPEN SELL dc_wick_rejection @ 4627.83 SL=4632.83 TP=4622.83 vol=0.99 (main)
+15:41:49 [INFO] backtest.runner: [2026-05-06 03:55] OPEN SELL dc_wick_rejection @ 4644.08 SL=4649.08 TP=4639.08 vol=0.94 (main)
+15:41:50 [INFO] backtest.runner: [2026-05-06 12:31] OPEN BUY dc_wick_rejection @ 4679.23 SL=4674.23 TP=4684.23 vol=0.89 (main)
+15:41:50 [INFO] backtest.runner: Progress: 25974/57725 (45%) | Trades: 126 | Balance: $9422.50
+15:41:51 [INFO] backtest.runner: [2026-05-06 23:23] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4693.30 SL=4700.80 TP=4685.80 vol=0.62 (main)
+15:41:51 [INFO] backtest.runner: [2026-05-07 00:27] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4694.19 SL=4701.69 TP=4686.69 vol=0.59 (main)
+15:41:51 [INFO] backtest.runner: [2026-05-07 00:43] OPEN SELL dc_wick_rejection @ 4687.51 SL=4692.51 TP=4682.51 vol=0.93 (main)
+15:41:51 [INFO] backtest.runner: [2026-05-07 02:13] OPEN SELL dc_wick_rejection @ 4706.36 SL=4711.36 TP=4701.36 vol=0.89 (main)
+15:41:51 [INFO] backtest.runner: [2026-05-07 08:16] OPEN SELL dc_wick_rejection @ 4740.17 SL=4745.17 TP=4735.17 vol=0.93 (main)
+15:41:52 [INFO] backtest.runner: [2026-05-07 13:46] OPEN SELL dc_wick_rejection @ 4742.65 SL=4747.65 TP=4737.65 vol=0.98 (main)
+15:41:52 [INFO] backtest.runner: [2026-05-07 16:28] OPEN BUY dc_wick_rejection @ 4722.24 SL=4717.24 TP=4727.24 vol=0.93 (main)
+15:41:53 [INFO] backtest.runner: [2026-05-08 02:19] OPEN SELL dc_wick_rejection @ 4719.26 SL=4724.26 TP=4714.26 vol=0.88 (main)
+15:41:54 [INFO] backtest.runner: [2026-05-08 14:10] OPEN SELL dc_wick_rejection @ 4726.61 SL=4731.61 TP=4721.61 vol=0.93 (main)
+15:41:54 [INFO] backtest.runner: Progress: 28860/57725 (50%) | Trades: 135 | Balance: $9795.00
+15:41:54 [INFO] backtest.runner: [2026-05-10 22:28] OPEN BUY dc_wick_rejection @ 4693.25 SL=4688.25 TP=4698.25 vol=0.97 (main)
+15:41:54 [INFO] backtest.runner: [2026-05-11 00:34] OPEN BUY dc_wick_rejection @ 4692.79 SL=4687.79 TP=4697.79 vol=0.93 (main)
+15:41:54 [INFO] backtest.runner: [2026-05-11 00:43] OPEN BUY dc_wick_rejection @ 4690.49 SL=4685.49 TP=4695.49 vol=0.88 (main)
+15:41:54 [INFO] backtest.runner: [2026-05-11 01:07] OPEN BUY dc_wick_rejection @ 4696.13 SL=4691.13 TP=4701.13 vol=0.84 (main)
+15:41:54 [INFO] backtest.runner: [2026-05-11 02:45] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4688.21 SL=4695.71 TP=4680.71 vol=0.53 (main)
+15:41:55 [INFO] backtest.runner: [2026-05-11 06:10] OPEN BUY dc_wick_rejection @ 4662.56 SL=4657.56 TP=4667.56 vol=0.83 (main)
+15:41:55 [INFO] backtest.runner: [2026-05-11 07:45] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4671.96 SL=4679.46 TP=4664.46 vol=0.58 (main)
+15:41:55 [INFO] backtest.runner: [2026-05-11 08:43] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4669.56 SL=4677.06 TP=4662.06 vol=0.61 (main)
+15:41:55 [INFO] backtest.runner: [2026-05-11 12:05] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4671.15 SL=4678.65 TP=4663.65 vol=0.64 (main)
+15:41:55 [INFO] backtest.runner: [2026-05-11 14:01] OPEN SELL dc_wick_rejection @ 4733.21 SL=4738.21 TP=4728.21 vol=0.92 (main)
+15:41:56 [INFO] backtest.runner: [2026-05-11 20:52] OPEN SELL dc_wick_rejection @ 4733.64 SL=4738.64 TP=4728.64 vol=0.96 (main)
+15:41:56 [INFO] backtest.runner: [2026-05-12 00:31] OPEN SELL dc_wick_rejection @ 4762.00 SL=4767.00 TP=4757.00 vol=0.91 (main)
+15:41:57 [INFO] backtest.runner: [2026-05-12 12:07] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4701.09 SL=4708.59 TP=4693.59 vol=0.64 (main)
+15:41:57 [INFO] backtest.runner: [2026-05-12 13:05] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4696.46 SL=4703.96 TP=4688.96 vol=0.67 (main)
+15:41:57 [INFO] backtest.runner: [2026-05-12 13:15] OPEN SELL dc_wick_rejection @ 4688.81 SL=4693.81 TP=4683.81 vol=1.06 (main)
+15:41:57 [INFO] backtest.runner: [2026-05-12 13:40] OPEN BUY dc_wick_rejection @ 4697.99 SL=4692.99 TP=4702.99 vol=1.11 (main)
+15:41:57 [INFO] backtest.runner: [2026-05-12 13:49] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4690.13 SL=4697.63 TP=4682.63 vol=0.70 (main)
+15:41:57 [INFO] backtest.runner: [2026-05-12 15:34] OPEN BUY dc_wick_rejection @ 4660.96 SL=4655.96 TP=4665.96 vol=1.11 (main)
+15:41:57 [INFO] backtest.runner: [2026-05-12 16:25] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4667.55 SL=4675.05 TP=4660.05 vol=0.77 (main)
+15:41:57 [INFO] backtest.runner: Progress: 31746/57725 (55%) | Trades: 154 | Balance: $11105.00
+15:41:58 [INFO] backtest.runner: [2026-05-13 03:55] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4697.18 SL=4704.68 TP=4689.68 vol=0.74 (main)
+15:41:58 [INFO] backtest.runner: [2026-05-13 05:21] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4701.59 SL=4709.09 TP=4694.09 vol=0.70 (main)
+15:41:58 [INFO] backtest.runner: [2026-05-13 07:23] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4704.86 SL=4712.36 TP=4697.36 vol=0.73 (main)
+15:41:58 [INFO] backtest.runner: [2026-05-13 11:57] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4698.92 SL=4706.42 TP=4691.42 vol=0.77 (main)
+15:41:59 [INFO] backtest.runner: [2026-05-13 17:25] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4697.38 SL=4704.88 TP=4689.88 vol=0.81 (main)
+15:41:59 [INFO] backtest.runner: [2026-05-13 20:35] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4689.82 SL=4697.32 TP=4682.32 vol=0.85 (main)
+15:41:59 [INFO] backtest.runner: [2026-05-13 23:28] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4697.21 SL=4704.71 TP=4689.71 vol=0.81 (main)
+15:41:59 [INFO] backtest.runner: [2026-05-14 00:40] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4695.54 SL=4703.04 TP=4688.04 vol=0.85 (main)
+15:41:59 [INFO] backtest.runner: [2026-05-14 01:04] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4696.57 SL=4704.07 TP=4689.07 vol=0.80 (main)
+15:42:00 [INFO] backtest.runner: [2026-05-14 07:46] OPEN SELL dc_wick_rejection @ 4707.90 SL=4712.90 TP=4702.90 vol=1.27 (main)
+15:42:00 [INFO] backtest.runner: [2026-05-14 12:46] OPEN SELL dc_wick_rejection @ 4697.80 SL=4702.80 TP=4692.80 vol=1.33 (main)
+15:42:00 [INFO] backtest.runner: [2026-05-14 13:19] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4694.36 SL=4701.86 TP=4686.86 vol=0.84 (main)
+15:42:00 [INFO] backtest.runner: [2026-05-14 13:49] OPEN BUY dc_wick_rejection @ 4685.18 SL=4680.18 TP=4690.18 vol=1.33 (main)
+15:42:01 [INFO] backtest.runner: [2026-05-14 20:43] OPEN BUY dc_wick_rejection @ 4651.65 SL=4646.65 TP=4656.65 vol=1.40 (main)
+15:42:01 [INFO] backtest.runner: [2026-05-14 23:15] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4659.07 SL=4666.57 TP=4651.57 vol=0.88 (main)
+15:42:01 [INFO] backtest.runner: Progress: 34632/57725 (60%) | Trades: 168 | Balance: $13305.00
+15:42:01 [INFO] backtest.runner: [2026-05-15 06:19] OPEN BUY dc_wick_rejection @ 4576.36 SL=4571.36 TP=4581.36 vol=1.39 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 07:37] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4577.57 SL=4585.07 TP=4570.07 vol=0.88 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 09:34] OPEN BUY dc_wick_rejection @ 4554.80 SL=4549.80 TP=4559.80 vol=1.39 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 10:07] OPEN BUY dc_wick_rejection @ 4552.41 SL=4547.41 TP=4557.41 vol=1.32 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 10:29] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4552.74 SL=4560.24 TP=4545.24 vol=0.92 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 11:37] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4556.39 SL=4563.89 TP=4548.89 vol=0.88 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 12:29] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4553.55 SL=4561.05 TP=4546.05 vol=0.92 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 13:52] OPEN BUY dc_wick_rejection @ 4528.94 SL=4523.94 TP=4533.94 vol=1.45 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 15:19] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4549.14 SL=4556.64 TP=4541.64 vol=1.01 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 18:19] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4555.11 SL=4562.61 TP=4547.61 vol=1.06 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-15 19:07] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4554.33 SL=4561.83 TP=4546.83 vol=1.01 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-17 22:16] OPEN BUY dc_wick_rejection @ 4547.54 SL=4542.54 TP=4552.54 vol=1.60 (main)
+15:42:02 [INFO] backtest.runner: [2026-05-17 22:22] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4539.70 SL=4547.20 TP=4532.20 vol=1.01 (main)
+15:42:03 [INFO] backtest.runner: [2026-05-17 23:01] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4544.36 SL=4551.86 TP=4536.86 vol=0.96 (main)
+15:42:03 [INFO] backtest.runner: [2026-05-18 00:58] OPEN BUY dc_wick_rejection @ 4505.93 SL=4500.93 TP=4510.93 vol=1.51 (main)
+15:42:03 [INFO] backtest.runner: [2026-05-18 04:28] OPEN SELL dc_wick_rejection @ 4534.98 SL=4539.98 TP=4529.98 vol=1.59 (main)
+15:42:03 [INFO] backtest.runner: [2026-05-18 07:52] OPEN SELL dc_wick_rejection @ 4540.77 SL=4545.77 TP=4535.77 vol=1.67 (main)
+15:42:03 [INFO] backtest.runner: [2026-05-18 11:55] OPEN SELL dc_wick_rejection @ 4551.43 SL=4556.43 TP=4546.43 vol=1.58 (main)
+15:42:04 [INFO] backtest.runner: [2026-05-18 14:04] OPEN SELL dc_wick_rejection @ 4566.43 SL=4571.43 TP=4561.43 vol=1.50 (main)
+15:42:04 [INFO] backtest.runner: [2026-05-19 00:16] OPEN SELL dc_wick_rejection @ 4577.13 SL=4582.13 TP=4572.13 vol=1.58 (main)
+15:42:04 [INFO] backtest.runner: [2026-05-19 00:25] OPEN SELL dc_wick_rejection @ 4574.89 SL=4579.89 TP=4569.89 vol=1.50 (main)
+15:42:04 [INFO] backtest.runner: Progress: 37518/57725 (65%) | Trades: 190 | Balance: $15797.50
+15:42:05 [INFO] backtest.runner: [2026-05-19 06:51] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4544.07 SL=4551.57 TP=4536.57 vol=1.05 (main)
+15:42:05 [INFO] backtest.runner: [2026-05-19 07:21] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4545.38 SL=4552.88 TP=4537.88 vol=1.00 (main)
+15:42:05 [INFO] backtest.runner: [2026-05-19 08:10] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4544.12 SL=4551.62 TP=4536.62 vol=0.95 (main)
+15:42:05 [INFO] backtest.runner: [2026-05-19 08:53] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4540.93 SL=4548.43 TP=4533.43 vol=0.99 (main)
+15:42:05 [INFO] backtest.runner: [2026-05-19 10:58] OPEN BUY dc_wick_rejection @ 4541.85 SL=4536.85 TP=4546.85 vol=1.57 (main)
+15:42:05 [INFO] backtest.runner: [2026-05-19 12:45] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4537.35 SL=4544.85 TP=4529.85 vol=1.10 (main)
+15:42:05 [INFO] backtest.runner: [2026-05-19 13:55] OPEN BUY dc_wick_rejection @ 4504.77 SL=4499.77 TP=4509.77 vol=1.73 (main)
+15:42:05 [INFO] backtest.runner: [2026-05-19 16:07] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4500.68 SL=4508.18 TP=4493.18 vol=1.09 (main)
+15:42:06 [INFO] backtest.runner: [2026-05-19 17:25] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4503.67 SL=4511.17 TP=4496.17 vol=1.04 (main)
+15:42:06 [INFO] backtest.runner: [2026-05-19 22:37] OPEN BUY dc_wick_rejection @ 4484.04 SL=4479.04 TP=4489.04 vol=1.64 (main)
+15:42:06 [INFO] backtest.runner: [2026-05-20 01:04] OPEN SELL dc_wick_rejection @ 4491.53 SL=4496.53 TP=4486.53 vol=1.72 (main)
+15:42:06 [INFO] backtest.runner: [2026-05-20 01:13] OPEN SELL dc_wick_rejection @ 4493.28 SL=4498.28 TP=4488.28 vol=1.63 (main)
+15:42:06 [INFO] backtest.runner: [2026-05-20 01:55] OPEN BUY dc_wick_rejection @ 4481.69 SL=4476.69 TP=4486.69 vol=1.71 (main)
+15:42:06 [INFO] backtest.runner: [2026-05-20 05:47] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4468.36 SL=4475.86 TP=4460.86 vol=1.20 (main)
+15:42:06 [INFO] backtest.runner: [2026-05-20 06:25] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4468.64 SL=4476.14 TP=4461.14 vol=1.14 (main)
+15:42:07 [INFO] backtest.runner: [2026-05-20 12:58] OPEN SELL dc_wick_rejection @ 4495.95 SL=4500.95 TP=4490.95 vol=1.62 (main)
+15:42:07 [INFO] backtest.runner: [2026-05-20 13:22] OPEN SELL dc_wick_rejection @ 4497.42 SL=4502.42 TP=4492.42 vol=1.54 (main)
+15:42:07 [INFO] backtest.runner: [2026-05-20 14:16] OPEN BUY dc_wick_rejection @ 4483.26 SL=4478.26 TP=4488.26 vol=1.62 (main)
+15:42:08 [INFO] backtest.runner: [2026-05-21 00:19] OPEN SELL dc_wick_rejection @ 4542.31 SL=4547.31 TP=4537.31 vol=1.70 (main)
+15:42:08 [INFO] backtest.runner: Progress: 40404/57725 (70%) | Trades: 209 | Balance: $16217.50
+15:42:08 [INFO] backtest.runner: [2026-05-21 04:13] OPEN BUY dc_wick_rejection @ 4534.91 SL=4529.91 TP=4539.91 vol=1.62 (main)
+15:42:08 [INFO] backtest.runner: [2026-05-21 06:01] OPEN BUY dc_wick_rejection @ 4532.21 SL=4527.21 TP=4537.21 vol=1.70 (main)
+15:42:08 [INFO] backtest.runner: [2026-05-21 09:40] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4532.72 SL=4540.22 TP=4525.22 vol=1.19 (main)
+15:42:09 [INFO] backtest.runner: [2026-05-21 13:52] OPEN BUY dc_wick_rejection @ 4507.90 SL=4502.90 TP=4512.90 vol=1.87 (main)
+15:42:09 [INFO] backtest.runner: [2026-05-21 14:07] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4504.08 SL=4511.58 TP=4496.58 vol=1.31 (main)
+15:42:09 [INFO] backtest.runner: [2026-05-21 15:23] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4505.29 SL=4512.79 TP=4497.79 vol=1.37 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 04:37] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4527.68 SL=4535.18 TP=4520.18 vol=1.31 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 05:58] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4510.64 SL=4518.14 TP=4503.14 vol=1.37 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 06:07] OPEN BUY dc_wick_rejection @ 4521.26 SL=4516.26 TP=4526.26 vol=1.96 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 07:40] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4517.29 SL=4524.79 TP=4509.79 vol=1.37 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 08:33] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4523.64 SL=4531.14 TP=4516.14 vol=1.30 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 10:28] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4526.49 SL=4533.99 TP=4518.99 vol=1.36 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 12:28] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4522.38 SL=4529.88 TP=4514.88 vol=1.43 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 13:26] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4522.05 SL=4529.55 TP=4514.55 vol=1.36 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 15:49] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4515.85 SL=4523.35 TP=4508.35 vol=1.43 (main)
+15:42:10 [INFO] backtest.runner: [2026-05-22 16:40] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4519.50 SL=4527.00 TP=4512.00 vol=1.36 (main)
+15:42:11 [INFO] backtest.runner: [2026-05-22 18:01] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4518.14 SL=4525.64 TP=4510.64 vol=1.29 (main)
+15:42:11 [INFO] backtest.runner: [2026-05-24 22:02] OPEN BUY dc_wick_rejection @ 4547.01 SL=4542.01 TP=4552.01 vol=2.03 (main)
+15:42:11 [INFO] backtest.runner: [2026-05-24 23:58] OPEN SELL dc_wick_rejection @ 4571.74 SL=4576.74 TP=4566.74 vol=2.14 (main)
+15:42:11 [INFO] backtest.runner: [2026-05-25 05:37] OPEN BUY dc_wick_rejection @ 4560.61 SL=4555.61 TP=4565.61 vol=2.24 (main)
+15:42:11 [INFO] backtest.runner: Progress: 43290/57725 (75%) | Trades: 229 | Balance: $21350.00
+15:42:12 [INFO] backtest.runner: [2026-05-25 10:43] OPEN SELL dc_wick_rejection @ 4568.45 SL=4573.45 TP=4563.45 vol=2.13 (main)
+15:42:12 [INFO] backtest.runner: [2026-05-25 11:55] OPEN SELL dc_wick_rejection @ 4570.58 SL=4575.58 TP=4565.58 vol=2.02 (main)
+15:42:12 [INFO] backtest.runner: [2026-05-25 12:31] OPEN BUY dc_wick_rejection @ 4560.47 SL=4555.47 TP=4565.47 vol=2.12 (main)
+15:42:12 [INFO] backtest.runner: [2026-05-25 13:03] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4562.72 SL=4570.22 TP=4555.22 vol=1.49 (main)
+15:42:12 [INFO] backtest.runner: [2026-05-25 13:13] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4563.70 SL=4571.20 TP=4556.20 vol=1.41 (main)
+15:42:12 [INFO] backtest.runner: [2026-05-25 17:25] OPEN SELL dc_wick_rejection @ 4571.46 SL=4576.46 TP=4566.46 vol=2.01 (main)
+15:42:12 [INFO] backtest.runner: [2026-05-25 23:25] OPEN SELL dc_wick_rejection @ 4573.82 SL=4578.82 TP=4568.82 vol=2.11 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 03:45] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4541.20 SL=4548.70 TP=4533.70 vol=1.48 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 05:10] OPEN BUY dc_wick_rejection @ 4530.34 SL=4525.34 TP=4535.34 vol=2.33 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 06:29] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4529.44 SL=4536.94 TP=4521.94 vol=1.47 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 07:49] OPEN BUY dc_wick_rejection @ 4532.06 SL=4527.06 TP=4537.06 vol=2.32 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 09:28] OPEN BUY dc_wick_rejection @ 4526.18 SL=4521.18 TP=4531.18 vol=2.44 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 11:22] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4527.85 SL=4535.35 TP=4520.35 vol=1.54 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 12:49] OPEN BUY dc_wick_rejection @ 4516.76 SL=4511.76 TP=4521.76 vol=2.43 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 13:51] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4519.82 SL=4527.32 TP=4512.32 vol=1.70 (main)
+15:42:13 [INFO] backtest.runner: [2026-05-26 14:35] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4517.53 SL=4525.03 TP=4510.03 vol=1.79 (main)
+15:42:14 [INFO] backtest.runner: [2026-05-26 16:31] OPEN BUY dc_wick_rejection @ 4508.40 SL=4503.40 TP=4513.40 vol=2.82 (main)
+15:42:14 [INFO] backtest.runner: [2026-05-26 18:28] OPEN BUY dc_wick_rejection @ 4494.93 SL=4489.93 TP=4499.93 vol=2.68 (main)
+15:42:14 [INFO] backtest.runner: [2026-05-26 20:52] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4504.71 SL=4512.21 TP=4497.21 vol=1.87 (main)
+15:42:14 [INFO] backtest.runner: [2026-05-26 23:22] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4505.72 SL=4513.22 TP=4498.22 vol=1.78 (main)
+15:42:14 [INFO] backtest.runner: [2026-05-27 03:29] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4505.97 SL=4513.47 TP=4498.47 vol=1.69 (main)
+15:42:14 [INFO] backtest.runner: [2026-05-27 05:52] OPEN BUY dc_wick_rejection @ 4501.30 SL=4496.30 TP=4506.30 vol=2.66 (main)
+15:42:15 [INFO] backtest.runner: [2026-05-27 08:04] OPEN BUY dc_wick_rejection @ 4486.88 SL=4481.88 TP=4491.88 vol=2.53 (main)
+15:42:15 [INFO] backtest.runner: [2026-05-27 09:03] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4491.41 SL=4498.91 TP=4483.91 vol=1.77 (main)
+15:42:15 [INFO] backtest.runner: Progress: 46176/57725 (80%) | Trades: 253 | Balance: $27937.50
+15:42:15 [INFO] backtest.runner: [2026-05-27 12:33] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4449.44 SL=4456.94 TP=4441.94 vol=1.86 (main)
+15:42:15 [INFO] backtest.runner: [2026-05-27 14:51] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4437.22 SL=4444.72 TP=4429.72 vol=1.95 (main)
+15:42:15 [INFO] backtest.runner: [2026-05-27 15:45] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4434.21 SL=4441.71 TP=4426.71 vol=2.05 (main)
+15:42:15 [INFO] backtest.runner: [2026-05-27 16:05] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4437.55 SL=4445.05 TP=4430.05 vol=1.95 (main)
+15:42:15 [INFO] backtest.runner: [2026-05-27 17:10] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4443.06 SL=4450.56 TP=4435.56 vol=1.85 (main)
+15:42:15 [INFO] backtest.runner: [2026-05-27 19:19] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4450.51 SL=4458.01 TP=4443.01 vol=1.76 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-27 20:37] OPEN SELL dc_wick_rejection @ 4453.50 SL=4458.50 TP=4448.50 vol=2.50 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-28 00:46] OPEN BUY dc_wick_rejection @ 4453.17 SL=4448.17 TP=4458.17 vol=2.38 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-28 04:10] OPEN BUY dc_wick_rejection @ 4380.99 SL=4375.99 TP=4385.99 vol=2.50 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-28 06:01] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4386.55 SL=4394.05 TP=4379.05 vol=1.58 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-28 06:29] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4380.78 SL=4388.28 TP=4373.28 vol=1.66 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-28 07:49] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4387.44 SL=4394.94 TP=4379.94 vol=1.58 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-28 09:46] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4390.63 SL=4398.13 TP=4383.13 vol=1.50 (main)
+15:42:16 [INFO] backtest.runner: [2026-05-28 10:43] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4391.74 SL=4399.24 TP=4384.24 vol=1.42 (main)
+15:42:17 [INFO] backtest.runner: [2026-05-28 18:28] OPEN SELL dc_wick_rejection @ 4506.88 SL=4511.88 TP=4501.88 vol=2.24 (main)
+15:42:17 [INFO] backtest.runner: [2026-05-28 23:58] OPEN BUY dc_wick_rejection @ 4493.95 SL=4488.95 TP=4498.95 vol=2.35 (main)
+15:42:17 [INFO] backtest.runner: [2026-05-29 01:28] OPEN SELL dc_wick_rejection @ 4508.13 SL=4513.13 TP=4503.13 vol=2.47 (main)
+15:42:18 [INFO] backtest.runner: [2026-05-29 10:04] OPEN SELL dc_wick_rejection @ 4527.33 SL=4532.33 TP=4522.33 vol=2.60 (main)
+15:42:18 [INFO] backtest.runner: Progress: 49062/57725 (85%) | Trades: 271 | Balance: $24702.50
+15:42:18 [INFO] backtest.runner: [2026-05-29 14:22] OPEN SELL dc_wick_rejection @ 4536.87 SL=4541.87 TP=4531.87 vol=2.47 (main)
+15:42:19 [INFO] backtest.runner: [2026-05-31 22:13] OPEN BUY dc_wick_rejection @ 4531.57 SL=4526.57 TP=4536.57 vol=2.59 (main)
+15:42:19 [INFO] backtest.runner: [2026-06-01 00:34] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4537.46 SL=4544.96 TP=4529.96 vol=1.81 (main)
+15:42:19 [INFO] backtest.runner: [2026-06-01 05:07] OPEN BUY dc_wick_rejection @ 4516.44 SL=4511.44 TP=4521.44 vol=2.85 (main)
+15:42:19 [INFO] backtest.runner: [2026-06-01 05:33] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4516.11 SL=4523.61 TP=4508.61 vol=2.00 (main)
+15:42:20 [INFO] backtest.runner: [2026-06-01 07:58] OPEN BUY dc_wick_rejection @ 4501.03 SL=4496.03 TP=4506.03 vol=2.85 (main)
+15:42:20 [INFO] backtest.runner: [2026-06-01 10:59] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4503.57 SL=4511.07 TP=4496.07 vol=1.80 (main)
+15:42:20 [INFO] backtest.runner: [2026-06-01 11:53] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4506.50 SL=4514.00 TP=4499.00 vol=1.71 (main)
+15:42:20 [INFO] backtest.runner: [2026-06-01 12:57] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4502.57 SL=4510.07 TP=4495.07 vol=1.80 (main)
+15:42:20 [INFO] backtest.runner: [2026-06-01 16:09] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4468.90 SL=4476.40 TP=4461.40 vol=1.89 (main)
+15:42:20 [INFO] backtest.runner: [2026-06-01 17:17] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4474.42 SL=4481.92 TP=4466.92 vol=1.79 (main)
+15:42:20 [INFO] backtest.runner: [2026-06-01 18:31] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4485.54 SL=4493.04 TP=4478.04 vol=1.70 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 00:16] OPEN BUY dc_wick_rejection @ 4484.63 SL=4479.63 TP=4489.63 vol=2.68 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 00:43] OPEN SELL dc_wick_rejection @ 4486.70 SL=4491.70 TP=4481.70 vol=2.82 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 01:22] OPEN BUY dc_wick_rejection @ 4486.82 SL=4481.82 TP=4491.82 vol=2.96 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 01:28] OPEN BUY dc_wick_rejection @ 4488.43 SL=4483.43 TP=4493.43 vol=2.81 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 01:40] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4481.74 SL=4489.24 TP=4474.24 vol=1.78 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 02:01] OPEN BUY dc_wick_rejection @ 4480.11 SL=4475.11 TP=4485.11 vol=2.80 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 02:43] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4476.40 SL=4483.90 TP=4468.90 vol=1.77 (main)
+15:42:21 [INFO] backtest.runner: [2026-06-02 05:52] OPEN SELL dc_wick_rejection @ 4518.83 SL=4523.83 TP=4513.83 vol=2.53 (main)
+15:42:22 [INFO] backtest.runner: Progress: 51948/57725 (90%) | Trades: 291 | Balance: $24095.00
+15:42:22 [INFO] backtest.runner: [2026-06-02 18:52] OPEN BUY dc_wick_rejection @ 4489.38 SL=4484.38 TP=4494.38 vol=2.40 (main)
+15:42:22 [INFO] backtest.runner: [2026-06-02 22:25] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4488.53 SL=4496.03 TP=4481.03 vol=1.52 (main)
+15:42:22 [INFO] backtest.runner: [2026-06-03 00:58] OPEN SELL dc_wick_rejection @ 4487.19 SL=4492.19 TP=4482.19 vol=2.40 (main)
+15:42:23 [INFO] backtest.runner: [2026-06-03 07:04] OPEN BUY dc_wick_rejection @ 4466.38 SL=4461.38 TP=4471.38 vol=2.52 (main)
+15:42:23 [INFO] backtest.runner: [2026-06-03 09:07] OPEN BUY dc_wick_rejection @ 4454.07 SL=4449.07 TP=4459.07 vol=2.64 (main)
+15:42:23 [INFO] backtest.runner: [2026-06-03 11:17] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4461.04 SL=4468.54 TP=4453.54 vol=1.67 (main)
+15:42:23 [INFO] backtest.runner: [2026-06-03 13:19] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4456.02 SL=4463.52 TP=4448.52 vol=1.76 (main)
+15:42:23 [INFO] backtest.runner: [2026-06-03 15:07] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4449.35 SL=4456.85 TP=4441.85 vol=1.84 (main)
+15:42:24 [INFO] backtest.runner: [2026-06-03 19:45] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4446.78 SL=4454.28 TP=4439.28 vol=1.94 (main)
+15:42:24 [INFO] backtest.runner: [2026-06-03 22:28] OPEN BUY dc_wick_rejection @ 4434.19 SL=4429.19 TP=4439.19 vol=3.05 (main)
+15:42:24 [INFO] backtest.runner: [2026-06-04 00:16] OPEN SELL dc_wick_rejection @ 4451.53 SL=4456.53 TP=4446.53 vol=3.21 (main)
+15:42:24 [INFO] backtest.runner: [2026-06-04 03:25] OPEN SELL dc_wick_rejection @ 4467.73 SL=4472.73 TP=4462.73 vol=3.37 (main)
+15:42:25 [INFO] backtest.runner: [2026-06-04 12:10] OPEN SELL dc_wick_rejection @ 4498.27 SL=4503.27 TP=4493.27 vol=3.53 (main)
+15:42:25 [INFO] backtest.runner: [2026-06-04 13:55] OPEN SELL dc_wick_rejection @ 4498.55 SL=4503.55 TP=4493.55 vol=3.71 (main)
+15:42:25 [INFO] backtest.runner: Progress: 54834/57725 (95%) | Trades: 305 | Balance: $39017.50
+15:42:26 [INFO] backtest.runner: [2026-06-04 22:45] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4475.09 SL=4482.59 TP=4467.59 vol=2.60 (main)
+15:42:26 [INFO] backtest.runner: [2026-06-05 00:31] OPEN BUY dc_wick_rejection @ 4460.66 SL=4455.66 TP=4465.66 vol=4.09 (main)
+15:42:26 [INFO] backtest.runner: [2026-06-05 01:23] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4456.39 SL=4463.89 TP=4448.89 vol=2.86 (main)
+15:42:26 [INFO] backtest.runner: [2026-06-05 06:25] OPEN BUY dc_wick_rejection @ 4444.31 SL=4439.31 TP=4449.31 vol=4.51 (main)
+15:42:26 [INFO] backtest.runner: [2026-06-05 09:31] OPEN SELL dc_wick_rejection @ 4461.54 SL=4466.54 TP=4456.54 vol=4.74 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-05 12:04] OPEN SELL dc_wick_rejection @ 4466.77 SL=4471.77 TP=4461.77 vol=4.50 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-05 12:31] OPEN SELL dc_wick_rejection @ 4450.82 SL=4455.82 TP=4445.82 vol=4.27 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-05 14:52] OPEN BUY dc_wick_rejection @ 4365.74 SL=4360.74 TP=4370.74 vol=4.06 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-05 14:58] OPEN BUY dc_wick_rejection @ 4368.98 SL=4363.98 TP=4373.98 vol=3.86 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-05 16:55] OPEN BUY dc_wick_rejection @ 4338.31 SL=4333.31 TP=4343.31 vol=3.66 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-05 18:05] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4333.65 SL=4341.15 TP=4326.15 vol=2.56 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-05 20:28] OPEN BUY dc_wick_rejection @ 4325.08 SL=4320.08 TP=4330.08 vol=4.04 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-07 22:03] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4320.10 SL=4327.60 TP=4312.60 vol=2.83 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-07 22:16] OPEN BUY dc_wick_rejection @ 4326.55 SL=4321.55 TP=4331.55 vol=4.45 (main)
+15:42:27 [INFO] backtest.runner: [2026-06-08 01:43] OPEN BUY dc_wick_rejection @ 4324.61 SL=4319.61 TP=4329.61 vol=4.23 (main)
+15:42:28 [INFO] backtest.runner: [2026-06-08 05:52] OPEN BUY dc_wick_rejection @ 4293.35 SL=4288.35 TP=4298.35 vol=4.44 (main)
+15:42:28 [INFO] backtest.runner: [2026-06-08 07:43] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4303.60 SL=4311.10 TP=4296.10 vol=2.81 (main)
+15:42:28 [INFO] backtest.runner: [2026-06-08 10:05] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4290.57 SL=4298.07 TP=4283.07 vol=2.95 (main)
+15:42:28 [INFO] backtest.runner: [2026-06-08 12:16] OPEN SELL dc_wick_rejection @ 4320.63 SL=4325.63 TP=4315.63 vol=4.21 (main)
+15:42:28 [INFO] backtest.runner: [2026-06-08 13:52] OPEN SELL dc_wick_rejection @ 4330.26 SL=4335.26 TP=4325.26 vol=4.00 (main)
+15:42:28 [INFO] backtest.runner: [2026-06-08 13:58] OPEN SELL dc_wick_rejection @ 4328.16 SL=4333.16 TP=4323.16 vol=3.80 (main)
+15:42:29 [INFO] backtest.runner: Progress: 57720/57725 (100%) | Trades: 326 | Balance: $39950.00
+15:42:29 [INFO] backtest.runner: Backtest complete: 57725 bars, 380 signals, 0 blocked, 326 trades, final balance $39950.00
+Config loaded: config-gold.yaml
+Data: 57725 M1 bars for XAUUSD
+Period: 2026-04-09 19:22:00 → 2026-06-08 19:21:00
+Backtest completed in 75.2s
+
+======================================================================
+                    BACKTEST RESULTS
+======================================================================
+------------------  -------------
+Total Trades        326
+Win Rate            55.5%
+Net Profit          $+29950.00
+ROI                 +299.5%
+Profit Factor       1.25
+Expectancy          $+91.87
+
+Wins / Losses / BE  181 / 145 / 0
+Avg Win             $817.87
+Avg Loss            $814.38
+Avg Duration        22 min
+Max Consec. Wins    13
+Max Consec. Losses  5
+
+Initial Balance     $10000.00
+Final Balance       $39950.00
+Max Drawdown        47.2%
+Peak Balance        $47412.50
+------------------  -------------
+
+── By Direction ──
+  LONG: 97 trades, 54.6% win, $+7800.00
+  SHORT: 229 trades, 55.9% win, $+22150.00
+
+── By Strategy ──
+Strategy                            Trades  Win%    Net P&L       PF  Avg
+--------------------------------  --------  ------  ----------  ----  --------
+dc2w_m3_m45bear_dcupper_vwap            34  52.9%   $-547.50    0.96  $-16.10
+dc_wick_rejection                      185  54.1%   $+10615.00  1.15  $+57.38
+trend_2w_m2_ema50_bounce2_vwap          61  62.3%   $+15907.50  1.84  $+260.78
+trend_2w_m2_m15bear_bounce2_vwap        46  54.3%   $+3975.00   1.26  $+86.41
+
+── By Exit Reason ──
+  SL               145 trades  $-118085.00
+  TP               181 trades  $+148035.00
+
+======================================================================
+
+── Trade Log (showing 50/326) ──
+Time         Dir    Strategy                     Entry     Exit  P&L       Exit
+-----------  -----  -------------------------  -------  -------  --------  ------
+04/09 20:27  S      trend_2w_m2_ema50_bounce2  4769.72  4762.22  $+495.00  TP
+04/10 09:04  B      dc_wick_rejection          4744.91  4749.91  $+520.00  TP
+04/10 10:39  S      trend_2w_m2_m15bear_bounc  4754.11  4761.61  $-547.50  SL
+04/10 12:25  S      dc_wick_rejection          4760.27  4765.27  $-520.00  SL
+04/10 12:49  S      dc_wick_rejection          4764.17  4769.17  $-495.00  SL
+04/10 14:43  S      dc_wick_rejection          4775.14  4780.14  $-470.00  SL
+04/10 14:49  S      dc_wick_rejection          4777.15  4772.15  $+445.00  TP
+04/10 16:16  B      dc_wick_rejection          4763.67  4758.67  $-470.00  SL
+04/13 06:49  S      dc_wick_rejection          4722.35  4727.35  $-445.00  SL
+04/13 10:37  B      dc_wick_rejection          4715.83  4720.83  $+425.00  TP
+04/13 12:13  B      dc_wick_rejection          4718.16  4713.16  $-445.00  SL
+04/13 14:04  S      dc_wick_rejection          4721.58  4726.58  $-420.00  SL
+04/13 23:22  S      dc_wick_rejection          4758.01  4753.01  $+400.00  TP
+04/14 03:10  S      dc_wick_rejection          4768.88  4773.88  $-420.00  SL
+04/14 05:52  B      dc_wick_rejection          4765.67  4760.67  $-400.00  SL
+04/14 07:25  S      dc_wick_rejection          4772.67  4777.67  $-380.00  SL
+04/14 14:46  S      dc_wick_rejection          4797.64  4802.64  $-360.00  SL
+04/14 22:19  S      dc_wick_rejection          4840.97  4835.97  $+345.00  TP
+04/15 01:22  S      dc_wick_rejection          4848.1   4843.1   $+360.00  TP
+04/15 12:47  S      trend_2w_m2_m15bear_bounc  4808.94  4816.44  $-375.00  SL
+04/15 14:34  S      dc_wick_rejection          4819.44  4814.44  $+360.00  TP
+04/15 22:04  B      dc_wick_rejection          4796.93  4791.93  $-380.00  SL
+04/16 00:28  S      dc_wick_rejection          4824.59  4829.59  $-360.00  SL
+04/16 10:58  B      dc_wick_rejection          4815.51  4820.51  $+340.00  TP
+04/16 12:11  S      trend_2w_m2_ema50_bounce2  4814.76  4822.26  $-360.00  SL
+04/16 13:09  S      trend_2w_m2_m15bear_bounc  4815.59  4823.09  $-337.50  SL
+04/16 13:43  S      trend_2w_m2_m15bear_bounc  4816.82  4809.32  $+322.50  TP
+04/16 13:52  S      dc_wick_rejection          4806.44  4801.44  $+340.00  TP
+04/16 16:23  S      trend_2w_m2_ema50_bounce2  4800.44  4792.94  $+352.50  TP
+04/16 22:31  S      dc2w_m3_m45bear_dcupper_v  4792.32  4799.82  $-375.00  SL
+04/17 01:01  S      dc_wick_rejection          4793.53  4788.53  $+355.00  TP
+04/17 02:55  S      trend_2w_m2_ema50_bounce2  4788.08  4795.58  $-375.00  SL
+04/17 08:01  B      dc_wick_rejection          4787.25  4782.25  $-355.00  SL
+04/17 13:22  S      dc_wick_rejection          4855.47  4860.47  $-335.00  SL
+04/20 07:31  S      dc_wick_rejection          4793.39  4798.39  $-320.00  SL
+04/20 12:28  S      dc_wick_rejection          4804.14  4809.14  $-305.00  SL
+04/20 14:43  S      dc_wick_rejection          4811.67  4806.67  $+290.00  TP
+04/21 07:13  B      dc_wick_rejection          4785.02  4790.02  $+305.00  TP
+04/21 07:59  S      trend_2w_m2_m15bear_bounc  4785.13  4777.63  $+315.00  TP
+04/21 11:09  S      trend_2w_m2_m15bear_bounc  4785.56  4793.06  $-330.00  SL
+04/21 12:17  S      trend_2w_m2_m15bear_bounc  4790.48  4782.98  $+315.00  TP
+04/21 12:21  S      dc2w_m3_m45bear_dcupper_v  4780.76  4773.26  $+330.00  TP
+04/21 12:37  B      dc_wick_rejection          4789.38  4784.38  $-350.00  SL
+04/21 17:43  B      dc_wick_rejection          4715.81  4710.81  $-330.00  SL
+04/21 18:37  B      dc_wick_rejection          4702.67  4707.67  $+315.00  TP
+04/22 02:49  S      dc_wick_rejection          4751.76  4756.76  $-330.00  SL
+04/22 03:55  S      dc_wick_rejection          4757.85  4752.85  $+315.00  TP
+04/22 06:01  S      dc_wick_rejection          4763.11  4768.11  $-330.00  SL
+04/22 07:16  S      dc_wick_rejection          4764.62  4759.62  $+315.00  TP
+04/22 10:22  B      dc_wick_rejection          4755.1   4750.1   $-330.00  SL

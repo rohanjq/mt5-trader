@@ -1,0 +1,436 @@
+15:39:05 [INFO] core.config: Config loaded from /Users/rohan.arora/repos/mt5-trader/config-gold.yaml
+15:39:05 [INFO] backtest.data_loader: Loaded 6890 bars from sample.csv (2026-06-01 15:53:00 to 2026-06-08 15:52:00)
+15:39:05 [INFO] rules.expression: Expression rule dc_confluence is disabled — skipping
+15:39:05 [INFO] rules.expression: Loaded expression rule: dc_wick_rejection (priority=110, buy=2 conds, sell=2 conds)
+15:39:05 [INFO] rules.expression: Expression rule gold_utbot_trend is disabled — skipping
+15:39:05 [INFO] rules.expression: Expression rule gold_dc_breakout is disabled — skipping
+15:39:05 [INFO] rules.expression: Loaded expression rule: trend_2w_m2_ema50_bounce2_vwap (priority=50, buy=0 conds, sell=4 conds)
+15:39:05 [INFO] rules.expression: Loaded expression rule: trend_2w_m2_m15bear_bounce2_vwap (priority=50, buy=0 conds, sell=4 conds)
+15:39:05 [INFO] rules.expression: Expression rule m2_triple_align is disabled — skipping
+15:39:05 [INFO] rules.expression: Loaded expression rule: dc2w_m3_m45bear_dcupper_vwap (priority=55, buy=0 conds, sell=4 conds)
+15:39:05 [INFO] backtest.runner: Computing indicators for 14 sources across 6890 M1 bars...
+15:39:05 [INFO] backtest.indicators: Resampled to M5: 1381 bars
+15:39:05 [INFO] backtest.indicators: Resampled to H4: 32 bars
+15:39:05 [INFO] backtest.indicators: Resampled to M2: 3445 bars
+15:39:05 [INFO] backtest.indicators: Resampled to M1: 6890 bars
+15:39:05 [INFO] backtest.indicators: Resampled to M45: 156 bars
+15:39:05 [INFO] backtest.indicators: Resampled to H1: 116 bars
+15:39:05 [INFO] backtest.indicators: Resampled to M10: 691 bars
+15:39:05 [INFO] backtest.indicators: Resampled to M3: 2301 bars
+15:39:05 [INFO] backtest.indicators: Resampled to M15: 461 bars
+15:39:05 [INFO] backtest.indicators: Resampled to M30: 231 bars
+15:39:05 [INFO] backtest.indicators: Computing utbot_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M1: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M2: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M3: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M5: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M10: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M15: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M30: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_M45 (156 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_M45: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_H1: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing utbot_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → utbot_H4: 6890 rows, 9 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M1: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M2: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M3: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M5: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M10: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M15: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M30: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_M45 (156 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_M45: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_H1: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing dc_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → dc_H4: 6890 rows, 10 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema9_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → ema9_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema21_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → ema21_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema50_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → ema50_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing ema200_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → ema200_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi14_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi14_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing rsi2_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → rsi2_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing adx14_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → adx14_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_M1 (6890 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_M1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_M2 (3445 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_M2: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_M3 (2301 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_M3: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_M5 (1381 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_M5: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_M10 (691 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_M10: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_M15 (461 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_M15: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_M30 (231 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_M30: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_H1 (116 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_H1: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing macd12_26_9_H4 (32 bars)
+15:39:05 [INFO] backtest.indicators:   → macd12_26_9_H4: 6890 rows, 3 fields
+15:39:05 [INFO] backtest.indicators: Computing stoch5_3_3_M1 (6890 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_M1: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_M2 (3445 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_M2: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_M3 (2301 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_M3: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_M5 (1381 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_M5: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_M10 (691 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_M10: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_M15 (461 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_M15: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_M30 (231 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_M30: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_H1 (116 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_H1: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing stoch5_3_3_H4 (32 bars)
+15:39:06 [INFO] backtest.indicators:   → stoch5_3_3_H4: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_M1 (6890 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_M1: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_M2 (3445 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_M2: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_M3 (2301 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_M3: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_M5 (1381 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_M5: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_M10 (691 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_M10: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_M15 (461 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_M15: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_M30 (231 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_M30: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_H1 (116 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_H1: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing bb20d2_H4 (32 bars)
+15:39:06 [INFO] backtest.indicators:   → bb20d2_H4: 6890 rows, 5 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_M1 (6890 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_M1: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_M2 (3445 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_M2: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_M3 (2301 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_M3: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_M5 (1381 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_M5: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_M10 (691 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_M10: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_M15 (461 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_M15: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_M30 (231 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_M30: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_H1 (116 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_H1: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing atr14_H4 (32 bars)
+15:39:06 [INFO] backtest.indicators:   → atr14_H4: 6890 rows, 3 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_M1 (6890 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_M1: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_M2 (3445 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_M2: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_M3 (2301 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_M3: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_M5 (1381 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_M5: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_M10 (691 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_M10: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_M15 (461 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_M15: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_M30 (231 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_M30: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_H1 (116 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_H1: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.indicators: Computing vwap_H4 (32 bars)
+15:39:06 [INFO] backtest.indicators:   → vwap_H4: 6890 rows, 2 fields
+15:39:06 [INFO] backtest.runner: Indicators computed: ['utbot_M1', 'utbot_M2', 'utbot_M3', 'utbot_M5', 'utbot_M10', 'utbot_M15', 'utbot_M30', 'utbot_M45', 'utbot_H1', 'utbot_H4', 'dc_M1', 'dc_M2', 'dc_M3', 'dc_M5', 'dc_M10', 'dc_M15', 'dc_M30', 'dc_M45', 'dc_H1', 'dc_H4', 'ema9_M1', 'ema9_M2', 'ema9_M3', 'ema9_M5', 'ema9_M10', 'ema9_M15', 'ema9_M30', 'ema9_H1', 'ema9_H4', 'ema21_M1', 'ema21_M2', 'ema21_M3', 'ema21_M5', 'ema21_M10', 'ema21_M15', 'ema21_M30', 'ema21_H1', 'ema21_H4', 'ema50_M1', 'ema50_M2', 'ema50_M3', 'ema50_M5', 'ema50_M10', 'ema50_M15', 'ema50_M30', 'ema50_H1', 'ema50_H4', 'ema200_M1', 'ema200_M2', 'ema200_M3', 'ema200_M5', 'ema200_M10', 'ema200_M15', 'ema200_M30', 'ema200_H1', 'ema200_H4', 'rsi14_M1', 'rsi14_M2', 'rsi14_M3', 'rsi14_M5', 'rsi14_M10', 'rsi14_M15', 'rsi14_M30', 'rsi14_H1', 'rsi14_H4', 'rsi2_M1', 'rsi2_M2', 'rsi2_M3', 'rsi2_M5', 'rsi2_M10', 'rsi2_M15', 'rsi2_M30', 'rsi2_H1', 'rsi2_H4', 'adx14_M1', 'adx14_M2', 'adx14_M3', 'adx14_M5', 'adx14_M10', 'adx14_M15', 'adx14_M30', 'adx14_H1', 'adx14_H4', 'macd12_26_9_M1', 'macd12_26_9_M2', 'macd12_26_9_M3', 'macd12_26_9_M5', 'macd12_26_9_M10', 'macd12_26_9_M15', 'macd12_26_9_M30', 'macd12_26_9_H1', 'macd12_26_9_H4', 'stoch5_3_3_M1', 'stoch5_3_3_M2', 'stoch5_3_3_M3', 'stoch5_3_3_M5', 'stoch5_3_3_M10', 'stoch5_3_3_M15', 'stoch5_3_3_M30', 'stoch5_3_3_H1', 'stoch5_3_3_H4', 'bb20d2_M1', 'bb20d2_M2', 'bb20d2_M3', 'bb20d2_M5', 'bb20d2_M10', 'bb20d2_M15', 'bb20d2_M30', 'bb20d2_H1', 'bb20d2_H4', 'atr14_M1', 'atr14_M2', 'atr14_M3', 'atr14_M5', 'atr14_M10', 'atr14_M15', 'atr14_M30', 'atr14_H1', 'atr14_H4', 'vwap_M1', 'vwap_M2', 'vwap_M3', 'vwap_M5', 'vwap_M10', 'vwap_M15', 'vwap_M30', 'vwap_H1', 'vwap_H4']
+15:39:06 [INFO] backtest.runner: Starting bar-by-bar replay (6890 bars)...
+15:39:06 [INFO] backtest.runner: [2026-06-01 22:07] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4482.86 SL=4490.36 TP=4475.36 vol=0.66 (main)
+15:39:06 [INFO] backtest.runner: Progress: 344/6890 (5%) | Trades: 0 | Balance: $10000.00
+15:39:06 [INFO] backtest.runner: [2026-06-02 00:26] OPEN BUY dc_wick_rejection @ 4490.42 SL=4485.42 TP=4495.42 vol=0.95 (main)
+15:39:06 [INFO] backtest.runner: [2026-06-02 00:43] OPEN SELL dc_wick_rejection @ 4486.70 SL=4491.70 TP=4481.70 vol=0.99 (main)
+15:39:06 [INFO] backtest.runner: [2026-06-02 01:22] OPEN BUY dc_wick_rejection @ 4486.82 SL=4481.82 TP=4491.82 vol=1.04 (main)
+15:39:06 [INFO] backtest.runner: [2026-06-02 01:28] OPEN BUY dc_wick_rejection @ 4488.43 SL=4483.43 TP=4493.43 vol=0.99 (main)
+15:39:06 [INFO] backtest.runner: [2026-06-02 02:01] OPEN BUY dc_wick_rejection @ 4480.11 SL=4475.11 TP=4485.11 vol=0.94 (main)
+15:39:06 [INFO] backtest.runner: [2026-06-02 02:43] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4476.40 SL=4483.90 TP=4468.90 vol=0.59 (main)
+15:39:07 [INFO] backtest.runner: Progress: 688/6890 (10%) | Trades: 7 | Balance: $8547.50
+15:39:07 [INFO] backtest.runner: [2026-06-02 05:52] OPEN SELL dc_wick_rejection @ 4518.83 SL=4523.83 TP=4513.83 vol=0.85 (main)
+15:39:07 [INFO] backtest.runner: Progress: 1032/6890 (15%) | Trades: 8 | Balance: $8122.50
+15:39:07 [INFO] backtest.runner: Progress: 1376/6890 (20%) | Trades: 8 | Balance: $8122.50
+15:39:08 [INFO] backtest.runner: [2026-06-02 18:52] OPEN BUY dc_wick_rejection @ 4489.38 SL=4484.38 TP=4494.38 vol=0.81 (main)
+15:39:08 [INFO] backtest.runner: [2026-06-02 22:25] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4488.53 SL=4496.03 TP=4481.03 vol=0.51 (main)
+15:39:08 [INFO] backtest.runner: Progress: 1720/6890 (25%) | Trades: 9 | Balance: $7717.50
+15:39:08 [INFO] backtest.runner: [2026-06-03 00:58] OPEN SELL dc_wick_rejection @ 4487.19 SL=4492.19 TP=4482.19 vol=0.81 (main)
+15:39:08 [INFO] backtest.runner: Progress: 2064/6890 (30%) | Trades: 11 | Balance: $8505.00
+15:39:08 [INFO] backtest.runner: [2026-06-03 07:04] OPEN BUY dc_wick_rejection @ 4466.38 SL=4461.38 TP=4471.38 vol=0.85 (main)
+15:39:09 [INFO] backtest.runner: [2026-06-03 09:07] OPEN BUY dc_wick_rejection @ 4454.07 SL=4449.07 TP=4459.07 vol=0.89 (main)
+15:39:09 [INFO] backtest.runner: Progress: 2408/6890 (35%) | Trades: 13 | Balance: $8485.00
+15:39:09 [INFO] backtest.runner: [2026-06-03 11:17] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4461.04 SL=4468.54 TP=4453.54 vol=0.56 (main)
+15:39:09 [INFO] backtest.runner: [2026-06-03 13:19] OPEN SELL dc2w_m3_m45bear_dcupper_vwap @ 4456.02 SL=4463.52 TP=4448.52 vol=0.59 (main)
+15:39:09 [INFO] backtest.runner: [2026-06-03 15:07] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4449.35 SL=4456.85 TP=4441.85 vol=0.62 (main)
+15:39:09 [INFO] backtest.runner: Progress: 2752/6890 (40%) | Trades: 16 | Balance: $9812.50
+15:39:09 [INFO] backtest.runner: [2026-06-03 19:45] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4446.78 SL=4454.28 TP=4439.28 vol=0.65 (main)
+15:39:09 [INFO] backtest.runner: [2026-06-03 22:28] OPEN BUY dc_wick_rejection @ 4434.19 SL=4429.19 TP=4439.19 vol=1.03 (main)
+15:39:10 [INFO] backtest.runner: Progress: 3096/6890 (45%) | Trades: 18 | Balance: $10815.00
+15:39:10 [INFO] backtest.runner: [2026-06-04 00:16] OPEN SELL dc_wick_rejection @ 4451.53 SL=4456.53 TP=4446.53 vol=1.08 (main)
+15:39:10 [INFO] backtest.runner: [2026-06-04 03:25] OPEN SELL dc_wick_rejection @ 4467.73 SL=4472.73 TP=4462.73 vol=1.13 (main)
+15:39:10 [INFO] backtest.runner: Progress: 3440/6890 (50%) | Trades: 20 | Balance: $11920.00
+15:39:10 [INFO] backtest.runner: Progress: 3784/6890 (55%) | Trades: 20 | Balance: $11920.00
+15:39:11 [INFO] backtest.runner: [2026-06-04 12:10] OPEN SELL dc_wick_rejection @ 4498.27 SL=4503.27 TP=4493.27 vol=1.19 (main)
+15:39:11 [INFO] backtest.runner: [2026-06-04 13:55] OPEN SELL dc_wick_rejection @ 4498.55 SL=4503.55 TP=4493.55 vol=1.25 (main)
+15:39:11 [INFO] backtest.runner: Progress: 4128/6890 (60%) | Trades: 22 | Balance: $13140.00
+15:39:11 [INFO] backtest.runner: Progress: 4472/6890 (65%) | Trades: 22 | Balance: $13140.00
+15:39:11 [INFO] backtest.runner: [2026-06-04 22:45] OPEN SELL trend_2w_m2_m15bear_bounce2_vwap @ 4475.09 SL=4482.59 TP=4467.59 vol=0.87 (main)
+15:39:11 [INFO] backtest.runner: [2026-06-05 00:31] OPEN BUY dc_wick_rejection @ 4460.66 SL=4455.66 TP=4465.66 vol=1.37 (main)
+15:39:11 [INFO] backtest.runner: [2026-06-05 01:23] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4456.39 SL=4463.89 TP=4448.89 vol=0.96 (main)
+15:39:12 [INFO] backtest.runner: Progress: 4816/6890 (70%) | Trades: 25 | Balance: $15197.50
+15:39:12 [INFO] backtest.runner: [2026-06-05 06:25] OPEN BUY dc_wick_rejection @ 4444.31 SL=4439.31 TP=4449.31 vol=1.51 (main)
+15:39:12 [INFO] backtest.runner: [2026-06-05 09:31] OPEN SELL dc_wick_rejection @ 4461.54 SL=4466.54 TP=4456.54 vol=1.59 (main)
+15:39:12 [INFO] backtest.runner: Progress: 5160/6890 (75%) | Trades: 27 | Balance: $15157.50
+15:39:12 [INFO] backtest.runner: [2026-06-05 12:04] OPEN SELL dc_wick_rejection @ 4466.77 SL=4471.77 TP=4461.77 vol=1.51 (main)
+15:39:12 [INFO] backtest.runner: [2026-06-05 12:31] OPEN SELL dc_wick_rejection @ 4450.82 SL=4455.82 TP=4445.82 vol=1.44 (main)
+15:39:12 [INFO] backtest.runner: [2026-06-05 14:52] OPEN BUY dc_wick_rejection @ 4365.74 SL=4360.74 TP=4370.74 vol=1.36 (main)
+15:39:12 [INFO] backtest.runner: [2026-06-05 14:58] OPEN BUY dc_wick_rejection @ 4368.98 SL=4363.98 TP=4373.98 vol=1.30 (main)
+15:39:12 [INFO] backtest.runner: Progress: 5504/6890 (80%) | Trades: 31 | Balance: $12352.50
+15:39:13 [INFO] backtest.runner: [2026-06-05 16:55] OPEN BUY dc_wick_rejection @ 4338.31 SL=4333.31 TP=4343.31 vol=1.23 (main)
+15:39:13 [INFO] backtest.runner: [2026-06-05 18:05] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4333.65 SL=4341.15 TP=4326.15 vol=0.86 (main)
+15:39:13 [INFO] backtest.runner: [2026-06-05 20:28] OPEN BUY dc_wick_rejection @ 4325.08 SL=4320.08 TP=4330.08 vol=1.36 (main)
+15:39:13 [INFO] backtest.runner: [2026-06-07 22:03] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4320.10 SL=4327.60 TP=4312.60 vol=0.95 (main)
+15:39:13 [INFO] backtest.runner: [2026-06-07 22:16] OPEN BUY dc_wick_rejection @ 4326.55 SL=4321.55 TP=4331.55 vol=1.50 (main)
+15:39:13 [INFO] backtest.runner: Progress: 5848/6890 (85%) | Trades: 36 | Balance: $14255.00
+15:39:13 [INFO] backtest.runner: [2026-06-08 01:43] OPEN BUY dc_wick_rejection @ 4324.61 SL=4319.61 TP=4329.61 vol=1.42 (main)
+15:39:13 [INFO] backtest.runner: Progress: 6192/6890 (90%) | Trades: 37 | Balance: $14965.00
+15:39:13 [INFO] backtest.runner: [2026-06-08 05:52] OPEN BUY dc_wick_rejection @ 4293.35 SL=4288.35 TP=4298.35 vol=1.49 (main)
+15:39:14 [INFO] backtest.runner: [2026-06-08 07:43] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4303.60 SL=4311.10 TP=4296.10 vol=0.94 (main)
+15:39:14 [INFO] backtest.runner: Progress: 6536/6890 (95%) | Trades: 39 | Balance: $14925.00
+15:39:14 [INFO] backtest.runner: [2026-06-08 10:05] OPEN SELL trend_2w_m2_ema50_bounce2_vwap @ 4290.57 SL=4298.07 TP=4283.07 vol=0.99 (main)
+15:39:14 [INFO] backtest.runner: [2026-06-08 12:16] OPEN SELL dc_wick_rejection @ 4320.63 SL=4325.63 TP=4315.63 vol=1.41 (main)
+15:39:14 [INFO] backtest.runner: [2026-06-08 13:52] OPEN SELL dc_wick_rejection @ 4330.26 SL=4335.26 TP=4325.26 vol=1.34 (main)
+15:39:14 [INFO] backtest.runner: [2026-06-08 13:58] OPEN SELL dc_wick_rejection @ 4328.16 SL=4333.16 TP=4323.16 vol=1.28 (main)
+15:39:14 [INFO] backtest.runner: Progress: 6880/6890 (100%) | Trades: 43 | Balance: $13447.50
+15:39:14 [INFO] backtest.runner: Backtest complete: 6890 bars, 48 signals, 0 blocked, 43 trades, final balance $13447.50
+Config loaded: config-gold.yaml
+Data: 6890 M1 bars for XAUUSD
+Period: 2026-06-01 15:53:00 → 2026-06-08 15:52:00
+Backtest completed in 9.1s
+
+======================================================================
+                    BACKTEST RESULTS
+======================================================================
+------------------  -----------
+Total Trades        43
+Win Rate            58.1%
+Net Profit          $+3447.50
+ROI                 +34.5%
+Profit Factor       1.32
+Expectancy          $+80.17
+
+Wins / Losses / BE  25 / 18 / 0
+Avg Win             $574.30
+Avg Loss            $606.11
+Avg Duration        15 min
+Max Consec. Wins    13
+Max Consec. Losses  6
+
+Initial Balance     $10000.00
+Final Balance       $13447.50
+Max Drawdown        26.3%
+Peak Balance        $15952.50
+------------------  -----------
+
+── By Direction ──
+  LONG: 17 trades, 47.1% win, $-300.00
+  SHORT: 26 trades, 65.4% win, $+3747.50
+
+── By Strategy ──
+Strategy                            Trades  Win%    Net P&L      PF  Avg
+--------------------------------  --------  ------  ---------  ----  --------
+dc2w_m3_m45bear_dcupper_vwap             2  50.0%   $+0.00     1     $+0.00
+dc_wick_rejection                       30  50.0%   $-505.00   0.95  $-16.83
+trend_2w_m2_ema50_bounce2_vwap           6  83.3%   $+2505.00  4.37  $+417.50
+trend_2w_m2_m15bear_bounce2_vwap         5  80.0%   $+1447.50  3.92  $+289.50
+
+── By Exit Reason ──
+  SL                18 trades  $-10910.00
+  TP                25 trades  $+14357.50
+
+======================================================================
+
+── Trade Log (showing 43/43) ──
+Time         Dir    Strategy                     Entry     Exit  P&L       Exit
+-----------  -----  -------------------------  -------  -------  --------  ------
+06/01 22:07  S      trend_2w_m2_m15bear_bounc  4482.86  4490.36  $-495.00  SL
+06/02 00:26  B      dc_wick_rejection          4490.42  4495.42  $+475.00  TP
+06/02 00:43  S      dc_wick_rejection          4486.7   4481.7   $+495.00  TP
+06/02 01:22  B      dc_wick_rejection          4486.82  4481.82  $-520.00  SL
+06/02 01:28  B      dc_wick_rejection          4488.43  4483.43  $-495.00  SL
+06/02 02:01  B      dc_wick_rejection          4480.11  4475.11  $-470.00  SL
+06/02 02:43  S      dc2w_m3_m45bear_dcupper_v  4476.4   4483.9   $-442.50  SL
+06/02 05:52  S      dc_wick_rejection          4518.83  4523.83  $-425.00  SL
+06/02 18:52  B      dc_wick_rejection          4489.38  4484.38  $-405.00  SL
+06/02 22:25  S      trend_2w_m2_m15bear_bounc  4488.53  4481.03  $+382.50  TP
+06/03 00:58  S      dc_wick_rejection          4487.19  4482.19  $+405.00  TP
+06/03 07:04  B      dc_wick_rejection          4466.38  4471.38  $+425.00  TP
+06/03 09:07  B      dc_wick_rejection          4454.07  4449.07  $-445.00  SL
+06/03 11:17  S      trend_2w_m2_m15bear_bounc  4461.04  4453.54  $+420.00  TP
+06/03 13:19  S      dc2w_m3_m45bear_dcupper_v  4456.02  4448.52  $+442.50  TP
+06/03 15:07  S      trend_2w_m2_ema50_bounce2  4449.35  4441.85  $+465.00  TP
+06/03 19:45  S      trend_2w_m2_m15bear_bounc  4446.78  4439.28  $+487.50  TP
+06/03 22:28  B      dc_wick_rejection          4434.19  4439.19  $+515.00  TP
+06/04 00:16  S      dc_wick_rejection          4451.53  4446.53  $+540.00  TP
+06/04 03:25  S      dc_wick_rejection          4467.73  4462.73  $+565.00  TP
+06/04 12:10  S      dc_wick_rejection          4498.27  4493.27  $+595.00  TP
+06/04 13:55  S      dc_wick_rejection          4498.55  4493.55  $+625.00  TP
+06/04 22:45  S      trend_2w_m2_m15bear_bounc  4475.09  4467.59  $+652.50  TP
+06/05 00:31  B      dc_wick_rejection          4460.66  4465.66  $+685.00  TP
+06/05 01:23  S      trend_2w_m2_ema50_bounce2  4456.39  4448.89  $+720.00  TP
+06/05 06:25  B      dc_wick_rejection          4444.31  4449.31  $+755.00  TP
+06/05 09:31  S      dc_wick_rejection          4461.54  4466.54  $-795.00  SL
+06/05 12:04  S      dc_wick_rejection          4466.77  4471.77  $-755.00  SL
+06/05 12:31  S      dc_wick_rejection          4450.82  4455.82  $-720.00  SL
+06/05 14:52  B      dc_wick_rejection          4365.74  4360.74  $-680.00  SL
+06/05 14:58  B      dc_wick_rejection          4368.98  4363.98  $-650.00  SL
+06/05 16:55  B      dc_wick_rejection          4338.31  4343.31  $+615.00  TP
+06/05 18:05  S      trend_2w_m2_ema50_bounce2  4333.65  4326.15  $+645.00  TP
+06/05 20:28  B      dc_wick_rejection          4325.08  4330.08  $+680.00  TP
+06/07 22:03  S      trend_2w_m2_ema50_bounce2  4320.1   4312.6   $+712.50  TP
+06/07 22:16  B      dc_wick_rejection          4326.55  4321.55  $-750.00  SL
+06/08 01:43  B      dc_wick_rejection          4324.61  4329.61  $+710.00  TP
+06/08 05:52  B      dc_wick_rejection          4293.35  4288.35  $-745.00  SL
+06/08 07:43  S      trend_2w_m2_ema50_bounce2  4303.6   4296.1   $+705.00  TP
+06/08 10:05  S      trend_2w_m2_ema50_bounce2  4290.57  4298.07  $-742.50  SL
+06/08 12:16  S      dc_wick_rejection          4320.63  4325.63  $-705.00  SL
+06/08 13:52  S      dc_wick_rejection          4330.26  4335.26  $-670.00  SL
+06/08 13:58  S      dc_wick_rejection          4328.16  4323.16  $+640.00  TP

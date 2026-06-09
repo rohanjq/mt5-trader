@@ -14,7 +14,7 @@ trading:
   magic: 200             # separate magic from BTC (100)
   deviation: 20
   filling: FOK
-  multi_position: true
+  multi_position: false
   sl_dollars: 5.0         # default SL = $5.00 move (overridable per strategy)
   reward_ratio: 1.0        # default TP = SL × 1.0 (1:1 risk-reward)
 
