@@ -20,15 +20,15 @@ log = logging.getLogger(__name__)
 
 # ── UT Bot ─────────────────────────────────────────────────────────────────────
 
-def compute_utbot(df: pd.DataFrame, atr_period: int = 1, key_value: float = 1.0) -> pd.DataFrame:
+def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0) -> pd.DataFrame:
     """Compute UT Bot Alert indicator.
 
     The UT Bot uses ATR trailing stop. When close crosses above the trail stop,
     bias flips to BULLISH and a BUY signal fires (one bar). Vice versa for SELL.
 
     Parameters:
-        atr_period: ATR period (default 1 for the standard UT Bot)
-        key_value: ATR multiplier for trail stop distance (default 1.0)
+        atr_period: ATR period (default 10 to match SignalMaster EA)
+        key_value: ATR multiplier for trail stop distance (default 2.0)
     """
     close = df["close"].values
     high = df["high"].values

@@ -82,7 +82,7 @@ rules:
     # DC M15 zone + UT Bot M1 signal + M45 trend bars
     # ══════════════════════════════════════════════════════════
     - name: "dc_confluence"
-      enabled: true
+      enabled: false
       priority: 100
       sl_dollars: 5.0
       reward_ratio: 1.0
@@ -213,7 +213,7 @@ rules:
     # M15 bias must be fresh (≤ 7 candles old)
     # ══════════════════════════════════════════════════════════
     - name: "m2_triple_align"
-      enabled: true
+      enabled: false
       priority: 60
       sl_dollars: 7.5
       reward_ratio: 1.0
@@ -231,4 +231,24 @@ rules:
         - utbot_M15.closed_bias == BEARISH
         - utbot_M15.consecutive_bear_bars <= 7
         - utbot_M45.closed_bias == BEARISH
+        - vwap_M1.closed_price_vs_vwap == BELOW
+
+    # ══════════════════════════════════════════════════════════
+    # Strategy 8: DC Second Wave — M45 bear + DC M15 upper pullback
+    # Backtest 60d: PF 1.29, WR 57.6%, 59 trades, DD 30.6%
+    # M3 SELL + M45 bearish + price in DC M15 UPPER zone + VWAP below
+    # ══════════════════════════════════════════════════════════
+    - name: "dc2w_m3_m45bear_dcupper_vwap"
+      enabled: true
+      priority: 55
+      sl_dollars: 7.5
+      reward_ratio: 1.0
+      breakeven_pct: 0.0
+      partial_tp: false
+      description: "M3 SELL + M45 bearish + DC M15 upper pullback + VWAP"
+      buy: []
+      sell:
+        - utbot_M3.closed_signal == SELL
+        - utbot_M45.closed_bias == BEARISH
+        - dc_M15.closed_price_zone in UPPER,UPPER_MID
         - vwap_M1.closed_price_vs_vwap == BELOW
