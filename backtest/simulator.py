@@ -25,8 +25,11 @@ class Position:
     rule_name: str
     risk_dollars: float = 0.0
     breakeven_pct: float = 0.0
+    trailing_stop_dollars: float = 0.0
     is_runner: bool = False
     breakeven_moved: bool = False
+    trail_active: bool = False
+    trail_best_price: float = 0.0
 
 
 @dataclass
@@ -100,6 +103,7 @@ class Simulator:
         reward_ratio: float,
         risk_pct: float,
         breakeven_pct: float = 0.0,
+        trailing_stop_dollars: float = 0.0,
         partial_tp: bool = True,
         tp_close_pct: float = 80.0,
     ) -> list[Position]:
@@ -153,8 +157,10 @@ class Simulator:
             rule_name=rule_name,
             risk_dollars=sl_dollars,
             breakeven_pct=breakeven_pct,
+            trailing_stop_dollars=trailing_stop_dollars,
         )
         self.open_positions[rule_name] = main_pos
+        main_pos.trail_best_price = price  # init trailing baseline
         positions.append(main_pos)
 
         # Apply spread to entry
@@ -185,9 +191,11 @@ class Simulator:
                 rule_name=runner_name,
                 risk_dollars=sl_dollars,
                 breakeven_pct=breakeven_pct,
+                trailing_stop_dollars=trailing_stop_dollars,
                 is_runner=True,
             )
             self.open_positions[runner_name] = runner_pos
+            runner_pos.trail_best_price = price
             positions.append(runner_pos)
             log.debug(
                 "OPEN runner %s %s @ %.2f SL=%.2f (no TP) vol=%.2f",
@@ -224,6 +232,25 @@ class Simulator:
                     pos.breakeven_moved = True
                     log.debug("Breakeven moved for %s: SL → %.2f", pos.id, pos.sl)
 
+            # Check trailing stop
+            if pos.trailing_stop_dollars > 0:
+                if pos.direction == "BUY":
+                    if high > pos.trail_best_price:
+                        pos.trail_best_price = high
+                    new_sl = pos.trail_best_price - pos.trailing_stop_dollars
+                    if new_sl > pos.sl:
+                        log.debug("Trailing SL for %s: %.2f → %.2f (best=%.2f)", pos.id, pos.sl, new_sl, pos.trail_best_price)
+                        pos.sl = new_sl
+                        pos.trail_active = True
+                else:
+                    if pos.trail_best_price == 0 or low < pos.trail_best_price:
+                        pos.trail_best_price = low
+                    new_sl = pos.trail_best_price + pos.trailing_stop_dollars
+                    if new_sl < pos.sl:
+                        log.debug("Trailing SL for %s: %.2f → %.2f (best=%.2f)", pos.id, pos.sl, new_sl, pos.trail_best_price)
+                        pos.sl = new_sl
+                        pos.trail_active = True
+
             sl_hit = False
             tp_hit = False
 
@@ -249,7 +276,12 @@ class Simulator:
 
             if sl_hit:
                 exit_price = pos.sl
-                exit_reason = "BREAKEVEN" if pos.breakeven_moved and pos.sl == pos.entry_price else "SL"
+                if pos.trail_active:
+                    exit_reason = "TRAIL"
+                elif pos.breakeven_moved and pos.sl == pos.entry_price:
+                    exit_reason = "BREAKEVEN"
+                else:
+                    exit_reason = "SL"
                 to_close.append((rule_name, exit_price, exit_reason, bar_time))
                 continue
 

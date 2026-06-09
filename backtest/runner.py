@@ -55,6 +55,7 @@ class BacktestRunner:
         self.default_sl = float(config.get("trading.sl_dollars", 5.0))
         self.default_rr = float(config.get("trading.reward_ratio", 1.2))
         self.default_be_pct = float(config.get("exit_rules.breakeven_pct", 0.0))
+        self.default_trailing = float(config.get("exit_rules.trailing_stop_dollars", 0.0))
         self.default_partial_tp = bool(config.get("exit_rules.partial_tp", True))
         self.tp_close_pct = float(config.get("exit_rules.tp_close_pct", 80.0))
         self.multi_position = bool(config.get("trading.multi_position", True))
@@ -135,6 +136,7 @@ class BacktestRunner:
                     reward_ratio=p_rr,
                     risk_pct=self.risk_pct,
                     breakeven_pct=breakeven_pct,
+                    trailing_stop_dollars=self.default_trailing,
                     partial_tp=partial_tp,
                     tp_close_pct=self.tp_close_pct,
                 )

@@ -111,12 +111,13 @@ def load_strategies(strat_dir: Path, only: list[str] | None = None) -> list[dict
 def run_backtest(
     name: str, buy_conds: list[str], sl: float, rr: float,
     sources: list[dict], data: Path, balance: float,
-    breakeven_pct: float, tmpdir: Path,
+    breakeven_pct: float, trailing_stop: float, tmpdir: Path,
 ) -> tuple[int, float, float, float, float]:
     cfg = copy.deepcopy(_BASE)
     cfg["trading"]["sl_dollars"] = sl
     cfg["trading"]["reward_ratio"] = rr
     cfg["exit_rules"]["breakeven_pct"] = breakeven_pct
+    cfg["exit_rules"]["trailing_stop_dollars"] = trailing_stop
     cfg["signals"] = {
         "poll_interval": 2.0,
         "csv_dir": "../MetaTrader5-Docker/data/signals",
@@ -173,6 +174,8 @@ def main():
     parser.add_argument("--expr", action="append", default=[],
                         help="Buy expression to test directly (repeatable, each is a separate strategy)")
     parser.add_argument("--breakeven_pct", type=float, default=0.0)
+    parser.add_argument("--trailing", type=float, default=0.0,
+                        help="Trailing stop distance in dollars (0 = off)")
 
     args = parser.parse_args()
     strat_dir = Path(args.dir)
@@ -222,6 +225,8 @@ def main():
     print(f"RR values: {rr_values}")
     print(f"Extra filters: {filter_str}")
     print(f"Breakeven: {args.breakeven_pct}%")
+    if args.trailing > 0:
+        print(f"Trailing stop: ${args.trailing}")
     print(f"Total runs: {total_runs}")
     print(f"Sources: {', '.join(s['indicator'] for s in sources)}")
     print(f"\n{'=' * 110}")
@@ -242,7 +247,7 @@ def main():
             name = strat["name"]
             tr, wr, pf, net, dd = run_backtest(
                 name, combined, sl, rr, sources, data,
-                args.balance, args.breakeven_pct, tmpdir,
+                args.balance, args.breakeven_pct, args.trailing, tmpdir,
             )
             flag = (" ★" if pf >= 1.3 and tr >= 15
                     else " ✓" if pf >= 1.1 and tr >= 10
