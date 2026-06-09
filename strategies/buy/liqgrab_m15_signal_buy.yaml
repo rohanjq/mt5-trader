@@ -1,0 +1,1 @@
+{name: liqgrab_m15_signal_buy, description: Liq grab M15 composite BUY (rejection + breakout + MA), buy: ["liqgrab_M15.closed_liq_signal == BUY"]}

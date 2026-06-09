@@ -199,6 +199,22 @@ uv run python tests/run_all_strategies.py --include-disabled
 |-----------|--------|
 | `volatility_state` | `EXPANDING`, `ABOVE_AVG`, `BELOW_AVG`, `CONTRACTING` |
 
+### Liquidity Grab (`liqgrab`)
+| Expression | Values |
+|-----------|--------|
+| `closed_key_high` | numeric (structural pivot high) |
+| `closed_key_low` | numeric (structural pivot low) |
+| `closed_rejection_up` | `TRUE`, `FALSE` (bullish wick grab at key low) |
+| `closed_rejection_down` | `TRUE`, `FALSE` (bearish wick grab at key high) |
+| `closed_rejection_up_count` | numeric (count of rej-up bars in window) |
+| `closed_rejection_down_count` | numeric (count of rej-down bars in window) |
+| `closed_breakout_up` | `TRUE`, `FALSE` (closed above key high) |
+| `closed_breakout_down` | `TRUE`, `FALSE` (closed below key low) |
+| `closed_ma_trend` | `ABOVE`, `BELOW` (vs SMA100) |
+| `closed_liq_signal` | `BUY`, `SELL`, `NONE` (composite: rejection + breakout + MA) |
+
+Default params: lookback=50, barsN=5, wickRatio=2.0, candlesBk=5, maPeriod=100.
+
 ### Candle (`candle`)
 | Expression | Values |
 |-----------|--------|

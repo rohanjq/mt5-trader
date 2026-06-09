@@ -1,0 +1,1 @@
+{name: liqgrab_m15_ma_above, description: Liq grab M15 price above SMA100 trend filter, buy: ["liqgrab_M15.closed_ma_trend == ABOVE"]}

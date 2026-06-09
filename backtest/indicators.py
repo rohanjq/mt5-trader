@@ -611,6 +611,207 @@ def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
     return result
 
 
+# ── Liquidity Grab ─────────────────────────────────────────────────────────────
+
+def compute_liqgrab(
+    df: pd.DataFrame,
+    lookback: int = 50,
+    bars_n: int = 5,
+    wick_ratio: float = 2.0,
+    candles_bk: int = 5,
+    ma_period: int = 100,
+) -> pd.DataFrame:
+    """Compute Liquidity Grab indicator (matches SignalMaster.mq5).
+
+    Finds key structural highs/lows (pivot points), then detects when price
+    sweeps past them with a wick but closes back inside (liquidity grab).
+
+    Parameters:
+        lookback: Range for finding key levels (default 50)
+        bars_n: Pivot window half-size (default 5 = bar must be highest/lowest
+                in a 2*5+1 = 11 bar window)
+        wick_ratio: Min wick:body ratio for rejection candle (default 2.0)
+        candles_bk: How many recent bars to check for rejections (default 5)
+        ma_period: SMA period for trend filter (default 100)
+
+    Fields:
+        key_high, key_low: current structural pivot levels
+        rejection_up: TRUE if bullish wick rejection at key_low in last candles_bk bars
+        rejection_down: TRUE if bearish wick rejection at key_high in last candles_bk bars
+        rejection_up_count: number of rejection-up bars in last candles_bk bars
+        rejection_down_count: number of rejection-down bars in last candles_bk bars
+        breakout_up, breakout_down: price broke past key level
+        ma_trend: ABOVE/BELOW SMA
+        liq_signal: composite BUY/SELL/NONE
+    """
+    n = len(df)
+    opens = df["open"].values
+    highs = df["high"].values
+    lows = df["low"].values
+    closes = df["close"].values
+
+    # SMA for trend filter
+    sma = pd.Series(closes).rolling(ma_period, min_periods=1).mean().values
+
+    # Output arrays
+    key_high_arr = np.full(n, np.nan)
+    key_low_arr = np.full(n, np.nan)
+    rej_up_arr = np.full(n, "FALSE", dtype=object)
+    rej_down_arr = np.full(n, "FALSE", dtype=object)
+    rej_up_count_arr = np.zeros(n, dtype=int)
+    rej_down_count_arr = np.zeros(n, dtype=int)
+    breakout_up_arr = np.full(n, "FALSE", dtype=object)
+    breakout_down_arr = np.full(n, "FALSE", dtype=object)
+    ma_trend_arr = np.full(n, "BELOW", dtype=object)
+    signal_arr = np.full(n, "NONE", dtype=object)
+
+    min_bars = max(lookback, ma_period) + bars_n + 10
+
+    for i in range(min_bars, n):
+        # --- Find key high (highest pivot in lookback range) ---
+        key_high = _find_key_high(highs, i, bars_n, lookback)
+        key_low = _find_key_low(lows, i, bars_n, lookback)
+        key_high_arr[i] = key_high
+        key_low_arr[i] = key_low
+
+        # --- Check for rejection in last candles_bk closed bars ---
+        was_rej_up = False
+        was_rej_down = False
+        rej_up_cnt = 0
+        rej_down_cnt = 0
+
+        for j in range(1, min(candles_bk + 1, i + 1)):
+            shift = i - j
+            if shift < 0:
+                break
+            if _is_rejection_up(opens, highs, lows, closes, shift, wick_ratio, key_low):
+                was_rej_up = True
+                rej_up_cnt += 1
+            if _is_rejection_down(opens, highs, lows, closes, shift, wick_ratio, key_high):
+                was_rej_down = True
+                rej_down_cnt += 1
+
+        rej_up_arr[i] = "TRUE" if was_rej_up else "FALSE"
+        rej_down_arr[i] = "TRUE" if was_rej_down else "FALSE"
+        rej_up_count_arr[i] = rej_up_cnt
+        rej_down_count_arr[i] = rej_down_cnt
+
+        # --- Breakout detection ---
+        bk_range = candles_bk + bars_n
+        bk_key_high = _find_key_high(highs, i, bars_n, bk_range)
+        bk_key_low = _find_key_low(lows, i, bars_n, bk_range)
+
+        brk_up = False
+        brk_down = False
+        for j in range(1, min(candles_bk + 1, i + 1)):
+            shift = i - j
+            if shift < 0:
+                break
+            if closes[shift] > bk_key_high:
+                brk_up = True
+            if closes[shift] < bk_key_low:
+                brk_down = True
+
+        breakout_up_arr[i] = "TRUE" if brk_up else "FALSE"
+        breakout_down_arr[i] = "TRUE" if brk_down else "FALSE"
+
+        # --- MA trend ---
+        ma_trend_arr[i] = "ABOVE" if closes[i] > sma[i] else "BELOW"
+
+        # --- Composite signal ---
+        if was_rej_up and brk_up and closes[i] > sma[i]:
+            signal_arr[i] = "BUY"
+        elif was_rej_down and brk_down and closes[i] < sma[i]:
+            signal_arr[i] = "SELL"
+
+    result = pd.DataFrame(index=df.index)
+    result["closed_key_high"] = key_high_arr
+    result["closed_key_low"] = key_low_arr
+    result["closed_rejection_up"] = rej_up_arr
+    result["closed_rejection_down"] = rej_down_arr
+    result["closed_rejection_up_count"] = rej_up_count_arr
+    result["closed_rejection_down_count"] = rej_down_count_arr
+    result["closed_breakout_up"] = breakout_up_arr
+    result["closed_breakout_down"] = breakout_down_arr
+    result["closed_ma_trend"] = ma_trend_arr
+    result["closed_liq_signal"] = signal_arr
+    return result
+
+
+def _find_key_high(highs: np.ndarray, current: int, bars_n: int, lookback: int) -> float:
+    """Find the highest pivot high in the lookback range before current bar."""
+    best = -np.inf
+    found = False
+    limit = min(lookback, current - bars_n)
+    for offset in range(bars_n, limit):
+        idx = current - offset
+        if idx < bars_n:
+            break
+        hi = highs[idx]
+        is_peak = True
+        for j in range(idx - bars_n, idx + bars_n + 1):
+            if j < 0 or j >= len(highs):
+                continue
+            if j != idx and highs[j] > hi:
+                is_peak = False
+                break
+        if is_peak and hi > best:
+            best = hi
+            found = True
+    return best if found else np.inf
+
+
+def _find_key_low(lows: np.ndarray, current: int, bars_n: int, lookback: int) -> float:
+    """Find the lowest pivot low in the lookback range before current bar."""
+    best = np.inf
+    found = False
+    limit = min(lookback, current - bars_n)
+    for offset in range(bars_n, limit):
+        idx = current - offset
+        if idx < bars_n:
+            break
+        lo = lows[idx]
+        is_trough = True
+        for j in range(idx - bars_n, idx + bars_n + 1):
+            if j < 0 or j >= len(lows):
+                continue
+            if j != idx and lows[j] < lo:
+                is_trough = False
+                break
+        if is_trough and lo < best:
+            best = lo
+            found = True
+    return best if found else -1.0
+
+
+def _is_rejection_up(
+    opens: np.ndarray, highs: np.ndarray, lows: np.ndarray, closes: np.ndarray,
+    shift: int, wick_ratio: float, key_low: float,
+) -> bool:
+    """Bullish rejection: lower wick grabs below key_low, closes above it."""
+    body = abs(closes[shift] - opens[shift])
+    if body < 1e-8:
+        return False
+    lower_wick = min(opens[shift], closes[shift]) - lows[shift]
+    return (lower_wick >= wick_ratio * body
+            and lows[shift] < key_low
+            and highs[shift] > key_low)
+
+
+def _is_rejection_down(
+    opens: np.ndarray, highs: np.ndarray, lows: np.ndarray, closes: np.ndarray,
+    shift: int, wick_ratio: float, key_high: float,
+) -> bool:
+    """Bearish rejection: upper wick grabs above key_high, closes below it."""
+    body = abs(closes[shift] - opens[shift])
+    if body < 1e-8:
+        return False
+    upper_wick = highs[shift] - max(opens[shift], closes[shift])
+    return (upper_wick >= wick_ratio * body
+            and highs[shift] > key_high
+            and lows[shift] < key_high)
+
+
 # ── VWAP ───────────────────────────────────────────────────────────────────────
 
 def compute_vwap(df: pd.DataFrame, session_reset_hour: int = 22) -> pd.DataFrame:
@@ -811,6 +1012,8 @@ def compute_all_indicators(
                 ind_df = compute_vwap(df_tf)
             elif indicator == "candle":
                 ind_df = compute_candle(df_tf)
+            elif indicator == "liqgrab":
+                ind_df = compute_liqgrab(df_tf)
             else:
                 log.warning("Unknown indicator: %s — skipping", indicator)
                 continue

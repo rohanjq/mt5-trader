@@ -1,0 +1,1 @@
+{name: liqgrab_m3_rej_up, description: Liq grab M3 bullish rejection at key low, buy: ["liqgrab_M3.closed_rejection_up is TRUE"]}
