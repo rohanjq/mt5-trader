@@ -60,8 +60,8 @@ class BaseSignal(abc.ABC):
                     reader = csv.DictReader(f)
                     data: dict[str, str] = {}
                     for row in reader:
-                        k = row.get("key", "").strip()
-                        v = row.get("value", "").strip()
+                        k = (row.get("key") or "").strip()
+                        v = (row.get("value") or "").strip()
                         if k:
                             data[k] = v
                     return data
