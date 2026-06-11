@@ -82,16 +82,36 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
         elif direction[i] < 0 and direction[i - 1] > 0:
             signal[i] = "SELL"
 
-    # Consecutive bars (EA counts from running bar backward, including running)
-    consec_bull = np.zeros(n, dtype=int)
-    consec_bear = np.zeros(n, dtype=int)
+    # Consecutive bars — per-bar closed count
+    closed_consec_bull = np.zeros(n, dtype=int)
+    closed_consec_bear = np.zeros(n, dtype=int)
     for i in range(1, n):
         if direction[i] > 0:
-            consec_bull[i] = consec_bull[i - 1] + 1
+            closed_consec_bull[i] = closed_consec_bull[i - 1] + 1
+            closed_consec_bear[i] = 0
+        else:
+            closed_consec_bear[i] = closed_consec_bear[i - 1] + 1
+            closed_consec_bull[i] = 0
+
+    # EA counts from the *running* bar backward, so when bar[i] is the
+    # closed bar the consecutive count includes the running bar[i+1].
+    # Simulate: if bar[i+1] continues the streak, add 1.
+    consec_bull = closed_consec_bull.copy()
+    consec_bear = closed_consec_bear.copy()
+    for i in range(n - 1):
+        if direction[i] > 0 and direction[i + 1] > 0:
+            consec_bull[i] = closed_consec_bull[i] + 1
+        elif direction[i] < 0 and direction[i + 1] < 0:
+            consec_bear[i] = closed_consec_bear[i] + 1
+        elif direction[i + 1] > 0:
+            # running bar flipped to bull — EA count = 1 bull, 0 bear
+            consec_bull[i] = 1
             consec_bear[i] = 0
         else:
-            consec_bear[i] = consec_bear[i - 1] + 1
+            # running bar flipped to bear — EA count = 0 bull, 1 bear
             consec_bull[i] = 0
+            consec_bear[i] = 1
+    # Last bar: no next bar, keep closed count (best we can do)
 
     result = pd.DataFrame(index=df.index)
     result["closed_bias"] = bias
@@ -145,10 +165,13 @@ def compute_candle(df: pd.DataFrame) -> pd.DataFrame:
     lower_wick = body_bottom - l
     total_range = h - l
 
-    # Safe divisors
-    eps = 1e-10
-    range_safe = np.where(total_range > eps, total_range, eps)
-    body_safe = np.where(body_size > eps, body_size, eps)
+    # Safe divisors — use _Point=0.01 for XAUUSD to match EA
+    # The EA uses _Point (smallest price increment) as its epsilon,
+    # which is 0.01 for XAUUSD.  Using 1e-10 caused classification
+    # differences for candles with very small bodies.
+    point = 0.01
+    range_safe = np.where(total_range > point, total_range, point)
+    body_safe = np.where(body_size > point, body_size, point)
 
     # Percentages
     body_pct = np.round(body_size / range_safe * 100, 1)
@@ -156,7 +179,7 @@ def compute_candle(df: pd.DataFrame) -> pd.DataFrame:
     lower_wick_pct = np.round(lower_wick / range_safe * 100, 1)
 
     # Ratios (wick / body) — 0 if doji
-    has_body = body_size > eps
+    has_body = body_size > point
     upper_wick_ratio = np.where(has_body, np.round(upper_wick / body_safe, 2), 0.0)
     lower_wick_ratio = np.where(has_body, np.round(lower_wick / body_safe, 2), 0.0)
 
@@ -164,7 +187,7 @@ def compute_candle(df: pd.DataFrame) -> pd.DataFrame:
     candle_dir = np.where(c > o, "UP", np.where(c < o, "DOWN", "DOJI"))
 
     # Boolean flags
-    has_range = total_range > eps
+    has_range = total_range > point
     has_long_upper = np.where((upper_wick >= 2.0 * body_safe) & has_range, "TRUE", "FALSE")
     has_long_lower = np.where((lower_wick >= 2.0 * body_safe) & has_range, "TRUE", "FALSE")
     is_bullish = np.where(c > o, "TRUE", "FALSE")
@@ -256,32 +279,35 @@ def compute_dc(df: pd.DataFrame, period: int = 20) -> pd.DataFrame:
     low = df["low"].values
     width = upper - lower
 
-    # Price zone (5 zones)
+    # Price zone (5 zones) — EA uses 90/70/30/10 pct thresholds
     zones = []
     for i in range(len(close)):
         if width[i] == 0:
             zones.append("MIDDLE")
             continue
-        pct = (close[i] - lower[i]) / width[i]
-        if pct >= 0.8:
+        pct = (close[i] - lower[i]) / width[i] * 100.0
+        if pct >= 90:
             zones.append("UPPER")
-        elif pct >= 0.6:
+        elif pct >= 70:
             zones.append("UPPER_MID")
-        elif pct >= 0.4:
-            zones.append("MIDDLE")
-        elif pct >= 0.2:
+        elif pct <= 10:
+            zones.append("LOWER")
+        elif pct <= 30:
             zones.append("LOWER_MID")
         else:
-            zones.append("LOWER")
+            zones.append("MIDDLE")
 
-    # Wick rejections
+    # Wick rejections — EA requires wick > body AND touch AND close inside
     upper_rej = []
     lower_rej = []
     for i in range(len(close)):
-        # Upper wick rejection: high touched upper band but close below it
-        upper_rej.append("TRUE" if high[i] >= upper[i] and close[i] < upper[i] else "FALSE")
-        # Lower wick rejection: low touched lower band but close above it
-        lower_rej.append("TRUE" if low[i] <= lower[i] and close[i] > lower[i] else "FALSE")
+        body_top_i = max(df["open"].iloc[i], close[i])
+        body_bottom_i = min(df["open"].iloc[i], close[i])
+        upper_wick_i = high[i] - body_top_i
+        lower_wick_i = body_bottom_i - low[i]
+        body_size_i = body_top_i - body_bottom_i
+        upper_rej.append("TRUE" if high[i] >= upper[i] and upper_wick_i > body_size_i and close[i] < upper[i] else "FALSE")
+        lower_rej.append("TRUE" if low[i] <= lower[i] and lower_wick_i > body_size_i and close[i] > lower[i] else "FALSE")
 
     # DC compressed: channel width is below its 20-bar average
     width_sma = pd.Series(width).rolling(20).mean().values
@@ -837,33 +863,33 @@ def _is_rejection_down(
 
 # ── VWAP ───────────────────────────────────────────────────────────────────────
 
-def compute_vwap(df: pd.DataFrame, session_reset_hour: int = 22) -> pd.DataFrame:
+def compute_vwap(df: pd.DataFrame, session_reset_hour: int = 0) -> pd.DataFrame:
     """Compute session VWAP: Σ(TP × Vol) / Σ(Vol), reset at session boundary.
 
-    session_reset_hour: UTC hour when session resets (default 22:00 = 5 PM ET).
-    This matches typical forex broker server time session boundaries.
+    session_reset_hour: UTC hour when session resets (default 0 = midnight).
+    Matches SignalMaster EA which resets at 00:00 server time.
 
     Fields: closed_price_vs_vwap (ABOVE/BELOW), running_dist_pct (%).
     """
     tp = (df["high"] + df["low"] + df["close"]) / 3.0
     vol = df["volume"].values.astype(float)
 
-    # Detect session boundaries: reset when hour crosses session_reset_hour
+    # Detect session boundaries: reset at 00:00 server time each day
     times = pd.to_datetime(df["time"])
-    hours = times.dt.hour
+    dates = times.dt.date
 
     vwap_vals = np.zeros(len(df))
     cum_tp_vol = 0.0
     cum_vol = 0.0
-    prev_hour = -1
+    prev_date = None
 
     for i in range(len(df)):
-        h = hours.iloc[i]
-        # Reset when we cross the session boundary hour
-        if prev_hour >= 0 and prev_hour != h and h == session_reset_hour:
+        d = dates.iloc[i]
+        # Reset when the date changes (midnight boundary)
+        if prev_date is not None and d != prev_date:
             cum_tp_vol = 0.0
             cum_vol = 0.0
-        prev_hour = h
+        prev_date = d
 
         v = max(vol[i], 1.0)  # avoid zero volume
         cum_tp_vol += tp.iloc[i] * v
