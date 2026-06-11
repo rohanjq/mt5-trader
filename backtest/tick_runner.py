@@ -33,18 +33,14 @@ import numpy as np
 import pandas as pd
 
 from core.config import Config
-from core.models import Signal, SignalDirection
-from rules.expression import ExpressionRule, load_expression_rules
-from backtest.indicators import compute_all_indicators
-from backtest.simulator import Simulator
+from core.models import Signal
+from backtest.base_runner import BaseBacktestRunner, compute_warmup
 from backtest.tick_builder import CandleBuilder
-from backtest.filters import BacktestFilterChain
-from backtest.runner import _compute_warmup
 
 log = logging.getLogger(__name__)
 
 
-class TickBacktestRunner:
+class TickBacktestRunner(BaseBacktestRunner):
     """Tick-by-tick backtest engine."""
 
     def __init__(
@@ -54,49 +50,20 @@ class TickBacktestRunner:
         *,
         trade_from: datetime | None = None,
     ) -> None:
-        self.config = config
+        super().__init__(config, trade_from=trade_from, spread_points=0.0)
         self.df_ticks = df_ticks
-        self.trade_from = trade_from
-
-        self.strategies: list[ExpressionRule] = load_expression_rules(config)
-        self.strategies.sort(key=lambda r: r.priority)
-
-        bt = config.get("backtest", {}) or {}
-        self.simulator = Simulator(
-            initial_balance=bt.get("initial_balance", 10000.0),
-            tick_size=bt.get("tick_size", 0.01),
-            tick_value=bt.get("tick_value", 1.0),
-            volume_step=bt.get("volume_step", 0.01),
-            commission_per_lot=bt.get("commission_per_lot", 0.0),
-            spread_points=0.0,  # spread is inherent in bid/ask
-        )
-
-        self.filter_chain = BacktestFilterChain(config)
-
-        self.risk_pct = float(config.get("trading.risk_pct", 5.0))
-        self.default_sl = float(config.get("trading.sl_dollars", 5.0))
-        self.default_rr = float(config.get("trading.reward_ratio", 1.2))
-        self.default_be_pct = float(config.get("exit_rules.breakeven_pct", 0.0))
-        self.default_trailing = float(config.get("exit_rules.trailing_stop_dollars", 0.0))
-        self.default_partial_tp = bool(config.get("exit_rules.partial_tp", True))
-        self.tp_close_pct = float(config.get("exit_rules.tp_close_pct", 80.0))
-        self.multi_position = bool(config.get("trading.multi_position", True))
-
-        # Stats
         self.total_ticks = 0
-        self.signals_fired = 0
-        self.trades_blocked = 0
 
     # ── public API ───────────────────────────────────────────────────────
 
-    def run(self) -> Simulator:
+    def run(self) -> "Simulator":
         """Execute the tick-by-tick backtest.  Returns the Simulator."""
 
         # ── Phase 1: build M1 candles from ticks ─────────────────────
         log.info("Phase 1: Building M1 candles from %d ticks...", len(self.df_ticks))
         m1_builder = CandleBuilder(1)
 
-        tick_times = self.df_ticks["time"].values       # numpy datetime64
+        tick_times = self.df_ticks["time"].values
         tick_bids = self.df_ticks["bid"].values.astype(np.float64)
         tick_asks = self.df_ticks["ask"].values.astype(np.float64)
 
@@ -106,7 +73,6 @@ class TickBacktestRunner:
         m1_builder.finalize()
 
         df_m1 = m1_builder.to_dataframe()
-        # Ensure time is pandas Timestamp (needed by resample)
         df_m1["time"] = pd.to_datetime(df_m1["time"])
         log.info("Built %d M1 candles", len(df_m1))
 
@@ -115,19 +81,15 @@ class TickBacktestRunner:
             return self.simulator
 
         # ── Phase 2: compute indicators (vectorised) ─────────────────
-        sources = self.config.get("signals.sources", [])
-        if not sources:
-            log.error("No signal sources configured")
+        all_indicators = self._compute_indicators(df_m1)
+        if all_indicators is None:
             return self.simulator
 
-        log.info("Phase 2: Computing indicators for %d sources across %d M1 bars...",
-                 len(sources), len(df_m1))
-        all_indicators = compute_all_indicators(df_m1, sources)
-        warmup_map = _compute_warmup(all_indicators, self.strategies)
+        warmup_map = compute_warmup(all_indicators, self.strategies)
         global_warmup = max(warmup_map.values()) if warmup_map else 0
         log.info("Indicators ready.  Warmup max: %d bars", global_warmup)
 
-        # Build M1-epoch → row-index lookup for fast boundary detection
+        # Build M1-epoch → row-index lookup
         m1_epochs = (
             pd.DatetimeIndex(df_m1["time"]).astype("int64") // 10**9
         ).astype(int)
@@ -139,15 +101,14 @@ class TickBacktestRunner:
         n_ticks = len(tick_times)
         log.info("Phase 3: Replaying %d ticks...", n_ticks)
 
-        # Convert tick times to epoch-seconds for fast M1 boundary check
         tick_epochs = (
             pd.DatetimeIndex(tick_times).astype("int64") // 10**9
         ).astype(np.int64)
 
-        prev_bar_epoch: int = -1          # epoch-second of previous M1 bar
-        current_m1_idx: int = -1          # index of latest CLOSED M1 bar
-        signals: dict[str, Signal] = {}   # latest closed-bar signals
-        signals_dirty = False             # True when signals updated
+        prev_bar_epoch: int = -1
+        current_m1_idx: int = -1
+        signals: dict[str, Signal] = {}
+        signals_dirty = False
         edge_reset_done = self.trade_from is None
         log_interval = max(1, n_ticks // 20)
 
@@ -156,7 +117,7 @@ class TickBacktestRunner:
             epoch = int(tick_epochs[i])
             bid = float(tick_bids[i])
             ask = float(tick_asks[i])
-            bar_epoch = (epoch // 60) * 60   # M1 floor
+            bar_epoch = (epoch // 60) * 60
 
             m1_closed = bar_epoch != prev_bar_epoch and prev_bar_epoch >= 0
 
@@ -179,38 +140,26 @@ class TickBacktestRunner:
                     current_m1_idx = idx
                     signals = self._build_signals(all_indicators, current_m1_idx)
                     signals_dirty = True
-
-                    # Equity curve entry per M1 bar
                     mid = (bid + ask) / 2.0
                     self.simulator._update_equity(mid)
 
-            # ── 3. Evaluate strategies on every tick ─────────────────
-            #
-            # Currently only closed_* fields are populated so the
-            # signals dict changes only on M1 close.  Rising-edge
-            # detection prevents duplicate fires between closes.
-            #
-            # When running_* fields are added later, the signals dict
-            # can be updated here with running candle state so
-            # strategies fire intra-bar.
+            # ── 3. Evaluate strategies ───────────────────────────────
             if signals and current_m1_idx >= 0:
                 # Rising-edge reset at trade_from boundary
                 if m1_closed and not edge_reset_done and self.trade_from is not None:
                     closed_bar_time = df_m1["time"].iloc[current_m1_idx].to_pydatetime()
                     if closed_bar_time >= self.trade_from:
-                        for rule in self.strategies:
-                            rule._prev_buy_met = False
-                            rule._prev_sell_met = False
+                        self._reset_edge_state(closed_bar_time.strftime("%Y-%m-%d %H:%M"))
                         edge_reset_done = True
-                        log.info("[%s] Rising-edge state reset",
-                                 closed_bar_time.strftime("%Y-%m-%d %H:%M"))
 
-                # Only re-evaluate when signals changed (M1 closed).
+                # Evaluate when signals changed.
                 # When running_* is implemented, remove this guard to
                 # evaluate on every tick.
                 if signals_dirty:
                     tick_dt_eval = datetime.fromtimestamp(epoch, tz=timezone.utc).replace(tzinfo=None)
-                    self._evaluate_strategies(
+                    # BUY fills at ask, SELL fills at bid — _try_open_trades
+                    # receives ask as entry_price; override below.
+                    self._try_open_tick_trades(
                         signals, tick_dt_eval, bid, ask,
                         current_m1_idx, warmup_map,
                     )
@@ -218,7 +167,6 @@ class TickBacktestRunner:
 
             prev_bar_epoch = bar_epoch
 
-            # Progress
             if self.total_ticks % log_interval == 0:
                 pct = self.total_ticks / n_ticks * 100
                 log.info(
@@ -228,23 +176,22 @@ class TickBacktestRunner:
                     self.simulator.balance,
                 )
 
-        # ── Finalize: evaluate last M1 bar if not yet processed ──────
+        # ── Finalize ─────────────────────────────────────────────────
         if prev_bar_epoch >= 0:
             idx = m1_epoch_to_idx.get(prev_bar_epoch)
             if idx is not None and idx > current_m1_idx:
                 current_m1_idx = idx
                 signals = self._build_signals(all_indicators, current_m1_idx)
-                last_bid = float(tick_bids[-1])
-                last_ask = float(tick_asks[-1])
                 last_dt = datetime.fromtimestamp(
                     int(tick_epochs[-1]), tz=timezone.utc,
                 ).replace(tzinfo=None)
-                self._evaluate_strategies(
-                    signals, last_dt, last_bid, last_ask,
+                self._try_open_tick_trades(
+                    signals, last_dt,
+                    float(tick_bids[-1]), float(tick_asks[-1]),
                     current_m1_idx, warmup_map,
                 )
 
-        # Close remaining open positions at last tick
+        # Close remaining positions at last tick
         if self.simulator.open_positions:
             last_dt = datetime.fromtimestamp(
                 int(tick_epochs[-1]), tz=timezone.utc,
@@ -265,9 +212,9 @@ class TickBacktestRunner:
         )
         return self.simulator
 
-    # ── private helpers ──────────────────────────────────────────────────
+    # ── private ──────────────────────────────────────────────────────────
 
-    def _evaluate_strategies(
+    def _try_open_tick_trades(
         self,
         signals: dict[str, Signal],
         tick_dt: datetime,
@@ -276,7 +223,18 @@ class TickBacktestRunner:
         current_m1_idx: int,
         warmup_map: dict[str, int],
     ) -> None:
-        """Run all strategy rules and open positions if signals fire."""
+        """Evaluate strategies with bid/ask fill prices.
+
+        Calls the shared ``_try_open_trades`` twice with direction-
+        appropriate prices isn't needed — instead we override the
+        entry price per-direction inside the base method.  Since
+        ``_try_open_trades`` uses a single ``entry_price`` we call it
+        with the mid and let the base handle it — but for tick mode we
+        need BUY→ask, SELL→bid.  We use the mid as a dummy; the
+        actual fill is set below.
+        """
+        # We need direction-aware fill, so we loop here directly
+        # using base helpers for the common checks.
         for rule in self.strategies:
             result = rule.evaluate(signals)
 
@@ -291,7 +249,7 @@ class TickBacktestRunner:
             if not self.multi_position and self.simulator.has_open_positions:
                 continue
 
-            direction = result.direction.value  # "BUY" or "SELL"
+            direction = result.direction.value
             self.signals_fired += 1
 
             sl_dollars = result.sl_dollars or self.default_sl
@@ -304,18 +262,9 @@ class TickBacktestRunner:
                 self.trades_blocked += 1
                 continue
 
-            # Fill at tick price: BUY at ask, SELL at bid
             entry_price = ask if direction == "BUY" else bid
-            breakeven_pct = (
-                result.breakeven_pct
-                if result.breakeven_pct is not None
-                else self.default_be_pct
-            )
-            partial_tp = (
-                result.partial_tp
-                if result.partial_tp is not None
-                else self.default_partial_tp
-            )
+            breakeven_pct = result.breakeven_pct if result.breakeven_pct is not None else self.default_be_pct
+            partial_tp = result.partial_tp if result.partial_tp is not None else self.default_partial_tp
 
             positions = self.simulator.open_position(
                 direction=direction,
@@ -339,25 +288,3 @@ class TickBacktestRunner:
                     pos.entry_price, pos.sl, pos.tp, pos.volume,
                     "runner" if pos.is_runner else "main",
                 )
-
-    def _build_signals(
-        self,
-        all_indicators: dict[str, pd.DataFrame],
-        bar_idx: int,
-    ) -> dict[str, Signal]:
-        """Build Signal objects for completed M1 bar *bar_idx*."""
-        signals: dict[str, Signal] = {}
-        for signal_name, ind_df in all_indicators.items():
-            if bar_idx >= len(ind_df):
-                continue
-            row = ind_df.iloc[bar_idx]
-            metadata = {}
-            for col in ind_df.columns:
-                val = row[col]
-                metadata[col] = str(val) if pd.notna(val) else ""
-            signals[signal_name] = Signal(
-                source=signal_name,
-                direction=SignalDirection.NEUTRAL,
-                metadata=metadata,
-            )
-        return signals
