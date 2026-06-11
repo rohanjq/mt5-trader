@@ -48,15 +48,21 @@ def main() -> None:
         mt5.shutdown()
         sys.exit(0)
 
-    df = pd.DataFrame(list(deals))
-
-    # Column names from MT5 deal structure
-    # Rename for clarity
-    col_rename = {}
-    for col in df.columns:
-        lc = str(col).lower()
-        col_rename[col] = lc
-    df = df.rename(columns=col_rename)
+    # rpyc returns proxy objects — extract fields manually
+    deal_fields = [
+        "ticket", "order", "time", "type", "entry", "position_id",
+        "volume", "price", "commission", "swap", "profit", "symbol", "comment",
+    ]
+    rows = []
+    for d in deals:
+        row = {}
+        for f in deal_fields:
+            try:
+                row[f] = getattr(d, f, None)
+            except Exception:
+                row[f] = None
+        rows.append(row)
+    df = pd.DataFrame(rows)
 
     print(f"Raw deals: {len(df)}")
 
