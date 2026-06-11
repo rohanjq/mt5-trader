@@ -77,6 +77,13 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable debug logging",
     )
+    parser.add_argument(
+        "--bars-dir",
+        default=None,
+        help="Directory with native MT5 bar CSVs (M1.csv, M5.csv, etc.) "
+             "from download_bars.py.  When provided, uses these instead of "
+             "resampling from M1, ensuring exact parity with live trading.",
+    )
     return parser.parse_args()
 
 
@@ -156,10 +163,30 @@ def main() -> None:
             sys.exit(1)
         print(f"Trading starts from: {trade_from}")
 
+    # Load native MT5 bars if provided
+    native_bars: dict[str, "pd.DataFrame"] | None = None
+    if args.bars_dir:
+        bars_dir = Path(args.bars_dir).resolve()
+        if not bars_dir.is_dir():
+            print(f"Error: Bars directory not found: {bars_dir}")
+            sys.exit(1)
+        native_bars = {}
+        for csv_file in sorted(bars_dir.glob("*.csv")):
+            tf_name = csv_file.stem  # e.g. "M5" from "M5.csv"
+            if tf_name == "M1":
+                continue  # M1 comes from ticks or --data
+            df_tf = load_ohlc(csv_file, start=start, end=end)
+            if len(df_tf) > 0:
+                native_bars[tf_name] = df_tf
+                print(f"  Native {tf_name}: {len(df_tf)} bars")
+        print(f"Loaded native bars for {len(native_bars)} timeframes from {bars_dir.name}/")
+
     # Run backtest
     t0 = time.time()
     if tick_mode:
-        runner = TickBacktestRunner(config, df_ticks, trade_from=trade_from)
+        runner = TickBacktestRunner(
+            config, df_ticks, trade_from=trade_from, native_bars=native_bars,
+        )
     else:
         runner = BacktestRunner(config, df, trade_from=trade_from)
     simulator = runner.run()

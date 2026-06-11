@@ -1014,18 +1014,24 @@ def forward_fill_to_m1(
 def compute_all_indicators(
     df_m1: pd.DataFrame,
     sources: list[dict],
+    native_bars: dict[str, pd.DataFrame] | None = None,
 ) -> dict[str, pd.DataFrame]:
     """Compute all indicators for all timeframes as specified in config.
 
     Args:
         df_m1: M1 OHLC DataFrame with columns [time, open, high, low, close, volume]
         sources: List of dicts like {"indicator": "utbot", "timeframes": ["M1", "M5", "M15"]}
+        native_bars: Optional dict mapping TF name (e.g. "M5") to native OHLC DataFrame
+                     downloaded directly from MT5.  When provided, these are used instead
+                     of resampling from M1, ensuring exact parity with live trading.
 
     Returns:
         Dict mapping signal name (e.g. "utbot_M1") to DataFrame of indicator fields,
         aligned to the M1 bar index.
     """
     signals: dict[str, pd.DataFrame] = {}
+    if native_bars is None:
+        native_bars = {}
 
     # Precompute resampled DataFrames for each unique timeframe
     timeframes_needed: set[str] = set()
@@ -1035,8 +1041,12 @@ def compute_all_indicators(
 
     resampled: dict[str, pd.DataFrame] = {}
     for tf in timeframes_needed:
-        resampled[tf] = resample_ohlc(df_m1, tf)
-        log.info("Resampled to %s: %d bars", tf, len(resampled[tf]))
+        if tf in native_bars:
+            resampled[tf] = native_bars[tf]
+            log.info("Using native MT5 bars for %s: %d bars", tf, len(resampled[tf]))
+        else:
+            resampled[tf] = resample_ohlc(df_m1, tf)
+            log.info("Resampled to %s: %d bars", tf, len(resampled[tf]))
 
     m1_times = df_m1["time"]
 

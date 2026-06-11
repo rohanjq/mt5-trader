@@ -49,9 +49,11 @@ class TickBacktestRunner(BaseBacktestRunner):
         df_ticks: pd.DataFrame,
         *,
         trade_from: datetime | None = None,
+        native_bars: dict[str, pd.DataFrame] | None = None,
     ) -> None:
         super().__init__(config, trade_from=trade_from, spread_points=0.0)
         self.df_ticks = df_ticks
+        self.native_bars = native_bars
         self.total_ticks = 0
 
     # ── public API ───────────────────────────────────────────────────────
@@ -81,7 +83,7 @@ class TickBacktestRunner(BaseBacktestRunner):
             return self.simulator
 
         # ── Phase 2: compute indicators (vectorised) ─────────────────
-        all_indicators = self._compute_indicators(df_m1)
+        all_indicators = self._compute_indicators(df_m1, native_bars=self.native_bars)
         if all_indicators is None:
             return self.simulator
 
