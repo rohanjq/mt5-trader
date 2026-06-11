@@ -883,8 +883,13 @@ _TF_MAP = {
 def resample_ohlc(df_m1: pd.DataFrame, timeframe: str) -> pd.DataFrame:
     """Resample M1 OHLC to a higher timeframe.
 
+    Uses ``label='left', closed='left'`` so that candle boundaries match MT5:
+      - M5 bar at 00:00 contains M1 bars [00:00, 00:01, 00:02, 00:03, 00:04]
+      - M15 bar at 00:00 contains M1 bars [00:00 … 00:14]
+      - H4 bar at 00:00 contains M1 bars [00:00 … 03:59]
+
     Returns a DataFrame with the same columns but fewer rows.
-    Each row represents one bar of the target timeframe.
+    Each row represents one completed bar of the target timeframe.
     """
     if timeframe == "M1":
         return df_m1.copy()
@@ -896,7 +901,7 @@ def resample_ohlc(df_m1: pd.DataFrame, timeframe: str) -> pd.DataFrame:
     df = df_m1.copy()
     df = df.set_index("time")
 
-    resampled = df.resample(freq, label="right", closed="right").agg({
+    resampled = df.resample(freq, label="left", closed="left").agg({
         "open": "first",
         "high": "max",
         "low": "min",
@@ -912,29 +917,44 @@ def forward_fill_to_m1(
     indicator_df: pd.DataFrame,
     htf_times: pd.Series,
     m1_times: pd.Series,
+    freq: str = "5min",
 ) -> pd.DataFrame:
     """Forward-fill higher-TF indicator values to M1 bars.
 
-    For each M1 bar, use the most recent completed HTF bar's indicator values.
-    This simulates "closed_" fields: only update when a higher TF bar closes.
+    Simulates ``closed_*`` fields: an HTF bar's values only become visible
+    when the bar's last M1 bar finishes.  For an M5 bar starting at 00:00
+    the last M1 bar is 00:04, so M1[00:04] is the first bar to see that
+    M5 bar's closed values.
+
+    ``freq`` is the pandas frequency string from ``_TF_MAP`` (e.g. '5min').
     """
-    # Create a mapping: for each M1 time, find the most recent HTF time <= M1 time
     htf_idx = pd.DatetimeIndex(htf_times)
     m1_idx = pd.DatetimeIndex(m1_times)
 
-    # Use searchsorted to find the insertion point
-    positions = htf_idx.searchsorted(m1_idx, side="right") - 1
+    # close_m1 = the M1 bar at which each HTF bar finishes.
+    # HTF bar at T covers M1 bars [T, T+period).  Its last M1 bar has
+    # timestamp T + period - 1min.
+    period = pd.Timedelta(freq)
+    close_m1 = htf_idx + period - pd.Timedelta("1min")
+
+    # For each M1 time find the latest HTF bar whose close_m1 <= m1_time.
+    positions = close_m1.searchsorted(m1_idx, side="right") - 1
 
     # Build result DataFrame
+    n_htf = len(indicator_df)
     result = pd.DataFrame(index=range(len(m1_times)))
     for col in indicator_df.columns:
         vals = indicator_df[col].values
-        filled = []
-        for pos in positions:
-            if pos >= 0 and pos < len(vals):
-                filled.append(vals[pos])
+        # Determine the default for bars before the first completed HTF bar
+        default = np.nan
+        if len(vals) > 0 and isinstance(vals[0], str):
+            default = ""
+        filled = np.empty(len(positions), dtype=object)
+        for k, pos in enumerate(positions):
+            if 0 <= pos < n_htf:
+                filled[k] = vals[pos]
             else:
-                filled.append("" if isinstance(vals[0], str) else 0.0)
+                filled[k] = default
         result[col] = filled
 
     return result
@@ -976,6 +996,7 @@ def compute_all_indicators(
         for tf in src.get("timeframes", []):
             name = f"{indicator}_{tf}"
             df_tf = resampled[tf]
+            freq = _TF_MAP.get(tf, "1min")
 
             log.info("Computing %s (%d bars)", name, len(df_tf))
 
@@ -1027,7 +1048,7 @@ def compute_all_indicators(
             # Forward-fill to M1 if higher TF
             if tf != "M1":
                 htf_times = df_tf["time"]
-                ind_df = forward_fill_to_m1(ind_df, htf_times, m1_times)
+                ind_df = forward_fill_to_m1(ind_df, htf_times, m1_times, freq=freq)
             else:
                 ind_df = ind_df.reset_index(drop=True)
 

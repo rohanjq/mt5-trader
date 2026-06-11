@@ -1,12 +1,25 @@
 """Main backtest runner — bar-by-bar replay through historical data.
 
 Uses the same Config, Signal, and ExpressionRule classes as the live trader.
+
+Fill model matches live behaviour:
+  • The EA writes CSV at candle close.
+  • Python polls every 2 s → signal detected within 2 s of close.
+  • Trade fills at market price ≈ bar close.
+  Therefore: signal evaluated on bar-close data → fill at that bar's close.
+  SL/TP monitoring starts from the NEXT bar.
+
+Warmup:
+  Indicators need N bars before they produce valid values.
+  During warmup the runner evaluates rules (so rising-edge state builds up)
+  but does NOT open trades.
 """
 from __future__ import annotations
 
 import logging
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 
 from core.config import Config
@@ -19,12 +32,55 @@ from backtest.filters import BacktestFilterChain
 log = logging.getLogger(__name__)
 
 
+def _compute_warmup(
+    all_indicators: dict[str, pd.DataFrame],
+    strategies: list[ExpressionRule],
+) -> dict[str, int]:
+    """Return per-strategy warmup bar index.
+
+    Each strategy gets its own warmup threshold — the first M1 bar where
+    ALL of that strategy's referenced indicators have valid values.
+    Strategies whose indicators never become valid get warmup = inf (they
+    simply won't fire).
+
+    Returns: {rule_name: first_valid_bar_index}
+    """
+    # Pre-compute first-valid bar for each signal indicator
+    sig_first_valid: dict[str, int] = {}
+    for sig_name, ind_df in all_indicators.items():
+        if ind_df.empty:
+            sig_first_valid[sig_name] = len(ind_df)
+            continue
+        valid_mask = ind_df.notna().all(axis=1)
+        if valid_mask.any():
+            first_valid = valid_mask.idxmax()
+            idx = int(first_valid) if isinstance(first_valid, (np.integer, int)) else ind_df.index.get_loc(first_valid)
+        else:
+            idx = len(ind_df)  # never valid
+        sig_first_valid[sig_name] = idx
+
+    warmups: dict[str, int] = {}
+    for rule in strategies:
+        needed_sigs = {c.signal for c in rule._buy_conditions + rule._sell_conditions}
+        worst = 0
+        for sig in needed_sigs:
+            bar = sig_first_valid.get(sig, 0)
+            if bar > worst:
+                worst = bar
+        warmups[rule.name] = worst
+        if worst > 0:
+            log.info("Strategy %s warmup: %d bars", rule.name, worst)
+
+    return warmups
+
+
 class BacktestRunner:
     """Orchestrates the entire backtest: indicators → signals → strategies → fills."""
 
-    def __init__(self, config: Config, df_m1: pd.DataFrame) -> None:
+    def __init__(self, config: Config, df_m1: pd.DataFrame, *, trade_from: datetime | None = None) -> None:
         self.config = config
         self.df = df_m1
+        self.trade_from = trade_from
 
         # Load strategies using the same loader as live trading
         self.strategies: list[ExpressionRule] = load_expression_rules(config)
@@ -79,7 +135,12 @@ class BacktestRunner:
         all_indicators = compute_all_indicators(self.df, sources)
         log.info("Indicators computed: %s", list(all_indicators.keys()))
 
-        # Step 2: Replay bar by bar
+        # Step 2: Determine per-strategy warmup periods
+        warmup_map = _compute_warmup(all_indicators, self.strategies)
+        global_warmup = max(warmup_map.values()) if warmup_map else 0
+        log.info("Per-strategy warmup computed — global max: %d bars", global_warmup)
+
+        # Step 3: Replay bar by bar
         times = pd.to_datetime(self.df["time"])
         opens = self.df["open"].values
         highs = self.df["high"].values
@@ -89,16 +150,28 @@ class BacktestRunner:
         n_bars = len(self.df)
         log_interval = max(1, n_bars // 20)
 
-        # Pending entries: signals fire on bar i close, fill at bar i+1 open
-        pending_entries: list[tuple[str, str, float, float, float | None, bool | None]] = []
-
         log.info("Starting bar-by-bar replay (%d bars)...", n_bars)
+
+        # Track whether we've reset rising-edge state at trade_from.
+        # In live, the system boots with _prev_*_met = False, so the
+        # first time conditions are met they fire immediately.
+        edge_reset_done = self.trade_from is None
 
         for i in range(n_bars):
             self.total_bars += 1
             bar_time = times.iloc[i].to_pydatetime()
 
-            # Check SL/TP on existing positions FIRST
+            # Reset rising-edge state at the trade_from boundary so it
+            # matches a live cold-start (all _prev_*_met = False).
+            if not edge_reset_done and self.trade_from is not None and bar_time >= self.trade_from:
+                for rule in self.strategies:
+                    rule._prev_buy_met = False
+                    rule._prev_sell_met = False
+                edge_reset_done = True
+                log.info("[%s] Rising-edge state reset (simulates live cold-start)",
+                         bar_time.strftime("%Y-%m-%d %H:%M"))
+
+            # Check SL/TP on existing positions FIRST (uses this bar's OHLC)
             closed = self.simulator.process_bar(bar_time, opens[i], highs[i], lows[i], closes[i])
             for trade in closed:
                 log.debug(
@@ -108,32 +181,58 @@ class BacktestRunner:
                     trade.exit_price, trade.profit, trade.exit_reason,
                 )
 
-            # Fill pending entries from previous bar's signals at this bar's open
-            for (p_direction, p_rule, p_sl, p_rr, p_be, p_ptp) in pending_entries:
-                if self.simulator.has_position_for_rule(p_rule):
+            # Build signal snapshot for this bar and evaluate strategies.
+            # IMPORTANT: ALL rules are evaluated every bar so rising-edge
+            # state (_prev_buy_met / _prev_sell_met) stays current — this
+            # matches live where evaluate() runs every poll cycle regardless
+            # of position state.
+            signals = self._build_signals(all_indicators, i)
+
+            for rule in self.strategies:
+                # Always evaluate — keeps rising-edge state in sync with live
+                result = rule.evaluate(signals)
+
+                # Skip trading when blocked (but evaluation already happened)
+                if not result.should_trade or result.direction is None:
+                    continue
+                # Per-strategy warmup: skip until this strategy's indicators are ready
+                if i < warmup_map.get(rule.name, 0):
+                    continue
+                # --trade-from: skip until we reach the specified start time
+                if self.trade_from is not None and bar_time < self.trade_from:
+                    continue
+                if self.simulator.has_position_for_rule(rule.name):
                     continue
                 if not self.multi_position and self.simulator.has_open_positions:
-                    break
+                    continue
 
-                # Re-check filters at fill time
+                direction = result.direction.value  # "BUY" or "SELL"
+                self.signals_fired += 1
+
+                # Per-rule overrides
+                sl_dollars = result.sl_dollars or self.default_sl
+                reward_ratio = result.reward_ratio or self.default_rr
+
+                # Check filters
                 allowed, block_reason = self.filter_chain.evaluate(
-                    p_direction, p_rule, bar_time, self.simulator,
+                    direction, rule.name, bar_time, self.simulator,
                 )
                 if not allowed:
                     self.trades_blocked += 1
                     continue
 
-                entry_price = opens[i]  # fill at this bar's open
-                breakeven_pct = p_be if p_be is not None else self.default_be_pct
-                partial_tp = p_ptp if p_ptp is not None else self.default_partial_tp
+                # Fill at this bar's CLOSE — matches live behaviour
+                entry_price = closes[i]
+                breakeven_pct = result.breakeven_pct if result.breakeven_pct is not None else self.default_be_pct
+                partial_tp = result.partial_tp if result.partial_tp is not None else self.default_partial_tp
 
                 positions = self.simulator.open_position(
-                    direction=p_direction,
+                    direction=direction,
                     price=entry_price,
                     time=bar_time,
-                    rule_name=p_rule,
-                    sl_dollars=p_sl,
-                    reward_ratio=p_rr,
+                    rule_name=rule.name,
+                    sl_dollars=sl_dollars,
+                    reward_ratio=reward_ratio,
                     risk_pct=self.risk_pct,
                     breakeven_pct=breakeven_pct,
                     trailing_stop_dollars=self.default_trailing,
@@ -145,37 +244,10 @@ class BacktestRunner:
                     log.info(
                         "[%s] OPEN %s %s @ %.2f SL=%.2f TP=%.2f vol=%.2f (%s)",
                         bar_time.strftime("%Y-%m-%d %H:%M"),
-                        pos.direction, p_rule,
+                        pos.direction, rule.name,
                         pos.entry_price, pos.sl, pos.tp, pos.volume,
                         "runner" if pos.is_runner else "main",
                     )
-            pending_entries.clear()
-
-            # Build signal snapshot for this bar and evaluate strategies
-            signals = self._build_signals(all_indicators, i)
-
-            for rule in self.strategies:
-                if self.simulator.has_position_for_rule(rule.name):
-                    continue
-                if not self.multi_position and self.simulator.has_open_positions:
-                    break
-
-                result = rule.evaluate(signals)
-                if not result.should_trade or result.direction is None:
-                    continue
-
-                direction = result.direction.value  # "BUY" or "SELL"
-                self.signals_fired += 1
-
-                # Per-rule overrides
-                sl_dollars = result.sl_dollars or self.default_sl
-                reward_ratio = result.reward_ratio or self.default_rr
-
-                # Queue for next bar's open (no look-ahead)
-                pending_entries.append((
-                    direction, rule.name, sl_dollars, reward_ratio,
-                    result.breakeven_pct, result.partial_tp,
-                ))
 
             # Progress logging
             if (i + 1) % log_interval == 0:

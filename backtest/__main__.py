@@ -13,8 +13,9 @@ from datetime import datetime
 from pathlib import Path
 
 from core.config import Config
-from backtest.data_loader import load_ohlc
+from backtest.data_loader import load_ohlc, load_ticks
 from backtest.runner import BacktestRunner
+from backtest.tick_runner import TickBacktestRunner
 from backtest.stats import compute_stats, print_report, print_trade_log, save_results
 
 
@@ -30,8 +31,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--data", "-d",
-        required=True,
-        help="Path to OHLC CSV file (e.g. data/XAUUSD_M1.csv)",
+        default=None,
+        help="Path to M1 OHLC CSV (bar-by-bar mode)",
+    )
+    parser.add_argument(
+        "--ticks", "-t",
+        default=None,
+        help="Path to tick CSV with bid/ask (tick-by-tick mode)",
     )
     parser.add_argument(
         "--from", dest="start_date",
@@ -59,6 +65,12 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=None,
         help="Override initial balance (default: from config or $10,000)",
+    )
+    parser.add_argument(
+        "--trade-from",
+        default=None,
+        help="Only open trades after this time (YYYY-MM-DD HH:MM). "
+             "Indicators and rising-edge state still compute from bar 0.",
     )
     parser.add_argument(
         "--verbose", "-v",
@@ -96,26 +108,64 @@ def main() -> None:
     start = datetime.strptime(args.start_date, "%Y-%m-%d") if args.start_date else None
     end = datetime.strptime(args.end_date, "%Y-%m-%d") if args.end_date else None
 
-    # Load data
-    data_path = Path(args.data).resolve()
-    if not data_path.exists():
-        print(f"Error: Data file not found: {data_path}")
+    # Determine mode: tick vs bar
+    if not args.data and not args.ticks:
+        print("Error: Provide --data (bar mode) or --ticks (tick mode)")
         sys.exit(1)
-    df = load_ohlc(data_path, start=start, end=end)
-    if len(df) == 0:
-        print("Error: No data rows after filtering")
+    if args.data and args.ticks:
+        print("Error: --data and --ticks are mutually exclusive")
         sys.exit(1)
 
+    tick_mode = args.ticks is not None
     symbol = config.get("trading.symbol", "UNKNOWN")
-    print(f"Data: {len(df)} M1 bars for {symbol}")
-    print(f"Period: {df['time'].iloc[0]} → {df['time'].iloc[-1]}")
+
+    if tick_mode:
+        tick_path = Path(args.ticks).resolve()
+        if not tick_path.exists():
+            print(f"Error: Tick file not found: {tick_path}")
+            sys.exit(1)
+        df_ticks = load_ticks(tick_path, start=start, end=end)
+        if len(df_ticks) == 0:
+            print("Error: No tick rows after filtering")
+            sys.exit(1)
+        print(f"Data: {len(df_ticks):,} ticks for {symbol}")
+        print(f"Period: {df_ticks['time'].iloc[0]} → {df_ticks['time'].iloc[-1]}")
+    else:
+        data_path = Path(args.data).resolve()
+        if not data_path.exists():
+            print(f"Error: Data file not found: {data_path}")
+            sys.exit(1)
+        df = load_ohlc(data_path, start=start, end=end)
+        if len(df) == 0:
+            print("Error: No data rows after filtering")
+            sys.exit(1)
+        print(f"Data: {len(df)} M1 bars for {symbol}")
+        print(f"Period: {df['time'].iloc[0]} → {df['time'].iloc[-1]}")
+
+    # Parse trade-from
+    trade_from = None
+    if args.trade_from:
+        for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
+            try:
+                trade_from = datetime.strptime(args.trade_from, fmt)
+                break
+            except ValueError:
+                continue
+        if trade_from is None:
+            print(f"Error: invalid --trade-from format: {args.trade_from}")
+            sys.exit(1)
+        print(f"Trading starts from: {trade_from}")
 
     # Run backtest
     t0 = time.time()
-    runner = BacktestRunner(config, df)
+    if tick_mode:
+        runner = TickBacktestRunner(config, df_ticks, trade_from=trade_from)
+    else:
+        runner = BacktestRunner(config, df, trade_from=trade_from)
     simulator = runner.run()
     elapsed = time.time() - t0
-    print(f"Backtest completed in {elapsed:.1f}s")
+    mode_label = "tick" if tick_mode else "bar"
+    print(f"Backtest completed in {elapsed:.1f}s ({mode_label} mode, {runner.total_ticks if tick_mode else runner.total_bars} {mode_label}s)")
 
     # Compute stats and print report
     stats = compute_stats(simulator)

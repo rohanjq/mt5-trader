@@ -81,3 +81,55 @@ def load_ohlc(
         df["time"].iloc[-1] if len(df) > 0 else "N/A",
     )
     return df
+
+
+def load_ticks(
+    path: str | Path,
+    start: datetime | None = None,
+    end: datetime | None = None,
+) -> pd.DataFrame:
+    """Load tick CSV and return a cleaned DataFrame.
+
+    Returns columns: time (datetime64), bid, ask.
+    Sorted by time ascending.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Tick data file not found: {path}")
+
+    df = pd.read_csv(path, sep=None, engine="python")
+
+    # Normalise column names
+    rename = {}
+    for col in df.columns:
+        lc = col.strip().lower()
+        if lc in ("time", "datetime", "timestamp"):
+            rename[col] = "time"
+        elif lc == "bid":
+            rename[col] = "bid"
+        elif lc == "ask":
+            rename[col] = "ask"
+    df = df.rename(columns=rename)
+
+    if "bid" not in df.columns or "ask" not in df.columns:
+        raise ValueError(f"Tick data must have 'bid' and 'ask' columns. Got: {list(df.columns)}")
+    if "time" not in df.columns:
+        raise ValueError(f"Tick data must have a 'time' column. Got: {list(df.columns)}")
+
+    df["time"] = pd.to_datetime(df["time"])
+    df = df.sort_values("time").reset_index(drop=True)
+
+    # Filter date range
+    if start:
+        df = df[df["time"] >= pd.Timestamp(start)]
+    if end:
+        df = df[df["time"] <= pd.Timestamp(end)]
+
+    df = df[["time", "bid", "ask"]].reset_index(drop=True)
+    log.info(
+        "Loaded %d ticks from %s (%s to %s)",
+        len(df), path.name,
+        df["time"].iloc[0] if len(df) > 0 else "N/A",
+        df["time"].iloc[-1] if len(df) > 0 else "N/A",
+    )
+    return df

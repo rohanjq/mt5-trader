@@ -299,6 +299,97 @@ class Simulator:
 
         return closed_this_bar
 
+    # ── Tick-level processing ──────────────────────────────────────────────
+
+    def process_tick(
+        self, tick_time: datetime, bid: float, ask: float,
+    ) -> list[ClosedTrade]:
+        """Check all open positions against tick bid/ask for SL/TP hits.
+
+        • BUY positions are checked against *bid* (sell-side exit price).
+        • SELL positions are checked against *ask* (buy-back exit price).
+
+        Fills at the SL/TP level (matching MT5 server-side order behaviour).
+        Does NOT update the equity curve — the caller handles that at
+        M1-close boundaries.
+        """
+        if not self.open_positions:
+            return []
+
+        closed_this_tick: list[ClosedTrade] = []
+        to_close: list[tuple[str, float, str, datetime]] = []
+
+        for rule_name, pos in list(self.open_positions.items()):
+            # Exit check price: BUY exits at bid, SELL exits at ask
+            if pos.direction == "BUY":
+                px = bid
+            else:
+                px = ask
+
+            # ── Breakeven ────────────────────────────────────────────
+            if pos.breakeven_pct > 0 and not pos.breakeven_moved and pos.risk_dollars > 0:
+                if pos.direction == "BUY":
+                    trigger = pos.entry_price + pos.risk_dollars * (pos.breakeven_pct / 100.0)
+                    if px >= trigger:
+                        pos.sl = pos.entry_price
+                        pos.breakeven_moved = True
+                else:
+                    trigger = pos.entry_price - pos.risk_dollars * (pos.breakeven_pct / 100.0)
+                    if px <= trigger:
+                        pos.sl = pos.entry_price
+                        pos.breakeven_moved = True
+
+            # ── Trailing stop ────────────────────────────────────────
+            if pos.trailing_stop_dollars > 0:
+                if pos.direction == "BUY":
+                    if px > pos.trail_best_price:
+                        pos.trail_best_price = px
+                    new_sl = pos.trail_best_price - pos.trailing_stop_dollars
+                    if new_sl > pos.sl:
+                        pos.sl = new_sl
+                        pos.trail_active = True
+                else:
+                    if pos.trail_best_price == 0 or px < pos.trail_best_price:
+                        pos.trail_best_price = px
+                    new_sl = pos.trail_best_price + pos.trailing_stop_dollars
+                    if new_sl < pos.sl:
+                        pos.sl = new_sl
+                        pos.trail_active = True
+
+            # ── SL / TP hit ──────────────────────────────────────────
+            sl_hit = False
+            tp_hit = False
+            if pos.direction == "BUY":
+                sl_hit = px <= pos.sl
+                tp_hit = pos.tp > 0 and px >= pos.tp
+            else:
+                sl_hit = px >= pos.sl
+                tp_hit = pos.tp > 0 and px <= pos.tp
+
+            # With tick data a single price can't straddle both SL
+            # and TP (they're on opposite sides), but guard anyway.
+            if sl_hit and tp_hit:
+                tp_hit = False  # conservative: take the loss
+
+            if sl_hit:
+                reason = (
+                    "TRAIL" if pos.trail_active
+                    else "BREAKEVEN" if pos.breakeven_moved and pos.sl == pos.entry_price
+                    else "SL"
+                )
+                to_close.append((rule_name, pos.sl, reason, tick_time))
+            elif tp_hit:
+                to_close.append((rule_name, pos.tp, "TP", tick_time))
+
+        for rule_name, exit_price, exit_reason, exit_time in to_close:
+            trade = self._close_position(rule_name, exit_price, exit_time, exit_reason)
+            if trade:
+                closed_this_tick.append(trade)
+
+        return closed_this_tick
+
+    # ── Position lifecycle ─────────────────────────────────────────────────
+
     def _close_position(
         self, rule_name: str, exit_price: float, exit_time: datetime, exit_reason: str,
     ) -> ClosedTrade | None:
