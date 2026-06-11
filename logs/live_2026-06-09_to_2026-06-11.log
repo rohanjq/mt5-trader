@@ -1,0 +1,607 @@
+2026-06-09 16:49:49,841 [INFO] main: === MT5 Auto-Trader starting [XAUUSD] ===
+2026-06-09 16:49:49,844 [INFO] signals.base: Signal source: utbot_M1
+2026-06-09 16:49:49,844 [INFO] signals.base: Signal source: utbot_M2
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_M3
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_M5
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_M10
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_M15
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_M30
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_M45
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_H1
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: utbot_H4
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: dc_M1
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: dc_M2
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: dc_M3
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: dc_M5
+2026-06-09 16:49:49,845 [INFO] signals.base: Signal source: dc_M10
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: dc_M15
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: dc_M30
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: dc_M45
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: dc_H1
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: dc_H4
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: ema9_M1
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: ema9_M2
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: ema9_M3
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: ema9_M5
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: ema9_M10
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: ema9_M15
+2026-06-09 16:49:49,846 [INFO] signals.base: Signal source: ema9_M30
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema9_H1
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema9_H4
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_M1
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_M2
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_M3
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_M5
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_M10
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_M15
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_M30
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_H1
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema21_H4
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema50_M1
+2026-06-09 16:49:49,847 [INFO] signals.base: Signal source: ema50_M2
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema50_M3
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema50_M5
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema50_M10
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema50_M15
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema50_M30
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema50_H1
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema50_H4
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema200_M1
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema200_M2
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema200_M3
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema200_M5
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema200_M10
+2026-06-09 16:49:49,848 [INFO] signals.base: Signal source: ema200_M15
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: ema200_M30
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: ema200_H1
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: ema200_H4
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_M1
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_M2
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_M3
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_M5
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_M10
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_M15
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_M30
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_H1
+2026-06-09 16:49:49,849 [INFO] signals.base: Signal source: rsi14_H4
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_M1
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_M2
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_M3
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_M5
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_M10
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_M15
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_M30
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_H1
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: rsi2_H4
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: adx14_M1
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: adx14_M2
+2026-06-09 16:49:49,850 [INFO] signals.base: Signal source: adx14_M3
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: adx14_M5
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: adx14_M10
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: adx14_M15
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: adx14_M30
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: adx14_H1
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: adx14_H4
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: macd12_26_9_M1
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: macd12_26_9_M2
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: macd12_26_9_M3
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: macd12_26_9_M5
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: macd12_26_9_M10
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: macd12_26_9_M15
+2026-06-09 16:49:49,851 [INFO] signals.base: Signal source: macd12_26_9_M30
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: macd12_26_9_H1
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: macd12_26_9_H4
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_M1
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_M2
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_M3
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_M5
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_M10
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_M15
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_M30
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_H1
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: stoch5_3_3_H4
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: bb20d2_M1
+2026-06-09 16:49:49,852 [INFO] signals.base: Signal source: bb20d2_M2
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: bb20d2_M3
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: bb20d2_M5
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: bb20d2_M10
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: bb20d2_M15
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: bb20d2_M30
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: bb20d2_H1
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: bb20d2_H4
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_M1
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_M2
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_M3
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_M5
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_M10
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_M15
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_M30
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_H1
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: atr14_H4
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: vwap_M1
+2026-06-09 16:49:49,853 [INFO] signals.base: Signal source: vwap_M2
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: vwap_M3
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: vwap_M5
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: vwap_M10
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: vwap_M15
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: vwap_M30
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: vwap_H1
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: vwap_H4
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: candle_M1
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: candle_M2
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: candle_M3
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: candle_M5
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: candle_M10
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: candle_M15
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: candle_M30
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: liqgrab_M3
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: liqgrab_M5
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: liqgrab_M15
+2026-06-09 16:49:49,854 [INFO] signals.base: Signal source: liqgrab_H1
+2026-06-09 16:49:49,855 [INFO] filters.base: Loaded filter plugin: consecutive_loss
+2026-06-09 16:49:49,856 [INFO] filters.base: Loaded filter plugin: cooldown
+2026-06-09 16:49:49,856 [INFO] filters.base: Loaded filter plugin: daily_loss
+2026-06-09 16:49:49,857 [INFO] filters.base: Loaded filter plugin: manual_switch
+2026-06-09 16:49:49,857 [INFO] filters.base: Loaded filter plugin: reversal_cooldown
+2026-06-09 16:49:49,857 [INFO] filters.base: Filter added: consecutive_loss
+2026-06-09 16:49:49,857 [INFO] filters.base: Filter added: cooldown
+2026-06-09 16:49:49,857 [INFO] filters.base: Filter added: daily_loss
+2026-06-09 16:49:49,857 [INFO] filters.base: Filter added: manual_switch
+2026-06-09 16:49:49,857 [INFO] filters.base: Filter added: reversal_cooldown
+2026-06-09 16:49:49,858 [INFO] exits.base: Loaded exit rule: breakeven
+2026-06-09 16:49:49,859 [INFO] exits.base: Loaded exit rule: partial_tp
+2026-06-09 16:49:49,859 [INFO] exits.base: Loaded exit rule: signal_reversal
+2026-06-09 16:49:49,860 [INFO] exits.base: Loaded exit rule: trailing_stop
+2026-06-09 16:49:49,860 [INFO] trade.manager: Exit rules loaded: ['breakeven', 'partial_tp', 'signal_reversal', 'trailing_stop']
+2026-06-09 16:49:49,860 [INFO] rules.expression: Loaded expression rule: dc_wick_rejection (priority=110, buy=2 conds, sell=2 conds)
+2026-06-09 16:49:49,860 [INFO] rules.expression: Loaded expression rule: trend_2w_m2_ema50_bounce2_vwap (priority=50, buy=0 conds, sell=4 conds)
+2026-06-09 16:49:49,861 [INFO] rules.expression: Loaded expression rule: trend_2w_m2_m15bear_bounce2_vwap (priority=50, buy=0 conds, sell=4 conds)
+2026-06-09 16:49:49,861 [INFO] rules.expression: Loaded expression rule: dc2w_m3_m45bear_dcupper_vwap (priority=55, buy=0 conds, sell=4 conds)
+2026-06-09 16:49:49,861 [INFO] rules.expression: Loaded expression rule: hammer_2w_m15_dc (priority=55, buy=4 conds, sell=0 conds)
+2026-06-09 16:49:49,861 [INFO] rules.expression: Loaded expression rule: doji_dc_upper_m15 (priority=55, buy=0 conds, sell=3 conds)
+2026-06-09 16:49:49,861 [INFO] rules.expression: Loaded expression rule: shstar_m5_m15 (priority=50, buy=0 conds, sell=2 conds)
+2026-06-09 16:49:49,861 [INFO] rules.expression: Loaded expression rule: wick2x_dc_m45_vwap_sell (priority=55, buy=0 conds, sell=5 conds)
+2026-06-09 16:49:49,861 [INFO] rules.expression: Loaded expression rule: dc_mid_hammer_2w_m15 (priority=55, buy=4 conds, sell=0 conds)
+2026-06-09 16:49:49,862 [INFO] rules.expression: Loaded expression rule: dc_mid_shstar_2w_m15 (priority=55, buy=0 conds, sell=4 conds)
+2026-06-09 16:49:49,862 [INFO] rules.expression: Loaded expression rule: dc_lowmid_hammer_2w_m15 (priority=50, buy=4 conds, sell=0 conds)
+2026-06-09 16:49:49,862 [INFO] rules.expression: Loaded expression rule: dc_upmid_shstar_2w_m15 (priority=50, buy=0 conds, sell=4 conds)
+2026-06-09 16:49:49,862 [INFO] rules.expression: Loaded expression rule: rsi2_mean_rev_full (priority=110, buy=4 conds, sell=0 conds)
+2026-06-09 16:49:49,862 [INFO] rules.expression: Loaded expression rule: ema50_dc_wick_h1 (priority=110, buy=3 conds, sell=0 conds)
+2026-06-09 16:49:49,862 [INFO] rules.expression: Loaded expression rule: rsi2_dc_wick (priority=120, buy=3 conds, sell=0 conds)
+2026-06-09 16:49:49,862 [INFO] trade.initiator: Rules loaded: ['trend_2w_m2_ema50_bounce2_vwap', 'trend_2w_m2_m15bear_bounce2_vwap', 'shstar_m5_m15', 'dc_lowmid_hammer_2w_m15', 'dc_upmid_shstar_2w_m15', 'dc2w_m3_m45bear_dcupper_vwap', 'hammer_2w_m15_dc', 'doji_dc_upper_m15', 'wick2x_dc_m45_vwap_sell', 'dc_mid_hammer_2w_m15', 'dc_mid_shstar_2w_m15', 'dc_wick_rejection', 'rsi2_mean_rev_full', 'ema50_dc_wick_h1', 'rsi2_dc_wick']
+2026-06-09 16:49:50,627 [INFO] core.mt5_client: Connected to MT5: PXBT Trading MT5 Terminal
+2026-06-09 16:49:50,629 [INFO] core.config: Config hot-reload watcher started
+2026-06-09 16:49:50,630 [INFO] core.engine: Engine started — 139 signal sources, 5 filters
+2026-06-09 16:49:50,755 [INFO] trade.initiator: Signals are fresh — skipping warmup, ready to trade
+2026-06-09 17:48:02,062 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=7, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-09 17:48:02,077 [INFO] trade.initiator: Risk sizing: 5.0% of $12089 = $604 risk, SL=$7.50, cash/lot=$750 → vol=0.80
+2026-06-09 17:48:02,077 [INFO] trade.initiator: Trade request 8d5827bd2076: SELL XAUUSD vol=0.8000 SL=4266.08 TP=4251.08 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-09 17:48:02,121 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.8, 'type': 1, 'price': 4258.58, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4266.08, 'tp': 4251.08}
+2026-06-09 17:48:02,298 [INFO] core.mt5_client: Order executed: ticket=44704552
+2026-06-09 17:48:02,302 [INFO] trade.manager: Trade 8d5827bd2076 registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-09 17:48:02,302 [INFO] trade.initiator: Trade 8d5827bd2076 EXECUTED: ticket=44704552 entry=4258.89 SL=4266.08 TP=4251.08 vol=0.80
+2026-06-09 18:09:30,700 [WARNING] trade.manager: Tracked position ticket=44704552 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-09 18:09:30,749 [INFO] trade.manager: Deal history for ticket=44704552: profit=-579.20 exit=4266.13000 (1 close deals, 2 total deals)
+2026-06-09 18:09:30,749 [INFO] trade.manager: Trade 8d5827bd2076 CLOSED with LOSS: -579.20 (consecutive: 1)
+2026-06-09 18:44:03,139 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=18, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-09 18:44:03,148 [INFO] trade.initiator: Risk sizing: 5.0% of $11510 = $575 risk, SL=$7.50, cash/lot=$750 → vol=0.76
+2026-06-09 18:44:03,148 [INFO] trade.initiator: Trade request d8aeafa276de: SELL XAUUSD vol=0.7600 SL=4272.73 TP=4257.73 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-09 18:44:03,192 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.76, 'type': 1, 'price': 4265.23, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4272.73, 'tp': 4257.73}
+2026-06-09 18:44:03,371 [INFO] core.mt5_client: Order executed: ticket=44711858
+2026-06-09 18:44:03,375 [INFO] trade.manager: Trade d8aeafa276de registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-09 18:44:03,375 [INFO] trade.initiator: Trade d8aeafa276de EXECUTED: ticket=44711858 entry=4265.41 SL=4272.73 TP=4257.73 vol=0.76
+2026-06-09 19:15:18,699 [WARNING] trade.manager: Tracked position ticket=44711858 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-09 19:15:18,741 [INFO] trade.manager: Deal history for ticket=44711858: profit=588.24 exit=4257.67000 (1 close deals, 2 total deals)
+2026-06-09 19:15:18,741 [INFO] trade.manager: Trade d8aeafa276de CLOSED with PROFIT: 588.24
+2026-06-09 20:15:02,618 [INFO] trade.initiator: Rule dc_upmid_shstar_2w_m15 triggered: SELL — dc_M5.closed_price_zone=MIDDLE, utbot_M5.consecutive_bull_bars=4, candle_M3.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-09 20:15:02,627 [INFO] trade.initiator: Risk sizing: 5.0% of $12098 = $605 risk, SL=$7.50, cash/lot=$750 → vol=0.80
+2026-06-09 20:15:02,627 [INFO] trade.initiator: Trade request fc827c4572f7: SELL XAUUSD vol=0.8000 SL=4265.69 TP=4250.69 (rule: dc_upmid_shstar_2w_m15)
+2026-06-09 20:15:02,671 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.8, 'type': 1, 'price': 4258.19, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4265.69, 'tp': 4250.69}
+2026-06-09 20:15:02,850 [INFO] core.mt5_client: Order executed: ticket=44723288
+2026-06-09 20:15:02,901 [INFO] trade.manager: Trade fc827c4572f7 registered under rule 'dc_upmid_shstar_2w_m15' and monitoring
+2026-06-09 20:15:02,902 [INFO] trade.initiator: Trade fc827c4572f7 EXECUTED: ticket=44723288 entry=4258.12 SL=4265.69 TP=4250.69 vol=0.80
+2026-06-09 22:41:08,944 [WARNING] trade.manager: Tracked position ticket=44723288 (rule=dc_upmid_shstar_2w_m15) no longer in MT5 — marking closed
+2026-06-09 22:41:08,983 [INFO] trade.manager: Deal history for ticket=44723288: profit=610.40 exit=4250.49000 (1 close deals, 2 total deals)
+2026-06-09 22:41:08,983 [INFO] trade.manager: Trade fc827c4572f7 CLOSED with PROFIT: 610.40
+2026-06-10 00:06:02,629 [INFO] trade.initiator: Rule dc_wick_rejection triggered: BUY — dc_M15.closed_lower_wick_rej=TRUE, utbot_M3.closed_bias=BULLISH
+2026-06-10 00:06:02,639 [INFO] trade.initiator: Risk sizing: 5.0% of $12708 = $635 risk, SL=$5.00, cash/lot=$500 → vol=1.27
+2026-06-10 00:06:02,639 [INFO] trade.initiator: Trade request 6bf9cbc74773: BUY XAUUSD vol=1.2700 SL=4221.43 TP=4231.43 (rule: dc_wick_rejection)
+2026-06-10 00:06:02,685 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.27, 'type': 0, 'price': 4226.43, 'deviation': 20, 'magic': 200, 'comment': 'bot buy', 'type_time': 0, 'type_filling': 0, 'sl': 4221.43, 'tp': 4231.43}
+2026-06-10 00:06:02,861 [INFO] core.mt5_client: Order executed: ticket=44735043
+2026-06-10 00:06:02,868 [INFO] trade.manager: Trade 6bf9cbc74773 registered under rule 'dc_wick_rejection' and monitoring
+2026-06-10 00:06:02,869 [INFO] trade.initiator: Trade 6bf9cbc74773 EXECUTED: ticket=44735043 entry=4226.38 SL=4221.43 TP=4231.43 vol=1.27
+2026-06-10 00:09:07,447 [WARNING] trade.manager: Tracked position ticket=44735043 (rule=dc_wick_rejection) no longer in MT5 — marking closed
+2026-06-10 00:09:07,495 [INFO] trade.manager: Deal history for ticket=44735043: profit=-642.62 exit=4221.32000 (1 close deals, 2 total deals)
+2026-06-10 00:09:07,495 [INFO] trade.manager: Trade 6bf9cbc74773 CLOSED with LOSS: -642.62 (consecutive: 1)
+2026-06-10 00:59:11,133 [ERROR] signals.base: Error reading CSV ../MetaTrader5-Docker/data/signals/XAUUSD_dc_M10.csv
+Traceback (most recent call last):
+  File "/root/mt5-trader/signals/base.py", line 46, in _read_csv
+    v = row.get("value", "").strip()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'strip'
+2026-06-10 01:18:02,376 [INFO] trade.initiator: Rule dc_wick_rejection triggered: BUY — dc_M15.closed_lower_wick_rej=TRUE, utbot_M3.closed_bias=BULLISH
+2026-06-10 01:18:02,387 [INFO] trade.initiator: Risk sizing: 5.0% of $12066 = $603 risk, SL=$5.00, cash/lot=$500 → vol=1.20
+2026-06-10 01:18:02,387 [INFO] trade.initiator: Trade request 9a9123596548: BUY XAUUSD vol=1.2000 SL=4210.33 TP=4220.33 (rule: dc_wick_rejection)
+2026-06-10 01:18:02,430 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.2, 'type': 0, 'price': 4215.33, 'deviation': 20, 'magic': 200, 'comment': 'bot buy', 'type_time': 0, 'type_filling': 0, 'sl': 4210.33, 'tp': 4220.33}
+2026-06-10 01:18:02,607 [INFO] core.mt5_client: Order executed: ticket=44742957
+2026-06-10 01:18:02,610 [INFO] trade.manager: Trade 9a9123596548 registered under rule 'dc_wick_rejection' and monitoring
+2026-06-10 01:18:02,610 [INFO] trade.initiator: Trade 9a9123596548 EXECUTED: ticket=44742957 entry=4215.33 SL=4210.33 TP=4220.33 vol=1.20
+2026-06-10 01:20:17,178 [WARNING] trade.manager: Tracked position ticket=44742957 (rule=dc_wick_rejection) no longer in MT5 — marking closed
+2026-06-10 01:20:17,226 [INFO] trade.manager: Deal history for ticket=44742957: profit=-633.60 exit=4210.05000 (1 close deals, 2 total deals)
+2026-06-10 01:20:17,227 [INFO] trade.manager: Trade 9a9123596548 CLOSED with LOSS: -633.60 (consecutive: 2)
+2026-06-10 02:15:01,451 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 02:15:01,460 [INFO] trade.initiator: Risk sizing: 5.0% of $11432 = $572 risk, SL=$7.50, cash/lot=$750 → vol=0.76
+2026-06-10 02:15:01,461 [INFO] trade.initiator: Trade request f0337e8a1aa4: SELL XAUUSD vol=0.7600 SL=4190.81 TP=4175.81 (rule: shstar_m5_m15)
+2026-06-10 02:15:01,504 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.76, 'type': 1, 'price': 4183.31, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4190.81, 'tp': 4175.81}
+2026-06-10 02:15:01,681 [INFO] core.mt5_client: Order executed: ticket=44747581
+2026-06-10 02:15:01,686 [INFO] trade.manager: Trade f0337e8a1aa4 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 02:15:01,687 [INFO] trade.initiator: Trade f0337e8a1aa4 EXECUTED: ticket=44747581 entry=4183.29 SL=4190.81 TP=4175.81 vol=0.76
+2026-06-10 02:30:05,087 [WARNING] trade.manager: Tracked position ticket=44747581 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 02:30:05,134 [INFO] trade.manager: Deal history for ticket=44747581: profit=-582.92 exit=4190.96000 (1 close deals, 2 total deals)
+2026-06-10 02:30:05,135 [INFO] trade.manager: Trade f0337e8a1aa4 CLOSED with LOSS: -582.92 (consecutive: 3)
+2026-06-10 03:10:02,160 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 03:10:02,170 [INFO] trade.initiator: Risk sizing: 5.0% of $10849 = $542 risk, SL=$7.50, cash/lot=$750 → vol=0.72
+2026-06-10 03:10:02,170 [INFO] trade.initiator: Trade request 62d29aa9350d: SELL XAUUSD vol=0.7200 SL=4182.72 TP=4167.72 (rule: shstar_m5_m15)
+2026-06-10 03:10:02,214 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.72, 'type': 1, 'price': 4175.22, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4182.72, 'tp': 4167.72}
+2026-06-10 03:10:02,391 [INFO] core.mt5_client: Order executed: ticket=44752009
+2026-06-10 03:10:02,395 [INFO] trade.manager: Trade 62d29aa9350d registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 03:10:02,395 [INFO] trade.initiator: Trade 62d29aa9350d EXECUTED: ticket=44752009 entry=4175.22 SL=4182.72 TP=4167.72 vol=0.72
+2026-06-10 03:38:55,363 [WARNING] trade.manager: Tracked position ticket=44752009 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 03:38:55,405 [INFO] trade.manager: Deal history for ticket=44752009: profit=-573.12 exit=4183.18000 (1 close deals, 2 total deals)
+2026-06-10 03:38:55,405 [INFO] trade.manager: Trade 62d29aa9350d CLOSED with LOSS: -573.12 (consecutive: 4)
+2026-06-10 07:50:01,605 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 07:50:01,615 [INFO] trade.initiator: Risk sizing: 5.0% of $10276 = $514 risk, SL=$7.50, cash/lot=$750 → vol=0.68
+2026-06-10 07:50:01,615 [INFO] trade.initiator: Trade request 192fa8b60e3f: SELL XAUUSD vol=0.6800 SL=4196.80 TP=4181.80 (rule: shstar_m5_m15)
+2026-06-10 07:50:01,662 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.68, 'type': 1, 'price': 4189.3, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4196.8, 'tp': 4181.8}
+2026-06-10 07:50:01,839 [INFO] core.mt5_client: Order executed: ticket=44785076
+2026-06-10 07:50:01,842 [INFO] trade.manager: Trade 192fa8b60e3f registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 07:50:01,843 [INFO] trade.initiator: Trade 192fa8b60e3f EXECUTED: ticket=44785076 entry=4189.30 SL=4196.80 TP=4181.80 vol=0.68
+2026-06-10 08:00:32,250 [WARNING] trade.manager: Tracked position ticket=44785076 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 08:00:32,299 [INFO] trade.manager: Deal history for ticket=44785076: profit=510.68 exit=4181.79000 (1 close deals, 2 total deals)
+2026-06-10 08:00:32,300 [INFO] trade.manager: Trade 192fa8b60e3f CLOSED with PROFIT: 510.68
+2026-06-10 08:45:01,785 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 08:45:01,795 [INFO] trade.initiator: Risk sizing: 5.0% of $10787 = $539 risk, SL=$7.50, cash/lot=$750 → vol=0.71
+2026-06-10 08:45:01,795 [INFO] trade.initiator: Trade request 304ff6737571: SELL XAUUSD vol=0.7100 SL=4177.67 TP=4162.67 (rule: shstar_m5_m15)
+2026-06-10 08:45:01,839 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.71, 'type': 1, 'price': 4170.17, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4177.67, 'tp': 4162.67}
+2026-06-10 08:45:02,016 [INFO] core.mt5_client: Order executed: ticket=44797300
+2026-06-10 08:45:02,019 [INFO] trade.manager: Trade 304ff6737571 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 08:45:02,020 [INFO] trade.initiator: Trade 304ff6737571 EXECUTED: ticket=44797300 entry=4170.01 SL=4177.67 TP=4162.67 vol=0.71
+2026-06-10 09:34:47,398 [WARNING] trade.manager: Tracked position ticket=44797300 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 09:34:47,445 [INFO] trade.manager: Deal history for ticket=44797300: profit=-548.83 exit=4177.74000 (1 close deals, 2 total deals)
+2026-06-10 09:34:47,445 [INFO] trade.manager: Trade 304ff6737571 CLOSED with LOSS: -548.83 (consecutive: 1)
+2026-06-10 11:00:01,358 [INFO] trade.initiator: Rule dc_upmid_shstar_2w_m15 triggered: SELL — dc_M5.closed_price_zone=UPPER_MID, utbot_M5.consecutive_bull_bars=4, candle_M3.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 11:00:01,367 [INFO] trade.initiator: Risk sizing: 5.0% of $10238 = $512 risk, SL=$7.50, cash/lot=$750 → vol=0.68
+2026-06-10 11:00:01,368 [INFO] trade.initiator: Trade request 8c75d6c70b59: SELL XAUUSD vol=0.6800 SL=4182.88 TP=4167.88 (rule: dc_upmid_shstar_2w_m15)
+2026-06-10 11:00:01,411 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.68, 'type': 1, 'price': 4175.38, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4182.88, 'tp': 4167.88}
+2026-06-10 11:00:01,589 [INFO] core.mt5_client: Order executed: ticket=44818432
+2026-06-10 11:00:01,636 [INFO] trade.manager: Trade 8c75d6c70b59 registered under rule 'dc_upmid_shstar_2w_m15' and monitoring
+2026-06-10 11:00:01,636 [INFO] trade.initiator: Trade 8c75d6c70b59 EXECUTED: ticket=44818432 entry=4175.38 SL=4182.88 TP=4167.88 vol=0.68
+2026-06-10 11:03:48,374 [WARNING] trade.manager: Tracked position ticket=44818432 (rule=dc_upmid_shstar_2w_m15) no longer in MT5 — marking closed
+2026-06-10 11:03:48,451 [INFO] trade.manager: Deal history for ticket=44818432: profit=521.56 exit=4167.71000 (1 close deals, 2 total deals)
+2026-06-10 11:03:48,452 [INFO] trade.manager: Trade 8c75d6c70b59 CLOSED with PROFIT: 521.56
+2026-06-10 11:04:12,413 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=4, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 11:04:12,422 [INFO] trade.initiator: Risk sizing: 5.0% of $10760 = $538 risk, SL=$7.50, cash/lot=$750 → vol=0.71
+2026-06-10 11:04:12,423 [INFO] trade.initiator: Trade request 0fc7b5625fa8: SELL XAUUSD vol=0.7100 SL=4171.76 TP=4156.76 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-10 11:04:12,466 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.71, 'type': 1, 'price': 4164.26, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4171.76, 'tp': 4156.76}
+2026-06-10 11:04:12,643 [INFO] core.mt5_client: Order executed: ticket=44819314
+2026-06-10 11:04:12,690 [INFO] trade.manager: Trade 0fc7b5625fa8 registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-10 11:04:12,691 [INFO] trade.initiator: Trade 0fc7b5625fa8 EXECUTED: ticket=44819314 entry=4164.31 SL=4171.76 TP=4156.76 vol=0.71
+2026-06-10 11:05:16,631 [WARNING] trade.manager: Tracked position ticket=44819314 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-10 11:05:16,710 [INFO] trade.manager: Deal history for ticket=44819314: profit=580.07 exit=4156.14000 (1 close deals, 2 total deals)
+2026-06-10 11:05:16,711 [INFO] trade.manager: Trade 0fc7b5625fa8 CLOSED with PROFIT: 580.07
+2026-06-10 11:25:02,276 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 11:25:02,286 [INFO] trade.initiator: Risk sizing: 5.0% of $11340 = $567 risk, SL=$7.50, cash/lot=$750 → vol=0.75
+2026-06-10 11:25:02,286 [INFO] trade.initiator: Trade request 937aa7a7580a: SELL XAUUSD vol=0.7500 SL=4170.97 TP=4155.97 (rule: shstar_m5_m15)
+2026-06-10 11:25:02,330 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.75, 'type': 1, 'price': 4163.47, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4170.97, 'tp': 4155.97}
+2026-06-10 11:25:02,509 [INFO] core.mt5_client: Order executed: ticket=44823336
+2026-06-10 11:25:02,512 [INFO] trade.manager: Trade 937aa7a7580a registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 11:25:02,513 [INFO] trade.initiator: Trade 937aa7a7580a EXECUTED: ticket=44823336 entry=4163.60 SL=4170.97 TP=4155.97 vol=0.75
+2026-06-10 11:44:49,311 [WARNING] trade.manager: Tracked position ticket=44823336 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 11:44:49,388 [INFO] trade.manager: Deal history for ticket=44823336: profit=580.50 exit=4155.86000 (1 close deals, 2 total deals)
+2026-06-10 11:44:49,388 [INFO] trade.manager: Trade 937aa7a7580a CLOSED with PROFIT: 580.50
+2026-06-10 12:33:01,992 [INFO] trade.initiator: Rule dc_wick_rejection triggered: BUY — dc_M15.closed_lower_wick_rej=TRUE, utbot_M3.closed_bias=BULLISH
+2026-06-10 12:33:02,002 [INFO] trade.initiator: Risk sizing: 5.0% of $11920 = $596 risk, SL=$5.00, cash/lot=$500 → vol=1.19
+2026-06-10 12:33:02,002 [INFO] trade.initiator: Trade request afee50669582: BUY XAUUSD vol=1.1900 SL=4157.97 TP=4167.97 (rule: dc_wick_rejection)
+2026-06-10 12:33:02,045 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.19, 'type': 0, 'price': 4162.97, 'deviation': 20, 'magic': 200, 'comment': 'bot buy', 'type_time': 0, 'type_filling': 0, 'sl': 4157.97, 'tp': 4167.97}
+2026-06-10 12:33:02,224 [INFO] core.mt5_client: Order executed: ticket=44843141
+2026-06-10 12:33:02,227 [INFO] trade.manager: Trade afee50669582 registered under rule 'dc_wick_rejection' and monitoring
+2026-06-10 12:33:02,227 [INFO] trade.initiator: Trade afee50669582 EXECUTED: ticket=44843141 entry=4162.93 SL=4157.97 TP=4167.97 vol=1.19
+2026-06-10 12:33:11,221 [WARNING] trade.manager: Tracked position ticket=44843141 (rule=dc_wick_rejection) no longer in MT5 — marking closed
+2026-06-10 12:33:11,312 [INFO] trade.manager: Deal history for ticket=44843141: profit=603.33 exit=4168.00000 (1 close deals, 2 total deals)
+2026-06-10 12:33:11,313 [INFO] trade.manager: Trade afee50669582 CLOSED with PROFIT: 603.33
+2026-06-10 12:48:01,503 [INFO] trade.initiator: Rule dc_upmid_shstar_2w_m15 triggered: SELL — dc_M5.closed_price_zone=MIDDLE, utbot_M5.consecutive_bull_bars=4, candle_M3.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 12:48:01,512 [INFO] trade.initiator: Risk sizing: 5.0% of $12524 = $626 risk, SL=$7.50, cash/lot=$750 → vol=0.83
+2026-06-10 12:48:01,513 [INFO] trade.initiator: Trade request 8ce5c48f4554: SELL XAUUSD vol=0.8300 SL=4167.91 TP=4152.91 (rule: dc_upmid_shstar_2w_m15)
+2026-06-10 12:48:01,557 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.83, 'type': 1, 'price': 4160.41, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4167.91, 'tp': 4152.91}
+2026-06-10 12:48:01,733 [INFO] core.mt5_client: Order executed: ticket=44848367
+2026-06-10 12:48:01,736 [INFO] trade.manager: Trade 8ce5c48f4554 registered under rule 'dc_upmid_shstar_2w_m15' and monitoring
+2026-06-10 12:48:01,737 [INFO] trade.initiator: Trade 8ce5c48f4554 EXECUTED: ticket=44848367 entry=4161.11 SL=4167.91 TP=4152.91 vol=0.83
+2026-06-10 12:51:18,509 [WARNING] trade.manager: Tracked position ticket=44848367 (rule=dc_upmid_shstar_2w_m15) no longer in MT5 — marking closed
+2026-06-10 12:51:18,602 [INFO] trade.manager: Deal history for ticket=44848367: profit=695.54 exit=4152.73000 (1 close deals, 2 total deals)
+2026-06-10 12:51:18,602 [INFO] trade.manager: Trade 8ce5c48f4554 CLOSED with PROFIT: 695.54
+2026-06-10 12:51:18,932 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 12:51:18,941 [INFO] trade.initiator: Risk sizing: 5.0% of $13219 = $661 risk, SL=$7.50, cash/lot=$750 → vol=0.88
+2026-06-10 12:51:18,942 [INFO] trade.initiator: Trade request 37cb887bc7ba: SELL XAUUSD vol=0.8800 SL=4160.44 TP=4145.44 (rule: shstar_m5_m15)
+2026-06-10 12:51:18,985 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.88, 'type': 1, 'price': 4152.94, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4160.44, 'tp': 4145.44}
+2026-06-10 12:51:19,161 [INFO] core.mt5_client: Order executed: ticket=44848922
+2026-06-10 12:51:19,164 [INFO] trade.manager: Trade 37cb887bc7ba registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 12:51:19,165 [INFO] trade.initiator: Trade 37cb887bc7ba EXECUTED: ticket=44848922 entry=4152.94 SL=4160.44 TP=4145.44 vol=0.88
+2026-06-10 12:56:16,969 [WARNING] trade.manager: Tracked position ticket=44848922 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 12:56:17,058 [INFO] trade.manager: Deal history for ticket=44848922: profit=682.00 exit=4145.19000 (1 close deals, 2 total deals)
+2026-06-10 12:56:17,059 [INFO] trade.manager: Trade 37cb887bc7ba CLOSED with PROFIT: 682.00
+2026-06-10 12:58:01,715 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=6, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 12:58:01,724 [INFO] trade.initiator: Risk sizing: 5.0% of $13901 = $695 risk, SL=$7.50, cash/lot=$750 → vol=0.92
+2026-06-10 12:58:01,725 [INFO] trade.initiator: Trade request f6720d4a9b05: SELL XAUUSD vol=0.9200 SL=4150.64 TP=4135.64 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-10 12:58:01,769 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.92, 'type': 1, 'price': 4143.14, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4150.64, 'tp': 4135.64}
+2026-06-10 12:58:01,944 [INFO] core.mt5_client: Order executed: ticket=44850773
+2026-06-10 12:58:01,948 [INFO] trade.manager: Trade f6720d4a9b05 registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-10 12:58:01,949 [INFO] trade.initiator: Trade f6720d4a9b05 EXECUTED: ticket=44850773 entry=4143.18 SL=4150.64 TP=4135.64 vol=0.92
+2026-06-10 13:00:30,419 [WARNING] trade.manager: Tracked position ticket=44850773 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-10 13:00:30,510 [INFO] trade.manager: Deal history for ticket=44850773: profit=-724.96 exit=4151.06000 (1 close deals, 2 total deals)
+2026-06-10 13:00:30,511 [INFO] trade.manager: Trade f6720d4a9b05 CLOSED with LOSS: -724.96 (consecutive: 1)
+2026-06-10 13:48:02,597 [INFO] trade.initiator: Rule wick2x_dc_m45_vwap_sell triggered: SELL — candle_M3.closed_upper_wick_ratio=3.21, candle_M3.closed_is_bearish=TRUE, dc_M15.closed_price_zone=UPPER, utbot_M45.closed_bias=BEARISH, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 13:48:02,606 [INFO] trade.initiator: Risk sizing: 5.0% of $13176 = $659 risk, SL=$7.50, cash/lot=$750 → vol=0.87
+2026-06-10 13:48:02,606 [INFO] trade.initiator: Trade request 6147000a6ef5: SELL XAUUSD vol=0.8700 SL=4185.24 TP=4170.24 (rule: wick2x_dc_m45_vwap_sell)
+2026-06-10 13:48:02,650 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.87, 'type': 1, 'price': 4177.74, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4185.24, 'tp': 4170.24}
+2026-06-10 13:48:02,828 [INFO] core.mt5_client: Order executed: ticket=44866569
+2026-06-10 13:48:02,886 [INFO] trade.manager: Trade 6147000a6ef5 registered under rule 'wick2x_dc_m45_vwap_sell' and monitoring
+2026-06-10 13:48:02,887 [INFO] trade.initiator: Trade 6147000a6ef5 EXECUTED: ticket=44866569 entry=4177.80 SL=4185.24 TP=4170.24 vol=0.87
+2026-06-10 13:49:58,831 [WARNING] trade.manager: Tracked position ticket=44866569 (rule=wick2x_dc_m45_vwap_sell) no longer in MT5 — marking closed
+2026-06-10 13:49:58,928 [INFO] trade.manager: Deal history for ticket=44866569: profit=-654.24 exit=4185.32000 (1 close deals, 2 total deals)
+2026-06-10 13:49:58,929 [INFO] trade.manager: Trade 6147000a6ef5 CLOSED with LOSS: -654.24 (consecutive: 2)
+2026-06-10 13:58:02,143 [INFO] trade.initiator: Rule wick2x_dc_m45_vwap_sell triggered: SELL — candle_M3.closed_upper_wick_ratio=8.41, candle_M3.closed_is_bearish=TRUE, dc_M15.closed_price_zone=UPPER, utbot_M45.closed_bias=BEARISH, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 13:58:02,153 [INFO] trade.initiator: Risk sizing: 5.0% of $12522 = $626 risk, SL=$7.50, cash/lot=$750 → vol=0.83
+2026-06-10 13:58:02,153 [INFO] trade.initiator: Trade request cbf251566769: SELL XAUUSD vol=0.8300 SL=4188.16 TP=4173.16 (rule: wick2x_dc_m45_vwap_sell)
+2026-06-10 13:58:02,200 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.83, 'type': 1, 'price': 4180.66, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4188.16, 'tp': 4173.16}
+2026-06-10 13:58:02,376 [INFO] core.mt5_client: Order executed: ticket=44871269
+2026-06-10 13:58:02,379 [INFO] trade.manager: Trade cbf251566769 registered under rule 'wick2x_dc_m45_vwap_sell' and monitoring
+2026-06-10 13:58:02,380 [INFO] trade.initiator: Trade cbf251566769 EXECUTED: ticket=44871269 entry=4180.64 SL=4188.16 TP=4173.16 vol=0.83
+2026-06-10 14:01:37,541 [WARNING] trade.manager: Tracked position ticket=44871269 (rule=wick2x_dc_m45_vwap_sell) no longer in MT5 — marking closed
+2026-06-10 14:01:37,632 [INFO] trade.manager: Deal history for ticket=44871269: profit=623.33 exit=4173.13000 (1 close deals, 2 total deals)
+2026-06-10 14:01:37,632 [INFO] trade.manager: Trade cbf251566769 CLOSED with PROFIT: 623.33
+2026-06-10 14:06:01,962 [INFO] trade.initiator: Rule wick2x_dc_m45_vwap_sell triggered: SELL — candle_M3.closed_upper_wick_ratio=14.59, candle_M3.closed_is_bearish=TRUE, dc_M15.closed_price_zone=UPPER_MID, utbot_M45.closed_bias=BEARISH, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 14:06:01,972 [INFO] trade.initiator: Risk sizing: 5.0% of $13145 = $657 risk, SL=$7.50, cash/lot=$750 → vol=0.87
+2026-06-10 14:06:01,972 [INFO] trade.initiator: Trade request 677dd05a032c: SELL XAUUSD vol=0.8700 SL=4179.27 TP=4164.27 (rule: wick2x_dc_m45_vwap_sell)
+2026-06-10 14:06:02,015 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.87, 'type': 1, 'price': 4171.77, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4179.27, 'tp': 4164.27}
+2026-06-10 14:06:02,192 [INFO] core.mt5_client: Order executed: ticket=44873697
+2026-06-10 14:06:02,238 [INFO] trade.manager: Trade 677dd05a032c registered under rule 'wick2x_dc_m45_vwap_sell' and monitoring
+2026-06-10 14:06:02,238 [INFO] trade.initiator: Trade 677dd05a032c EXECUTED: ticket=44873697 entry=4171.84 SL=4179.27 TP=4164.27 vol=0.87
+2026-06-10 14:13:53,880 [WARNING] trade.manager: Tracked position ticket=44873697 (rule=wick2x_dc_m45_vwap_sell) no longer in MT5 — marking closed
+2026-06-10 14:13:53,963 [INFO] trade.manager: Deal history for ticket=44873697: profit=-682.08 exit=4179.68000 (1 close deals, 2 total deals)
+2026-06-10 14:13:53,964 [INFO] trade.manager: Trade 677dd05a032c CLOSED with LOSS: -682.08 (consecutive: 1)
+2026-06-10 14:15:02,496 [INFO] trade.initiator: Rule wick2x_dc_m45_vwap_sell triggered: SELL — candle_M3.closed_upper_wick_ratio=2.59, candle_M3.closed_is_bearish=TRUE, dc_M15.closed_price_zone=UPPER_MID, utbot_M45.closed_bias=BEARISH, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 14:15:02,507 [INFO] trade.initiator: Risk sizing: 5.0% of $12463 = $623 risk, SL=$7.50, cash/lot=$750 → vol=0.83
+2026-06-10 14:15:02,508 [INFO] trade.initiator: Trade request 94535091c556: SELL XAUUSD vol=0.8300 SL=4182.37 TP=4167.37 (rule: wick2x_dc_m45_vwap_sell)
+2026-06-10 14:15:02,551 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.83, 'type': 1, 'price': 4174.87, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4182.37, 'tp': 4167.37}
+2026-06-10 14:15:02,728 [INFO] core.mt5_client: Order executed: ticket=44875867
+2026-06-10 14:15:02,735 [INFO] trade.manager: Trade 94535091c556 registered under rule 'wick2x_dc_m45_vwap_sell' and monitoring
+2026-06-10 14:15:02,736 [INFO] trade.initiator: Trade 94535091c556 EXECUTED: ticket=44875867 entry=4174.88 SL=4182.37 TP=4167.37 vol=0.83
+2026-06-10 14:20:58,553 [WARNING] trade.manager: Tracked position ticket=44875867 (rule=wick2x_dc_m45_vwap_sell) no longer in MT5 — marking closed
+2026-06-10 14:20:58,648 [INFO] trade.manager: Deal history for ticket=44875867: profit=656.53 exit=4166.97000 (1 close deals, 2 total deals)
+2026-06-10 14:20:58,649 [INFO] trade.manager: Trade 94535091c556 CLOSED with PROFIT: 656.53
+2026-06-10 15:30:02,028 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 15:30:02,039 [INFO] trade.initiator: Risk sizing: 5.0% of $13120 = $656 risk, SL=$7.50, cash/lot=$750 → vol=0.87
+2026-06-10 15:30:02,040 [INFO] trade.initiator: Trade request c15384042e17: SELL XAUUSD vol=0.8700 SL=4135.59 TP=4120.59 (rule: shstar_m5_m15)
+2026-06-10 15:30:02,085 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.87, 'type': 1, 'price': 4128.09, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4135.59, 'tp': 4120.59}
+2026-06-10 15:30:02,264 [INFO] core.mt5_client: Order executed: ticket=44895251
+2026-06-10 15:30:02,310 [INFO] trade.manager: Trade c15384042e17 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 15:30:02,310 [INFO] trade.initiator: Trade c15384042e17 EXECUTED: ticket=44895251 entry=4128.15 SL=4135.59 TP=4120.59 vol=0.87
+2026-06-10 15:47:33,778 [WARNING] trade.manager: Tracked position ticket=44895251 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 15:47:33,881 [INFO] trade.manager: Deal history for ticket=44895251: profit=684.69 exit=4120.28000 (1 close deals, 2 total deals)
+2026-06-10 15:47:33,881 [INFO] trade.manager: Trade c15384042e17 CLOSED with PROFIT: 684.69
+2026-06-10 16:00:02,489 [INFO] trade.initiator: Rule dc_wick_rejection triggered: BUY — dc_M15.closed_lower_wick_rej=TRUE, utbot_M3.closed_bias=BULLISH
+2026-06-10 16:00:02,498 [INFO] trade.initiator: Risk sizing: 5.0% of $13804 = $690 risk, SL=$5.00, cash/lot=$500 → vol=1.38
+2026-06-10 16:00:02,498 [INFO] trade.initiator: Trade request f8d930706668: BUY XAUUSD vol=1.3800 SL=4125.06 TP=4135.06 (rule: dc_wick_rejection)
+2026-06-10 16:00:02,541 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.38, 'type': 0, 'price': 4130.06, 'deviation': 20, 'magic': 200, 'comment': 'bot buy', 'type_time': 0, 'type_filling': 0, 'sl': 4125.06, 'tp': 4135.06}
+2026-06-10 16:00:02,722 [INFO] core.mt5_client: Order executed: ticket=44902090
+2026-06-10 16:00:02,731 [INFO] trade.manager: Trade f8d930706668 registered under rule 'dc_wick_rejection' and monitoring
+2026-06-10 16:00:02,733 [INFO] trade.initiator: Trade f8d930706668 EXECUTED: ticket=44902090 entry=4130.45 SL=4125.06 TP=4135.06 vol=1.38
+2026-06-10 16:01:41,125 [WARNING] trade.manager: Tracked position ticket=44902090 (rule=dc_wick_rejection) no longer in MT5 — marking closed
+2026-06-10 16:01:41,234 [INFO] trade.manager: Deal history for ticket=44902090: profit=-1046.04 exit=4122.87000 (1 close deals, 2 total deals)
+2026-06-10 16:01:41,235 [INFO] trade.manager: Trade f8d930706668 CLOSED with LOSS: -1046.04 (consecutive: 1)
+2026-06-10 16:03:33,176 [INFO] trade.initiator: Rule dc_wick_rejection triggered: BUY — dc_M15.closed_lower_wick_rej=TRUE, utbot_M3.closed_bias=BULLISH
+2026-06-10 16:03:33,185 [INFO] trade.initiator: Risk sizing: 5.0% of $12758 = $638 risk, SL=$5.00, cash/lot=$500 → vol=1.27
+2026-06-10 16:03:33,186 [INFO] trade.initiator: Trade request 4f14adb4f62d: BUY XAUUSD vol=1.2700 SL=4120.63 TP=4130.63 (rule: dc_wick_rejection)
+2026-06-10 16:03:33,229 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.27, 'type': 0, 'price': 4125.63, 'deviation': 20, 'magic': 200, 'comment': 'bot buy', 'type_time': 0, 'type_filling': 0, 'sl': 4120.63, 'tp': 4130.63}
+2026-06-10 16:03:33,407 [INFO] core.mt5_client: Order executed: ticket=44902926
+2026-06-10 16:03:33,410 [INFO] trade.manager: Trade 4f14adb4f62d registered under rule 'dc_wick_rejection' and monitoring
+2026-06-10 16:03:33,411 [INFO] trade.initiator: Trade 4f14adb4f62d EXECUTED: ticket=44902926 entry=4126.23 SL=4120.63 TP=4130.63 vol=1.27
+2026-06-10 16:07:00,477 [WARNING] trade.manager: Tracked position ticket=44902926 (rule=dc_wick_rejection) no longer in MT5 — marking closed
+2026-06-10 16:07:00,582 [INFO] trade.manager: Deal history for ticket=44902926: profit=575.31 exit=4130.76000 (1 close deals, 2 total deals)
+2026-06-10 16:07:00,583 [INFO] trade.manager: Trade 4f14adb4f62d CLOSED with PROFIT: 575.31
+2026-06-10 18:36:06,538 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=8, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 18:36:06,547 [INFO] trade.initiator: Risk sizing: 5.0% of $13334 = $667 risk, SL=$7.50, cash/lot=$750 → vol=0.88
+2026-06-10 18:36:06,548 [INFO] trade.initiator: Trade request 037d4b724be6: SELL XAUUSD vol=0.8800 SL=4115.80 TP=4100.80 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-10 18:36:06,591 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.88, 'type': 1, 'price': 4108.3, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4115.8, 'tp': 4100.8}
+2026-06-10 18:36:06,768 [INFO] core.mt5_client: Order executed: ticket=44927962
+2026-06-10 18:36:06,771 [INFO] trade.manager: Trade 037d4b724be6 registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-10 18:36:06,771 [INFO] trade.initiator: Trade 037d4b724be6 EXECUTED: ticket=44927962 entry=4108.27 SL=4115.80 TP=4100.80 vol=0.88
+2026-06-10 18:50:37,522 [WARNING] trade.manager: Tracked position ticket=44927962 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-10 18:50:37,620 [INFO] trade.manager: Deal history for ticket=44927962: profit=664.40 exit=4100.72000 (1 close deals, 2 total deals)
+2026-06-10 18:50:37,620 [INFO] trade.manager: Trade 037d4b724be6 CLOSED with PROFIT: 664.40
+2026-06-10 18:50:38,988 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 18:50:38,997 [INFO] trade.initiator: Risk sizing: 5.0% of $13998 = $700 risk, SL=$7.50, cash/lot=$750 → vol=0.93
+2026-06-10 18:50:38,998 [INFO] trade.initiator: Trade request dfb1d1a18f5b: SELL XAUUSD vol=0.9300 SL=4108.22 TP=4093.22 (rule: shstar_m5_m15)
+2026-06-10 18:50:39,042 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.93, 'type': 1, 'price': 4100.72, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4108.22, 'tp': 4093.2200000000003}
+2026-06-10 18:50:39,220 [INFO] core.mt5_client: Order executed: ticket=44929262
+2026-06-10 18:50:39,223 [INFO] trade.manager: Trade dfb1d1a18f5b registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 18:50:39,224 [INFO] trade.initiator: Trade dfb1d1a18f5b EXECUTED: ticket=44929262 entry=4100.71 SL=4108.22 TP=4093.22 vol=0.93
+2026-06-10 19:10:44,042 [WARNING] trade.manager: Tracked position ticket=44929262 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 19:10:44,136 [INFO] trade.manager: Deal history for ticket=44929262: profit=697.50 exit=4093.21000 (1 close deals, 2 total deals)
+2026-06-10 19:10:44,137 [INFO] trade.manager: Trade dfb1d1a18f5b CLOSED with PROFIT: 697.50
+2026-06-10 19:35:02,510 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-10 19:35:02,519 [INFO] trade.initiator: Risk sizing: 5.0% of $14695 = $735 risk, SL=$7.50, cash/lot=$750 → vol=0.97
+2026-06-10 19:35:02,520 [INFO] trade.initiator: Trade request ddc2707333f9: SELL XAUUSD vol=0.9700 SL=4093.67 TP=4078.67 (rule: shstar_m5_m15)
+2026-06-10 19:35:02,564 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.97, 'type': 1, 'price': 4086.17, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4093.67, 'tp': 4078.67}
+2026-06-10 19:35:02,739 [INFO] core.mt5_client: Order executed: ticket=44939547
+2026-06-10 19:35:02,744 [INFO] trade.manager: Trade ddc2707333f9 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-10 19:35:02,745 [INFO] trade.initiator: Trade ddc2707333f9 EXECUTED: ticket=44939547 entry=4085.94 SL=4093.67 TP=4078.67 vol=0.97
+2026-06-10 20:02:02,947 [WARNING] trade.manager: Tracked position ticket=44939547 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-10 20:02:03,045 [INFO] trade.manager: Deal history for ticket=44939547: profit=722.65 exit=4078.49000 (1 close deals, 2 total deals)
+2026-06-10 20:02:03,045 [INFO] trade.manager: Trade ddc2707333f9 CLOSED with PROFIT: 722.65
+2026-06-10 22:54:01,175 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=4, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 22:54:01,184 [INFO] trade.initiator: Risk sizing: 5.0% of $15418 = $771 risk, SL=$7.50, cash/lot=$750 → vol=1.02
+2026-06-10 22:54:01,184 [INFO] trade.initiator: Trade request 65d9792aaaf8: SELL XAUUSD vol=1.0200 SL=4060.93 TP=4045.93 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-10 22:54:01,231 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.02, 'type': 1, 'price': 4053.43, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4060.93, 'tp': 4045.93}
+2026-06-10 22:54:01,409 [INFO] core.mt5_client: Order executed: ticket=44960102
+2026-06-10 22:54:01,413 [INFO] trade.manager: Trade 65d9792aaaf8 registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-10 22:54:01,414 [INFO] trade.initiator: Trade 65d9792aaaf8 EXECUTED: ticket=44960102 entry=4053.38 SL=4060.93 TP=4045.93 vol=1.02
+2026-06-10 22:59:45,047 [WARNING] trade.manager: Tracked position ticket=44960102 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-10 22:59:45,142 [INFO] trade.manager: Deal history for ticket=44960102: profit=759.90 exit=4045.93000 (1 close deals, 2 total deals)
+2026-06-10 22:59:45,143 [INFO] trade.manager: Trade 65d9792aaaf8 CLOSED with PROFIT: 759.90
+2026-06-10 23:58:02,400 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=7, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-10 23:58:02,409 [INFO] trade.initiator: Risk sizing: 5.0% of $16178 = $809 risk, SL=$7.50, cash/lot=$750 → vol=1.07
+2026-06-10 23:58:02,410 [INFO] trade.initiator: Trade request d09c4a499d1d: SELL XAUUSD vol=1.0700 SL=4054.76 TP=4039.76 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-10 23:58:02,454 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.07, 'type': 1, 'price': 4047.26, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4054.76, 'tp': 4039.76}
+2026-06-10 23:58:02,630 [INFO] core.mt5_client: Order executed: ticket=44967285
+2026-06-10 23:58:02,632 [INFO] trade.manager: Trade d09c4a499d1d registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-10 23:58:02,633 [INFO] trade.initiator: Trade d09c4a499d1d EXECUTED: ticket=44967285 entry=4047.30 SL=4054.76 TP=4039.76 vol=1.07
+2026-06-11 00:00:16,824 [WARNING] trade.manager: Tracked position ticket=44967285 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-11 00:00:16,932 [INFO] trade.manager: Deal history for ticket=44967285: profit=-816.41 exit=4054.93000 (1 close deals, 2 total deals)
+2026-06-11 00:00:16,932 [INFO] trade.manager: Trade d09c4a499d1d CLOSED with LOSS: -816.41 (consecutive: 1)
+2026-06-11 00:05:03,176 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 00:05:03,185 [INFO] trade.initiator: Risk sizing: 5.0% of $15362 = $768 risk, SL=$7.50, cash/lot=$750 → vol=1.02
+2026-06-11 00:05:03,186 [INFO] trade.initiator: Trade request 220522dfd940: SELL XAUUSD vol=1.0200 SL=4050.97 TP=4035.97 (rule: shstar_m5_m15)
+2026-06-11 00:05:03,229 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.02, 'type': 1, 'price': 4043.47, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4050.97, 'tp': 4035.97}
+2026-06-11 00:05:03,405 [INFO] core.mt5_client: Order executed: ticket=44968289
+2026-06-11 00:05:03,408 [INFO] trade.manager: Trade 220522dfd940 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-11 00:05:03,409 [INFO] trade.initiator: Trade 220522dfd940 EXECUTED: ticket=44968289 entry=4043.51 SL=4050.97 TP=4035.97 vol=1.02
+2026-06-11 00:13:08,646 [WARNING] trade.manager: Tracked position ticket=44968289 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-11 00:13:08,729 [INFO] trade.manager: Deal history for ticket=44968289: profit=-780.30 exit=4051.16000 (1 close deals, 2 total deals)
+2026-06-11 00:13:08,729 [INFO] trade.manager: Trade 220522dfd940 CLOSED with LOSS: -780.30 (consecutive: 2)
+2026-06-11 03:22:02,392 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=5, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-11 03:22:02,403 [INFO] trade.initiator: Risk sizing: 5.0% of $14581 = $729 risk, SL=$7.50, cash/lot=$750 → vol=0.97
+2026-06-11 03:22:02,403 [INFO] trade.initiator: Trade request 096fcfcf27e9: SELL XAUUSD vol=0.9700 SL=4070.68 TP=4055.68 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-11 03:22:02,446 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.97, 'type': 1, 'price': 4063.18, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4070.68, 'tp': 4055.68}
+2026-06-11 03:22:02,623 [INFO] core.mt5_client: Order executed: ticket=44988129
+2026-06-11 03:22:02,628 [INFO] trade.manager: Trade 096fcfcf27e9 registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-11 03:22:02,629 [INFO] trade.initiator: Trade 096fcfcf27e9 EXECUTED: ticket=44988129 entry=4063.23 SL=4070.68 TP=4055.68 vol=0.97
+2026-06-11 03:39:53,642 [WARNING] trade.manager: Tracked position ticket=44988129 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-11 03:39:53,757 [INFO] trade.manager: Deal history for ticket=44988129: profit=-735.26 exit=4070.81000 (1 close deals, 2 total deals)
+2026-06-11 03:39:53,758 [INFO] trade.manager: Trade 096fcfcf27e9 CLOSED with LOSS: -735.26 (consecutive: 3)
+2026-06-11 04:36:02,500 [INFO] trade.initiator: Rule trend_2w_m2_m15bear_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, utbot_M15.closed_bias=BEARISH, utbot_M5.consecutive_bull_bars=20, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-11 04:36:02,509 [INFO] trade.initiator: Risk sizing: 5.0% of $13846 = $692 risk, SL=$7.50, cash/lot=$750 → vol=0.92
+2026-06-11 04:36:02,509 [INFO] trade.initiator: Trade request 18bacf24e5d1: SELL XAUUSD vol=0.9200 SL=4083.01 TP=4068.01 (rule: trend_2w_m2_m15bear_bounce2_vwap)
+2026-06-11 04:36:02,552 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.92, 'type': 1, 'price': 4075.51, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4083.01, 'tp': 4068.01}
+2026-06-11 04:36:02,731 [INFO] core.mt5_client: Order executed: ticket=44995416
+2026-06-11 04:36:02,742 [INFO] trade.manager: Trade 18bacf24e5d1 registered under rule 'trend_2w_m2_m15bear_bounce2_vwap' and monitoring
+2026-06-11 04:36:02,743 [INFO] trade.initiator: Trade 18bacf24e5d1 EXECUTED: ticket=44995416 entry=4075.39 SL=4083.01 TP=4068.01 vol=0.92
+2026-06-11 04:42:30,418 [WARNING] trade.manager: Tracked position ticket=44995416 (rule=trend_2w_m2_m15bear_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-11 04:42:30,517 [INFO] trade.manager: Deal history for ticket=44995416: profit=-702.88 exit=4083.03000 (1 close deals, 2 total deals)
+2026-06-11 04:42:30,518 [INFO] trade.manager: Trade 18bacf24e5d1 CLOSED with LOSS: -702.88 (consecutive: 4)
+2026-06-11 04:50:01,693 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 04:50:01,705 [INFO] trade.initiator: Risk sizing: 5.0% of $13143 = $657 risk, SL=$7.50, cash/lot=$750 → vol=0.87
+2026-06-11 04:50:01,705 [INFO] trade.initiator: Trade request 5123991f5973: SELL XAUUSD vol=0.8700 SL=4090.71 TP=4075.71 (rule: shstar_m5_m15)
+2026-06-11 04:50:01,749 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.87, 'type': 1, 'price': 4083.21, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4090.71, 'tp': 4075.71}
+2026-06-11 04:50:01,932 [INFO] core.mt5_client: Order executed: ticket=44998191
+2026-06-11 04:50:01,936 [INFO] trade.manager: Trade 5123991f5973 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-11 04:50:01,937 [INFO] trade.initiator: Trade 5123991f5973 EXECUTED: ticket=44998191 entry=4083.21 SL=4090.71 TP=4075.71 vol=0.87
+2026-06-11 05:03:50,414 [WARNING] trade.manager: Tracked position ticket=44998191 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-11 05:03:50,511 [INFO] trade.manager: Deal history for ticket=44998191: profit=652.50 exit=4075.71000 (1 close deals, 2 total deals)
+2026-06-11 05:03:50,511 [INFO] trade.manager: Trade 5123991f5973 CLOSED with PROFIT: 652.50
+2026-06-11 05:04:02,974 [INFO] trade.initiator: Rule trend_2w_m2_m15bear_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, utbot_M15.closed_bias=BEARISH, utbot_M5.consecutive_bull_bars=25, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-11 05:04:02,983 [INFO] trade.initiator: Risk sizing: 5.0% of $13796 = $690 risk, SL=$7.50, cash/lot=$750 → vol=0.91
+2026-06-11 05:04:02,983 [INFO] trade.initiator: Trade request 04e878408f98: SELL XAUUSD vol=0.9100 SL=4084.26 TP=4069.26 (rule: trend_2w_m2_m15bear_bounce2_vwap)
+2026-06-11 05:04:03,026 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.91, 'type': 1, 'price': 4076.76, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4084.26, 'tp': 4069.26}
+2026-06-11 05:04:03,207 [INFO] core.mt5_client: Order executed: ticket=45000113
+2026-06-11 05:04:03,212 [INFO] trade.manager: Trade 04e878408f98 registered under rule 'trend_2w_m2_m15bear_bounce2_vwap' and monitoring
+2026-06-11 05:04:03,213 [INFO] trade.initiator: Trade 04e878408f98 EXECUTED: ticket=45000113 entry=4076.76 SL=4084.26 TP=4069.26 vol=0.91
+2026-06-11 05:31:50,997 [WARNING] trade.manager: Tracked position ticket=45000113 (rule=trend_2w_m2_m15bear_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-11 05:31:51,098 [INFO] trade.manager: Deal history for ticket=45000113: profit=-690.69 exit=4084.35000 (1 close deals, 2 total deals)
+2026-06-11 05:31:51,099 [INFO] trade.manager: Trade 04e878408f98 CLOSED with LOSS: -690.69 (consecutive: 1)
+2026-06-11 07:00:02,620 [INFO] trade.initiator: Rule dc_lowmid_hammer_2w_m15 triggered: BUY — dc_M5.closed_price_zone=MIDDLE, utbot_M5.consecutive_bear_bars=13, candle_M3.closed_candle_type=HAMMER, utbot_M15.closed_bias=BULLISH
+2026-06-11 07:00:02,630 [INFO] trade.initiator: Risk sizing: 5.0% of $13105 = $655 risk, SL=$7.50, cash/lot=$750 → vol=0.87
+2026-06-11 07:00:02,630 [INFO] trade.initiator: Trade request 99291e866142: BUY XAUUSD vol=0.8700 SL=4088.36 TP=4103.36 (rule: dc_lowmid_hammer_2w_m15)
+2026-06-11 07:00:02,674 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.87, 'type': 0, 'price': 4095.86, 'deviation': 20, 'magic': 200, 'comment': 'bot buy', 'type_time': 0, 'type_filling': 0, 'sl': 4088.36, 'tp': 4103.360000000001}
+2026-06-11 07:00:02,854 [INFO] core.mt5_client: Order executed: ticket=45015638
+2026-06-11 07:00:02,862 [INFO] trade.manager: Trade 99291e866142 registered under rule 'dc_lowmid_hammer_2w_m15' and monitoring
+2026-06-11 07:00:02,863 [INFO] trade.initiator: Trade 99291e866142 EXECUTED: ticket=45015638 entry=4095.86 SL=4088.36 TP=4103.36 vol=0.87
+2026-06-11 07:18:18,176 [WARNING] trade.manager: Tracked position ticket=45015638 (rule=dc_lowmid_hammer_2w_m15) no longer in MT5 — marking closed
+2026-06-11 07:18:18,275 [INFO] trade.manager: Deal history for ticket=45015638: profit=653.37 exit=4103.37000 (1 close deals, 2 total deals)
+2026-06-11 07:18:18,275 [INFO] trade.manager: Trade 99291e866142 CLOSED with PROFIT: 653.37
+2026-06-11 10:55:02,912 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 10:55:02,924 [INFO] trade.initiator: Risk sizing: 5.0% of $13758 = $688 risk, SL=$7.50, cash/lot=$750 → vol=0.91
+2026-06-11 10:55:02,925 [INFO] trade.initiator: Trade request 5c74aea001e2: SELL XAUUSD vol=0.9100 SL=4097.63 TP=4082.63 (rule: shstar_m5_m15)
+2026-06-11 10:55:02,969 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.91, 'type': 1, 'price': 4090.13, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4097.63, 'tp': 4082.63}
+2026-06-11 10:55:03,151 [INFO] core.mt5_client: Order executed: ticket=45053875
+2026-06-11 10:55:03,154 [INFO] trade.manager: Trade 5c74aea001e2 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-11 10:55:03,154 [INFO] trade.initiator: Trade 5c74aea001e2 EXECUTED: ticket=45053875 entry=4090.17 SL=4097.63 TP=4082.63 vol=0.91
+2026-06-11 11:40:50,638 [WARNING] trade.manager: Tracked position ticket=45053875 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-11 11:40:50,753 [INFO] trade.manager: Deal history for ticket=45053875: profit=686.14 exit=4082.63000 (1 close deals, 2 total deals)
+2026-06-11 11:40:50,753 [INFO] trade.manager: Trade 5c74aea001e2 CLOSED with PROFIT: 686.14
+2026-06-11 12:20:01,416 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 12:20:01,424 [INFO] trade.initiator: Risk sizing: 5.0% of $14444 = $722 risk, SL=$7.50, cash/lot=$750 → vol=0.96
+2026-06-11 12:20:01,424 [INFO] trade.initiator: Trade request bf31b1584d03: SELL XAUUSD vol=0.9600 SL=4081.23 TP=4066.23 (rule: shstar_m5_m15)
+2026-06-11 12:20:01,467 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.96, 'type': 1, 'price': 4073.73, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4081.23, 'tp': 4066.23}
+2026-06-11 12:20:01,647 [INFO] core.mt5_client: Order executed: ticket=45066260
+2026-06-11 12:20:01,650 [INFO] trade.manager: Trade bf31b1584d03 registered under rule 'shstar_m5_m15' and monitoring
+2026-06-11 12:20:01,651 [INFO] trade.initiator: Trade bf31b1584d03 EXECUTED: ticket=45066260 entry=4072.89 SL=4081.23 TP=4066.23 vol=0.96
+2026-06-11 12:22:17,949 [WARNING] trade.manager: Tracked position ticket=45066260 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-11 12:22:18,134 [INFO] trade.manager: Deal history for ticket=45066260: profit=732.48 exit=4065.26000 (1 close deals, 2 total deals)
+2026-06-11 12:22:18,135 [INFO] trade.manager: Trade bf31b1584d03 CLOSED with PROFIT: 732.48
+2026-06-11 12:48:02,043 [INFO] trade.initiator: Rule dc_wick_rejection triggered: BUY — dc_M15.closed_lower_wick_rej=TRUE, utbot_M3.closed_bias=BULLISH
+2026-06-11 12:48:02,053 [INFO] trade.initiator: Risk sizing: 5.0% of $15177 = $759 risk, SL=$5.00, cash/lot=$500 → vol=1.51
+2026-06-11 12:48:02,053 [INFO] trade.initiator: Trade request eb31c3c3d12e: BUY XAUUSD vol=1.5100 SL=4074.42 TP=4084.42 (rule: dc_wick_rejection)
+2026-06-11 12:48:02,098 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 1.51, 'type': 0, 'price': 4079.42, 'deviation': 20, 'magic': 200, 'comment': 'bot buy', 'type_time': 0, 'type_filling': 0, 'sl': 4074.42, 'tp': 4084.42}
+2026-06-11 12:48:02,277 [INFO] core.mt5_client: Order executed: ticket=45074862
+2026-06-11 12:48:02,280 [INFO] trade.manager: Trade eb31c3c3d12e registered under rule 'dc_wick_rejection' and monitoring
+2026-06-11 12:48:02,281 [INFO] trade.initiator: Trade eb31c3c3d12e EXECUTED: ticket=45074862 entry=4079.41 SL=4074.42 TP=4084.42 vol=1.51
+2026-06-11 12:48:25,512 [WARNING] trade.manager: Tracked position ticket=45074862 (rule=dc_wick_rejection) no longer in MT5 — marking closed
+2026-06-11 12:48:25,608 [INFO] trade.manager: Deal history for ticket=45074862: profit=-759.53 exit=4074.38000 (1 close deals, 2 total deals)
+2026-06-11 12:48:25,608 [INFO] trade.manager: Trade eb31c3c3d12e CLOSED with LOSS: -759.53 (consecutive: 1)
+2026-06-11 12:57:02,100 [INFO] trade.initiator: Rule dc_upmid_shstar_2w_m15 triggered: SELL — dc_M5.closed_price_zone=MIDDLE, utbot_M5.consecutive_bull_bars=2, candle_M3.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 12:57:02,110 [INFO] trade.initiator: Risk sizing: 5.0% of $14417 = $721 risk, SL=$7.50, cash/lot=$750 → vol=0.96
+2026-06-11 12:57:02,110 [INFO] trade.initiator: Trade request ec6af80fc6b1: SELL XAUUSD vol=0.9600 SL=4085.58 TP=4070.58 (rule: dc_upmid_shstar_2w_m15)
+2026-06-11 12:57:02,154 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.96, 'type': 1, 'price': 4078.08, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4085.58, 'tp': 4070.58}
+2026-06-11 12:57:02,334 [INFO] core.mt5_client: Order executed: ticket=45076270
+2026-06-11 12:57:02,344 [INFO] trade.manager: Trade ec6af80fc6b1 registered under rule 'dc_upmid_shstar_2w_m15' and monitoring
+2026-06-11 12:57:02,345 [INFO] trade.initiator: Trade ec6af80fc6b1 EXECUTED: ticket=45076270 entry=4078.08 SL=4085.58 TP=4070.58 vol=0.96
+2026-06-11 13:03:49,714 [WARNING] trade.manager: Tracked position ticket=45076270 (rule=dc_upmid_shstar_2w_m15) no longer in MT5 — marking closed
+2026-06-11 13:03:49,808 [INFO] trade.manager: Deal history for ticket=45076270: profit=-730.56 exit=4085.69000 (1 close deals, 2 total deals)
+2026-06-11 13:03:49,808 [INFO] trade.manager: Trade ec6af80fc6b1 CLOSED with LOSS: -730.56 (consecutive: 2)
+2026-06-11 13:12:02,476 [INFO] trade.initiator: Rule dc_upmid_shstar_2w_m15 triggered: SELL — dc_M5.closed_price_zone=UPPER_MID, utbot_M5.consecutive_bull_bars=5, candle_M3.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 13:12:02,486 [INFO] trade.initiator: Risk sizing: 5.0% of $13687 = $684 risk, SL=$7.50, cash/lot=$750 → vol=0.91
+2026-06-11 13:12:02,486 [INFO] trade.initiator: Trade request cbd283fcd8a2: SELL XAUUSD vol=0.9100 SL=4089.37 TP=4074.37 (rule: dc_upmid_shstar_2w_m15)
+2026-06-11 13:12:02,529 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.91, 'type': 1, 'price': 4081.87, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4089.37, 'tp': 4074.37}
+2026-06-11 13:12:02,716 [INFO] core.mt5_client: Order executed: ticket=45078496
+2026-06-11 13:12:02,726 [INFO] trade.manager: Trade cbd283fcd8a2 registered under rule 'dc_upmid_shstar_2w_m15' and monitoring
+2026-06-11 13:12:02,727 [INFO] trade.initiator: Trade cbd283fcd8a2 EXECUTED: ticket=45078496 entry=4081.95 SL=4089.37 TP=4074.37 vol=0.91
+2026-06-11 13:14:18,574 [WARNING] trade.manager: Tracked position ticket=45078496 (rule=dc_upmid_shstar_2w_m15) no longer in MT5 — marking closed
+2026-06-11 13:14:18,669 [INFO] trade.manager: Deal history for ticket=45078496: profit=698.88 exit=4074.27000 (1 close deals, 2 total deals)
+2026-06-11 13:14:18,670 [INFO] trade.manager: Trade cbd283fcd8a2 CLOSED with PROFIT: 698.88
+2026-06-11 13:20:01,998 [INFO] trade.initiator: Rule trend_2w_m2_ema50_bounce2_vwap triggered: SELL — utbot_M2.closed_signal=SELL, ema50_M5.closed_price_vs_ema=BELOW, utbot_M5.consecutive_bull_bars=7, vwap_M1.closed_price_vs_vwap=BELOW
+2026-06-11 13:20:02,009 [INFO] trade.initiator: Risk sizing: 5.0% of $14386 = $719 risk, SL=$7.50, cash/lot=$750 → vol=0.95
+2026-06-11 13:20:02,009 [INFO] trade.initiator: Trade request 0adbcdf8c2bd: SELL XAUUSD vol=0.9500 SL=4080.67 TP=4065.67 (rule: trend_2w_m2_ema50_bounce2_vwap)
+2026-06-11 13:20:02,053 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.95, 'type': 1, 'price': 4073.17, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4080.67, 'tp': 4065.67}
+2026-06-11 13:20:02,258 [INFO] core.mt5_client: Order executed: ticket=45079385
+2026-06-11 13:20:02,261 [INFO] trade.manager: Trade 0adbcdf8c2bd registered under rule 'trend_2w_m2_ema50_bounce2_vwap' and monitoring
+2026-06-11 13:20:02,262 [INFO] trade.initiator: Trade 0adbcdf8c2bd EXECUTED: ticket=45079385 entry=4072.87 SL=4080.67 TP=4065.67 vol=0.95
+2026-06-11 13:28:20,002 [WARNING] trade.manager: Tracked position ticket=45079385 (rule=trend_2w_m2_ema50_bounce2_vwap) no longer in MT5 — marking closed
+2026-06-11 13:28:20,101 [INFO] trade.manager: Deal history for ticket=45079385: profit=-787.55 exit=4081.16000 (1 close deals, 2 total deals)
+2026-06-11 13:28:20,101 [INFO] trade.manager: Trade 0adbcdf8c2bd CLOSED with LOSS: -787.55 (consecutive: 1)
+2026-06-11 13:33:03,184 [INFO] trade.initiator: Rule dc_upmid_shstar_2w_m15 triggered: SELL — dc_M5.closed_price_zone=MIDDLE, utbot_M5.consecutive_bull_bars=9, candle_M3.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 13:33:03,197 [INFO] trade.initiator: Risk sizing: 5.0% of $13598 = $680 risk, SL=$7.50, cash/lot=$750 → vol=0.90
+2026-06-11 13:33:03,197 [INFO] trade.initiator: Trade request 6fa25be9ba71: SELL XAUUSD vol=0.9000 SL=4084.21 TP=4069.21 (rule: dc_upmid_shstar_2w_m15)
+2026-06-11 13:33:03,240 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.9, 'type': 1, 'price': 4076.71, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4084.21, 'tp': 4069.21}
+2026-06-11 13:33:03,421 [INFO] core.mt5_client: Order executed: ticket=45081609
+2026-06-11 13:33:03,424 [INFO] trade.manager: Trade 6fa25be9ba71 registered under rule 'dc_upmid_shstar_2w_m15' and monitoring
+2026-06-11 13:33:03,425 [INFO] trade.initiator: Trade 6fa25be9ba71 EXECUTED: ticket=45081609 entry=4076.33 SL=4084.21 TP=4069.21 vol=0.90
+2026-06-11 13:38:31,980 [WARNING] trade.manager: Tracked position ticket=45081609 (rule=dc_upmid_shstar_2w_m15) no longer in MT5 — marking closed
+2026-06-11 13:38:32,089 [INFO] trade.manager: Deal history for ticket=45081609: profit=685.80 exit=4068.71000 (1 close deals, 2 total deals)
+2026-06-11 13:38:32,089 [INFO] trade.manager: Trade 6fa25be9ba71 CLOSED with PROFIT: 685.80
+2026-06-11 13:55:03,061 [INFO] trade.initiator: Rule shstar_m5_m15 triggered: SELL — candle_M5.closed_candle_type=SHOOTING_STAR, utbot_M15.closed_bias=BEARISH
+2026-06-11 13:55:03,071 [INFO] trade.initiator: Risk sizing: 5.0% of $14284 = $714 risk, SL=$7.50, cash/lot=$750 → vol=0.95
+2026-06-11 13:55:03,071 [INFO] trade.initiator: Trade request 67e6bb39f79f: SELL XAUUSD vol=0.9500 SL=4093.68 TP=4078.68 (rule: shstar_m5_m15)
+2026-06-11 13:55:03,114 [INFO] core.mt5_client: Sending order: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.95, 'type': 1, 'price': 4086.18, 'deviation': 20, 'magic': 200, 'comment': 'bot sell', 'type_time': 0, 'type_filling': 0, 'sl': 4093.68, 'tp': 4078.68}
+2026-06-11 13:55:03,297 [INFO] core.mt5_client: Order executed: ticket=45087008
+2026-06-11 13:55:03,342 [INFO] trade.manager: Trade 67e6bb39f79f registered under rule 'shstar_m5_m15' and monitoring
+2026-06-11 13:55:03,343 [INFO] trade.initiator: Trade 67e6bb39f79f EXECUTED: ticket=45087008 entry=4086.19 SL=4093.68 TP=4078.68 vol=0.95
+2026-06-11 14:00:52,067 [WARNING] trade.manager: Tracked position ticket=45087008 (rule=shstar_m5_m15) no longer in MT5 — marking closed
+2026-06-11 14:00:52,175 [INFO] trade.manager: Deal history for ticket=45087008: profit=642.20 exit=4079.43000 (1 close deals, 2 total deals)
+2026-06-11 14:00:52,176 [INFO] trade.manager: Trade 67e6bb39f79f CLOSED with PROFIT: 642.20
+2026-06-11 14:01:59,686 [INFO] core.engine: Engine stopping...
+2026-06-11 14:02:00,103 [INFO] core.mt5_client: Disconnected from MT5
+2026-06-11 14:02:00,103 [INFO] core.engine: Engine stopped
+2026-06-11 14:02:00,297 [INFO] core.engine: Engine stopping...
+2026-06-11 14:02:00,297 [INFO] core.engine: Engine stopped
+2026-06-11 14:02:00,297 [INFO] main: === MT5 Auto-Trader stopped ===

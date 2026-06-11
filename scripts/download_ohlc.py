@@ -3,6 +3,7 @@
 Usage:
     uv run python scripts/download_ohlc.py --symbol XAUUSD --days 7
     uv run python scripts/download_ohlc.py --symbol XAUUSD --days 30 --output data/XAUUSD_M1_30d.csv
+    uv run python scripts/download_ohlc.py --symbol XAUUSD --from 2026-06-09 --to 2026-06-11
 """
 from __future__ import annotations
 
@@ -18,13 +19,39 @@ from mt5linux import MetaTrader5
 def main() -> None:
     parser = argparse.ArgumentParser(description="Download OHLC from MT5")
     parser.add_argument("--symbol", "-s", default="XAUUSD", help="Symbol (default: XAUUSD)")
-    parser.add_argument("--days", "-d", type=int, default=7, help="Number of days back (default: 7)")
+    parser.add_argument("--days", "-d", type=int, default=None, help="Number of days back (default: 7 if no --from/--to)")
+    parser.add_argument("--from", dest="from_date", default=None, help="Start date YYYY-MM-DD (or YYYY-MM-DD HH:MM)")
+    parser.add_argument("--to", dest="to_date", default=None, help="End date YYYY-MM-DD (or YYYY-MM-DD HH:MM)")
     parser.add_argument("--host", default="localhost", help="MT5 rpyc host (default: localhost)")
     parser.add_argument("--port", type=int, default=8001, help="MT5 rpyc port (default: 8001)")
-    parser.add_argument("--output", "-o", default=None, help="Output CSV path (default: data/<SYMBOL>_M1.csv)")
+    parser.add_argument("--output", "-o", default=None, help="Output CSV path (default: sampledata/<SYMBOL>_M1_<range>.csv)")
     args = parser.parse_args()
 
-    output = Path(args.output) if args.output else Path(f"data/{args.symbol}_M1.csv")
+    # Determine time range
+    def parse_dt(s: str) -> datetime:
+        for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
+            try:
+                return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue
+        print(f"ERROR: Cannot parse date '{s}'. Use YYYY-MM-DD or YYYY-MM-DD HH:MM")
+        sys.exit(1)
+
+    if args.from_date and args.to_date:
+        start = parse_dt(args.from_date)
+        end = parse_dt(args.to_date)
+        range_label = f"{start.strftime('%Y%m%d')}_{end.strftime('%Y%m%d')}"
+    elif args.from_date:
+        start = parse_dt(args.from_date)
+        end = datetime.now(timezone.utc)
+        range_label = f"{start.strftime('%Y%m%d')}_now"
+    else:
+        days = args.days or 7
+        end = datetime.now(timezone.utc)
+        start = end - timedelta(days=days)
+        range_label = f"{days}d"
+
+    output = Path(args.output) if args.output else Path(f"sampledata/{args.symbol}_M1_{range_label}.csv")
     output.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"Connecting to MT5 at {args.host}:{args.port}...")
@@ -38,9 +65,7 @@ def main() -> None:
         print(f"Connected: {info.name}")
 
     # Time range
-    end = datetime.now(timezone.utc)
-    start = end - timedelta(days=args.days)
-    print(f"Downloading {args.symbol} M1 from {start.strftime('%Y-%m-%d')} to {end.strftime('%Y-%m-%d')}...")
+    print(f"Downloading {args.symbol} M1 from {start.strftime('%Y-%m-%d %H:%M')} to {end.strftime('%Y-%m-%d %H:%M')}...")
 
     # TIMEFRAME_M1 = 1
     rates = mt5.copy_rates_range(args.symbol, 1, start, end)
