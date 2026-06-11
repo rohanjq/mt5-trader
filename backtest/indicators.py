@@ -21,10 +21,15 @@ log = logging.getLogger(__name__)
 # ── UT Bot ─────────────────────────────────────────────────────────────────────
 
 def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0) -> pd.DataFrame:
-    """Compute UT Bot Alert indicator.
+    """Compute UT Bot Alert indicator (matches SignalMaster EA exactly).
 
     The UT Bot uses ATR trailing stop. When close crosses above the trail stop,
     bias flips to BULLISH and a BUY signal fires (one bar). Vice versa for SELL.
+
+    The trail stop only ratchets (holds previous level) when the previous
+    direction matches the current one.  On a direction *flip* the trail resets
+    to ``close ± nLoss`` without clamping — this matches the EA behaviour and
+    prevents excessive whipsaws near the trail boundary.
 
     Parameters:
         atr_period: ATR period (default 10 to match SignalMaster EA)
@@ -40,33 +45,51 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
     atr_vals = atr_series.fillna(0).values
     nloss = key_value * atr_vals
 
-    # Trailing stop
+    # Trailing stop + direction (matches EA: direction[i] = +1 bull, -1 bear)
     trail_stop = np.zeros(n)
-    for i in range(1, n):
-        if close[i] > trail_stop[i - 1]:
-            trail_stop[i] = max(trail_stop[i - 1], close[i] - nloss[i])
+    direction = np.ones(n)  # default BULLISH
+
+    # Initialise first atr_period bars to close / direction +1 (EA convention)
+    for i in range(min(atr_period, n)):
+        trail_stop[i] = close[i]
+        direction[i] = 1.0
+
+    for i in range(atr_period, n):
+        prev_stop = trail_stop[i - 1]
+        prev_dir = direction[i - 1]
+
+        if close[i] > prev_stop:
+            trail_stop[i] = close[i] - nloss[i]
+            # Ratchet up ONLY if previous direction was already bullish
+            if prev_dir > 0:
+                trail_stop[i] = max(trail_stop[i], prev_stop)
+            direction[i] = 1.0
         else:
-            trail_stop[i] = min(trail_stop[i - 1], close[i] + nloss[i])
+            trail_stop[i] = close[i] + nloss[i]
+            # Ratchet down ONLY if previous direction was already bearish
+            if prev_dir < 0:
+                trail_stop[i] = min(trail_stop[i], prev_stop)
+            direction[i] = -1.0
 
     # Bias: above trail = BULLISH, below = BEARISH
-    bias = np.where(close > trail_stop, "BULLISH", "BEARISH")
+    bias = np.where(direction > 0, "BULLISH", "BEARISH")
 
     # Signal: fires on bias change
     signal = np.full(n, "NONE", dtype=object)
     for i in range(1, n):
-        if bias[i] == "BULLISH" and bias[i - 1] != "BULLISH":
+        if direction[i] > 0 and direction[i - 1] < 0:
             signal[i] = "BUY"
-        elif bias[i] == "BEARISH" and bias[i - 1] != "BEARISH":
+        elif direction[i] < 0 and direction[i - 1] > 0:
             signal[i] = "SELL"
 
-    # Consecutive bars
+    # Consecutive bars (EA counts from running bar backward, including running)
     consec_bull = np.zeros(n, dtype=int)
     consec_bear = np.zeros(n, dtype=int)
     for i in range(1, n):
-        if bias[i] == "BULLISH":
+        if direction[i] > 0:
             consec_bull[i] = consec_bull[i - 1] + 1
             consec_bear[i] = 0
-        elif bias[i] == "BEARISH":
+        else:
             consec_bear[i] = consec_bear[i - 1] + 1
             consec_bull[i] = 0
 
