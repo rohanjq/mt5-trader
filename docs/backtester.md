@@ -4,15 +4,78 @@
 
 The backtester is a signal-replay engine that simulates live trading using historical M1 OHLC data. It computes all indicators locally (no MT5 needed), evaluates the same YAML expression rules used in live trading, and simulates order fills with SL/TP management.
 
+## Getting Data
+
+The backtester uses native MT5 bar CSVs (one file per timeframe). You need an MT5 terminal running with the rpyc bridge on `localhost:8001`.
+
+### Step 1: Download Bars
+
+```bash
+# Download 60 days of bars for all timeframes used in the config
+uv run python scripts/download_bars.py --symbol XAUUSD --days 60
+
+# Or specify exact date range
+uv run python scripts/download_bars.py --symbol XAUUSD --from 2026-04-09 --to 2026-06-12
+
+# With specific config (detects which TFs to download)
+uv run python scripts/download_bars.py --symbol XAUUSD --days 60 --config config-gold.yaml
+```
+
+Output goes to `sampledata/XAUUSD_<date_range>/` with one CSV per timeframe:
+```
+sampledata/XAUUSD_bars_20260413_20260612/
+  M1.csv   # ~60K bars
+  M2.csv   # ~30K bars
+  M3.csv   # ~20K bars
+  M5.csv   # ~12K bars
+  M15.csv
+  H1.csv
+  ...
+```
+
+### Step 2 (Optional): EA ATR Dumps
+
+For highest accuracy, inject pre-computed ATR values from the live EA. This avoids warmup divergence (EA has 78K+ bars of history, backtester starts from download range).
+
+1. In MT5, load the SignalMaster EA on a chart
+2. The EA writes UTBot trail dump CSVs to `MQL5/Files/`
+3. Copy the `XAUUSD_utbot_trail_FULL_*.csv` files into `sampledata/ea_dumps/`
+
+The dump files look like:
+```
+sampledata/ea_dumps/
+  XAUUSD_utbot_trail_FULL_M2.csv
+  XAUUSD_utbot_trail_FULL_M3.csv
+  XAUUSD_utbot_trail_FULL_M5.csv
+```
+
 ## Usage
 
 ```bash
-# Run backtest with gold config against sample data
-uv run python -m backtest --config config-gold.yaml --data sampledata/sample.csv --balance 10000
+# Basic backtest
+uv run python -m backtest --config config-gold.yaml \
+    --bars-dir sampledata/XAUUSD_bars_20260413_20260612/ \
+    --balance 10000
+
+# With EA ATR injection (recommended for accuracy)
+uv run python -m backtest --config config-gold.yaml \
+    --bars-dir sampledata/XAUUSD_bars_20260413_20260612/ \
+    --balance 10000 \
+    --ea-atr-dir sampledata/ea_dumps/
+
+# Simulate from a specific time (e.g. match a live trading window)
+uv run python -m backtest --config config-gold.yaml \
+    --bars-dir sampledata/XAUUSD_bars_20260413_20260612/ \
+    --balance 11206 \
+    --trade-from "2026-06-09 16:49" \
+    --ea-atr-dir sampledata/ea_dumps/ \
+    --trades 0 \
+    --output /tmp/bt_trades.csv
 
 # With date range filter
-uv run python -m backtest --config config-gold.yaml --data data/XAUUSD_M1.csv \
-    --balance 10000 --start 2026-06-01 --end 2026-06-07
+uv run python -m backtest --config config-gold.yaml \
+    --bars-dir sampledata/XAUUSD_bars_20260413_20260612/ \
+    --from 2026-06-01 --to 2026-06-07
 ```
 
 ### CLI Arguments
@@ -20,10 +83,15 @@ uv run python -m backtest --config config-gold.yaml --data data/XAUUSD_M1.csv \
 | Argument | Default | Description |
 |----------|---------|-------------|
 | `--config` | (required) | Path to YAML config file |
-| `--data` | (required) | Path to OHLC CSV file |
+| `--bars-dir` | (required) | Directory with native MT5 bar CSVs (M1.csv, M5.csv, etc.) |
 | `--balance` | 10000.0 | Starting account balance |
-| `--start` | (none) | Start date filter (YYYY-MM-DD) |
-| `--end` | (none) | End date filter (YYYY-MM-DD) |
+| `--from` | (none) | Start date filter (YYYY-MM-DD) |
+| `--to` | (none) | End date filter (YYYY-MM-DD) |
+| `--trade-from` | (none) | Only open trades after this time (YYYY-MM-DD HH:MM) |
+| `--output` | (none) | Path to save trade results CSV |
+| `--trades` | 50 | Number of trades to show in log (0=all) |
+| `--ea-atr-dir` | (none) | Path to EA UTBot trail dump CSVs for ATR injection |
+| `--verbose` | false | Enable debug logging |
 
 ## How It Works
 
@@ -140,14 +208,22 @@ uv run python tests/run_permutations.py --data sampledata/sample.csv
 
 It creates YAML configs in `tests/configs/`, runs each backtest, parses the results, and produces a comparison table sorted by profit factor. This is useful for finding optimal indicator combinations for a given strategy.
 
-## Downloading Historical Data
+## Comparing with Live Trades
 
 ```bash
-# Requires MT5 connection via rpyc bridge
-uv run python scripts/download_ohlc.py
-```
+# Run backtest with output CSV
+uv run python -m backtest --config config-gold.yaml \
+    --bars-dir sampledata/XAUUSD_bars_20260413_20260612/ \
+    --balance 11206 --trade-from "2026-06-09 16:49" \
+    --ea-atr-dir sampledata/ea_dumps/ \
+    --trades 0 --output /tmp/bt_trades.csv
 
-This fetches M1 OHLC data from MT5 and saves it to `data/XAUUSD_M1.csv`. The data file is gitignored (large CSVs). A sample file is provided in `sampledata/sample.csv`.
+# Compare indicators against live EA snapshots
+PYTHONPATH=. uv run python scripts/compare_indicators.py
+
+# Compare trades against live trade log
+PYTHONPATH=. uv run python scripts/compare_trades.py /tmp/bt_trades.csv
+```
 
 ## Known Limitations
 
