@@ -128,6 +128,11 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
     result["closed_trail_stop"] = trail_stop
     result["consecutive_bull_bars"] = consec_bull
     result["consecutive_bear_bars"] = consec_bear
+    # Raw closed-bar consecutive counts (without the +1 running-bar
+    # adjustment).  Used by the tick runner to recompute tick-level
+    # consecutive counts using the actual running-bar direction.
+    result["_closed_consec_bull"] = closed_consec_bull
+    result["_closed_consec_bear"] = closed_consec_bear
     result["running_bias"] = bias
     result["running_signal"] = signal
     result["running_atr"] = atr_vals
@@ -977,7 +982,7 @@ def forward_fill_to_m1(
 ) -> pd.DataFrame:
     """Forward-fill higher-TF indicator values to M1 bars.
 
-    Simulates ``closed_*`` fields: an HTF bar's values only become visible
+    Simulates ``closed_*`` fields: an HTF bar's values become visible
     when the bar's last M1 bar finishes.  For an M5 bar starting at 00:00
     the last M1 bar is 00:04, so M1[00:04] is the first bar to see that
     M5 bar's closed values.

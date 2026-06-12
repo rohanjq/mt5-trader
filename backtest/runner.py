@@ -9,6 +9,14 @@ Fill model matches live behaviour:
   Therefore: signal evaluated on bar-close data → fill at that bar's close.
   SL/TP monitoring starts from the NEXT bar.
 
+UTBot HTF boundary fix:
+  At M1 bars that fall on an HTF boundary (e.g. M1 11:04 is the last bar
+  of M5 11:00), the forward-fill shows the just-completed HTF bar as
+  closed.  But the EA evaluates ~1s after bar close, when that HTF bar is
+  still "running".  So for UTBot consecutive bar counts, we use bar i-1's
+  trail_stop and raw consecutive counts at HTF boundaries, matching the
+  EA's view of the last *closed* HTF bar.
+
 Warmup:
   Indicators need N bars before they produce valid values.
   During warmup the runner evaluates rules (so rising-edge state builds up)
@@ -22,6 +30,7 @@ from datetime import datetime
 import pandas as pd
 
 from core.config import Config
+from core.models import Signal, SignalDirection
 from backtest.base_runner import BaseBacktestRunner, compute_warmup
 
 log = logging.getLogger(__name__)
@@ -41,11 +50,13 @@ class BacktestRunner(BaseBacktestRunner):
         trade_from: datetime | None = None,
         native_bars: dict[str, pd.DataFrame] | None = None,
         ea_atr_dir: str | None = None,
+        ticks: pd.DataFrame | None = None,
     ) -> None:
         super().__init__(config, trade_from=trade_from)
         self.df = df_m1
         self.native_bars = native_bars
         self.ea_atr_dir = ea_atr_dir
+        self.ticks = ticks
         self.total_bars = 0
 
     def run(self) -> "Simulator":
@@ -95,6 +106,19 @@ class BacktestRunner(BaseBacktestRunner):
             # Build signal snapshot and evaluate strategies.
             # ALL rules evaluate every bar so rising-edge state stays current.
             signals = self._build_signals(all_indicators, i)
+
+            # UTBot consecutive-bar override: the EA evaluates ~1s after M1
+            # bar close.  At that instant, CopyRates(M5) still shows the
+            # current M5 bar as "running" — the last closed M5 is the
+            # previous one.  Our forward-fill already shows the new M5 bar
+            # as closed at the HTF boundary M1 bar, so the trail_stop and
+            # consecutive counts are off by one HTF bar.
+            #
+            # Fix: always use bar i-1's trail_stop (which at boundary bars
+            # points to the previous HTF bar — matching the EA), and use
+            # the M1 close price as the "current bid" for the direction check.
+            self._override_utbot_consecutive(signals, closes[i], all_indicators, i)
+
             self._try_open_trades(signals, bar_time, closes[i], i, warmup_map)
 
             # Progress logging
@@ -120,3 +144,73 @@ class BacktestRunner(BaseBacktestRunner):
             len(self.simulator.closed_trades), self.simulator.balance,
         )
         return self.simulator
+
+    @staticmethod
+    def _override_utbot_consecutive(
+        signals: dict[str, Signal],
+        bid: float,
+        all_indicators: dict[str, pd.DataFrame],
+        bar_idx: int,
+    ) -> None:
+        """Override UTBot consecutive bar counts using tick-level running direction.
+
+        The EA counts consecutive bars from the running bar backward.  The
+        running bar's direction is determined by ``bid > trail_stop``.
+
+        Critical timing detail: the EA evaluates ~1s after M1 bar close.
+        For M1 bar i that is the LAST bar of an HTF period (e.g. M1 11:04
+        is the last of M5 11:00), the forward-fill at bar i shows the
+        just-closed HTF bar (M5 11:00).  But the EA at 11:04:12 still
+        sees M5 11:00 as the running bar — the last closed M5 is 10:55.
+
+        So for the running-bar direction check, we use bar (i-1)'s
+        trail_stop.  If bar i-1 and bar i show the same HTF bar (mid-period),
+        the trail is the same.  If they differ (boundary), bar i-1 has the
+        previous HTF bar's trail — which is what the EA's running bar
+        would compare against.
+        """
+        prev_idx = max(0, bar_idx - 1)
+        for sig_name, sig in list(signals.items()):
+            if not sig_name.startswith("utbot_"):
+                continue
+            ind_df = all_indicators.get(sig_name)
+            if ind_df is None or bar_idx >= len(ind_df):
+                continue
+
+            # Use bar i-1's trail_stop for the running-bar direction check
+            prev_row = ind_df.iloc[prev_idx]
+            trail_stop = prev_row.get("closed_trail_stop")
+            if trail_stop is None or pd.isna(trail_stop):
+                continue
+
+            # Use bar i-1's raw consecutive counts (from the previous closed HTF bar)
+            raw_bull = prev_row.get("_closed_consec_bull", 0)
+            raw_bear = prev_row.get("_closed_consec_bear", 0)
+            if pd.isna(raw_bull):
+                raw_bull = 0
+            if pd.isna(raw_bear):
+                raw_bear = 0
+            raw_bull = int(raw_bull)
+            raw_bear = int(raw_bear)
+
+            # Running bar direction: EA does close > trail → BULL, else BEAR
+            running_bull = bid > trail_stop
+
+            if running_bull:
+                consec_bull = raw_bull + 1
+                consec_bear = 0
+            else:
+                consec_bull = 0
+                consec_bear = raw_bear + 1
+
+            # Patch metadata
+            md = dict(sig.metadata)
+            md["consecutive_bull_bars"] = str(consec_bull)
+            md["consecutive_bear_bars"] = str(consec_bear)
+            md["running_bias"] = "BULLISH" if running_bull else "BEARISH"
+
+            signals[sig_name] = Signal(
+                source=sig.source,
+                direction=SignalDirection.NEUTRAL,
+                metadata=md,
+            )

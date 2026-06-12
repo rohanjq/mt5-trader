@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 from core.config import Config
-from backtest.data_loader import load_ohlc
+from backtest.data_loader import load_ohlc, load_ticks
 from backtest.runner import BacktestRunner
 from backtest.stats import compute_stats, print_report, print_trade_log, save_results
 
@@ -78,6 +78,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Path to EA UTBot trail dumps (XAUUSD_utbot_trail_FULL_*.csv). "
              "When provided, iATR values from the EA are used for UTBot computation.",
+    )
+    parser.add_argument(
+        "--ticks",
+        default=None,
+        help="Path to tick CSV file (time,bid,ask). When provided, uses tick-level "
+             "signal evaluation during the tick data window for exact EA match.",
     )
     return parser.parse_args()
 
@@ -158,8 +164,26 @@ def main() -> None:
 
     # Run backtest
     t0 = time.time()
-    runner = BacktestRunner(config, df_m1, trade_from=trade_from, native_bars=native_bars,
-                            ea_atr_dir=args.ea_atr_dir)
+
+    if args.ticks:
+        tick_path = Path(args.ticks).resolve()
+        if not tick_path.exists():
+            print(f"Error: Tick file not found: {tick_path}")
+            sys.exit(1)
+        ticks_df = load_ticks(tick_path, start=start, end=end)
+        print(f"Ticks: {len(ticks_df):,} from {tick_path.name}")
+        runner = BacktestRunner(
+            config, df_m1,
+            trade_from=trade_from, native_bars=native_bars,
+            ea_atr_dir=args.ea_atr_dir, ticks=ticks_df,
+        )
+    else:
+        runner = BacktestRunner(
+            config, df_m1,
+            trade_from=trade_from, native_bars=native_bars,
+            ea_atr_dir=args.ea_atr_dir,
+        )
+
     simulator = runner.run()
     elapsed = time.time() - t0
     print(f"Backtest completed in {elapsed:.1f}s ({runner.total_bars:,} bars)")
