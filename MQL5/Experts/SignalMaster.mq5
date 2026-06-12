@@ -196,7 +196,113 @@ void OnDeinit(const int reason)
 }
 
 void OnTick()  { /* computed on timer only */ }
-void OnTimer() { WriteAllSignals(); }
+void OnTimer() { WriteAllSignals(); DumpFullTrailOnce(); }
+
+//+------------------------------------------------------------------+
+//| One-time full-history trail dump (ALL bars, not just LOOKBACK)     |
+//+------------------------------------------------------------------+
+bool g_full_dump_done = false;
+void DumpFullTrailOnce()
+{
+   if(g_full_dump_done) return;
+   g_full_dump_done = true;
+
+   // Dump M2 with ALL available bars
+   int tf_mins[] = {2, 3, 5};
+   for(int t = 0; t < 3; t++)
+   {
+      int tf_min = tf_mins[t];
+      if(!IsNativeTF(tf_min)) continue;
+
+      ENUM_TIMEFRAMES tf = MinToTF(tf_min);
+      int total = Bars(_Symbol, tf);  // ALL available bars
+      if(total < 20) continue;
+
+      double close_arr[], atr_arr[];
+      datetime time_arr[];
+      MqlRates rates[];
+      ArraySetAsSeries(rates, false);
+      ArraySetAsSeries(close_arr, false);
+      ArraySetAsSeries(atr_arr, false);
+      ArraySetAsSeries(time_arr, false);
+
+      if(CopyRates(_Symbol, tf, 0, total, rates) < total) continue;
+
+      // Get ATR from iATR handle — find the matching utbot index
+      int atr_handle = INVALID_HANDLE;
+      double atr_mul = 2.0;
+      for(int i = 0; i < g_utbot_count; i++)
+      {
+         if(g_utbot_tf[i] == tf_min)
+         {
+            atr_handle = g_utbot_atr_handle[i];
+            atr_mul = g_utbot_atr_mult[i];
+            break;
+         }
+      }
+      if(atr_handle == INVALID_HANDLE) continue;
+      if(CopyBuffer(atr_handle, 0, 0, total, atr_arr) < total) continue;
+
+      ArrayResize(close_arr, total);
+      ArrayResize(time_arr, total);
+      for(int i = 0; i < total; i++)
+      {
+         close_arr[i] = rates[i].close;
+         time_arr[i]  = rates[i].time;
+      }
+
+      // Compute trail on ALL bars
+      double trail_stop[], direction[];
+      ArrayResize(trail_stop, total);
+      ArrayResize(direction, total);
+      int atr_per = 10;
+
+      for(int i = 0; i < atr_per && i < total; i++)
+      {
+         trail_stop[i] = close_arr[i];
+         direction[i]  = 1;
+      }
+      for(int i = atr_per; i < total; i++)
+      {
+         double nLoss     = atr_mul * atr_arr[i];
+         double prev_stop = trail_stop[i - 1];
+         double prev_dir  = direction[i - 1];
+
+         if(close_arr[i] > prev_stop)
+         {
+            trail_stop[i] = close_arr[i] - nLoss;
+            if(prev_dir > 0) trail_stop[i] = MathMax(trail_stop[i], prev_stop);
+            direction[i] = 1;
+         }
+         else
+         {
+            trail_stop[i] = close_arr[i] + nLoss;
+            if(prev_dir < 0) trail_stop[i] = MathMin(trail_stop[i], prev_stop);
+            direction[i] = -1;
+         }
+      }
+
+      // Write to file
+      string filename = _Symbol + "_utbot_trail_FULL_M" + IntegerToString(tf_min) + ".csv";
+      int fh = FileOpen(filename, FILE_WRITE | FILE_CSV | FILE_COMMON, ',');
+      if(fh == INVALID_HANDLE) continue;
+
+      FileWrite(fh, "time", "close", "atr", "nloss", "trail_stop", "direction");
+      for(int i = 0; i < total; i++)
+      {
+         string dir_str = (direction[i] > 0) ? "1" : "-1";
+         FileWrite(fh,
+            TimeToString(time_arr[i], TIME_DATE | TIME_MINUTES),
+            DoubleToString(close_arr[i], _Digits),
+            DoubleToString(atr_arr[i], _Digits),
+            DoubleToString(atr_mul * atr_arr[i], _Digits),
+            DoubleToString(trail_stop[i], _Digits),
+            dir_str);
+      }
+      FileClose(fh);
+      Print("DumpFullTrail: wrote ", total, " bars for M", tf_min, " to ", filename);
+   }
+}
 
 //+------------------------------------------------------------------+
 //| Write all indicator signals                                        |
@@ -730,6 +836,40 @@ void WriteUTBotSignal(int idx)
    FileWrite(handle, "cfg_atr_mult",          DoubleToString(atr_mul, 1));
 
    FileClose(handle);
+
+   //--- Diagnostic: dump full trail array for this TF
+   if(tf_min == 2 || tf_min == 5 || tf_min == 3)
+      DumpUTBotTrail(tf_min, time_arr, close_arr, atr_arr, trail_stop, direction, total, atr_mul);
+}
+
+//+------------------------------------------------------------------+
+//| Diagnostic: write full UTBot trail history to CSV                  |
+//| File: <SYMBOL>_utbot_trail_M<tf>.csv in Common/Files              |
+//+------------------------------------------------------------------+
+void DumpUTBotTrail(int tf_min, datetime &time_arr[], double &close_arr[],
+                    double &atr_arr[], double &trail_stop[], double &direction[],
+                    int total, double atr_mul)
+{
+   string filename = _Symbol + "_utbot_trail_M" + IntegerToString(tf_min) + ".csv";
+   int fh = FileOpen(filename, FILE_WRITE | FILE_CSV | FILE_COMMON, ',');
+   if(fh == INVALID_HANDLE) return;
+
+   // Header
+   FileWrite(fh, "time", "close", "atr", "nloss", "trail_stop", "direction");
+
+   for(int i = 0; i < total; i++)
+   {
+      string dir_str = (direction[i] > 0) ? "1" : "-1";
+      FileWrite(fh,
+         TimeToString(time_arr[i], TIME_DATE | TIME_MINUTES),
+         DoubleToString(close_arr[i], _Digits),
+         DoubleToString(atr_arr[i], _Digits),
+         DoubleToString(atr_mul * atr_arr[i], _Digits),
+         DoubleToString(trail_stop[i], _Digits),
+         dir_str);
+   }
+
+   FileClose(fh);
 }
 
 //=====================================================================
