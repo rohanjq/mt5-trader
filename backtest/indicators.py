@@ -112,11 +112,12 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
             closed_consec_bear[i] = closed_consec_bear[i - 1] + 1
             closed_consec_bull[i] = 0
 
-    # The EA counts from the running bar backward, so its count includes the
-    # running bar.  At trade time the running bar almost always continues the
-    # closed bar's direction (it just opened at ~the same price), so
-    # count = closed_count + 1.  Edge cases where the running bar flips
-    # mid-bar are inherent timing differences we accept.
+    # The EA counts from the running bar backward, so its count includes
+    # the running bar.  At bar-close time the running bar almost always
+    # continues the closed bar's direction (it just opened at ~the same
+    # price), so count = closed_count + 1.  The rare mismatches where the
+    # running bar has already flipped at tick time are inherent
+    # tick-vs-bar-close timing differences.
     consec_bull = np.where(closed_consec_bull > 0, closed_consec_bull + 1, 0)
     consec_bear = np.where(closed_consec_bear > 0, closed_consec_bear + 1, 0)
 
