@@ -297,9 +297,9 @@ void DumpFullTrailOnce()
          FileWrite(fh,
             TimeToString(time_arr[i], TIME_DATE | TIME_MINUTES),
             DoubleToString(close_arr[i], _Digits),
-            DoubleToString(atr_arr[i], _Digits),
-            DoubleToString(atr_mul * atr_arr[i], _Digits),
-            DoubleToString(trail_stop[i], _Digits),
+            DoubleToString(atr_arr[i], 10),
+            DoubleToString(atr_mul * atr_arr[i], 10),
+            DoubleToString(trail_stop[i], 10),
             dir_str);
       }
       FileClose(fh);
@@ -866,9 +866,9 @@ void DumpUTBotTrail(int tf_min, datetime &time_arr[], double &close_arr[],
       FileWrite(fh,
          TimeToString(time_arr[i], TIME_DATE | TIME_MINUTES),
          DoubleToString(close_arr[i], _Digits),
-         DoubleToString(atr_arr[i], _Digits),
-         DoubleToString(atr_mul * atr_arr[i], _Digits),
-         DoubleToString(trail_stop[i], _Digits),
+         DoubleToString(atr_arr[i], 10),
+         DoubleToString(atr_mul * atr_arr[i], 10),
+         DoubleToString(trail_stop[i], 10),
          dir_str);
    }
 
