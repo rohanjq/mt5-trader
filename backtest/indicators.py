@@ -976,21 +976,20 @@ def forward_fill_to_m1(
     # For each M1 time find the latest HTF bar whose close_m1 <= m1_time.
     positions = close_m1.searchsorted(m1_idx, side="right") - 1
 
-    # Build result DataFrame
+    # Build result DataFrame — fully vectorized (no Python loop over bars)
     n_htf = len(indicator_df)
-    result = pd.DataFrame(index=range(len(m1_times)))
+    n_m1 = len(m1_times)
+    valid_mask = (positions >= 0) & (positions < n_htf)
+    safe_positions = np.clip(positions, 0, max(n_htf - 1, 0))
+
+    result = pd.DataFrame(index=range(n_m1))
     for col in indicator_df.columns:
         vals = indicator_df[col].values
-        # Determine the default for bars before the first completed HTF bar
-        default = np.nan
-        if len(vals) > 0 and isinstance(vals[0], str):
-            default = ""
-        filled = np.empty(len(positions), dtype=object)
-        for k, pos in enumerate(positions):
-            if 0 <= pos < n_htf:
-                filled[k] = vals[pos]
-            else:
-                filled[k] = default
+        is_str = len(vals) > 0 and isinstance(vals[0], str)
+        if is_str:
+            filled = np.where(valid_mask, vals[safe_positions], "")
+        else:
+            filled = np.where(valid_mask, vals[safe_positions], np.nan)
         result[col] = filled
 
     return result

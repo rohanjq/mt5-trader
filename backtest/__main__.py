@@ -1,7 +1,7 @@
 """CLI entry point for the backtester.
 
 Usage:
-    uv run python -m backtest --config config-gold.yaml --data data/XAUUSD_M1.csv
+    uv run python -m backtest --config config-gold.yaml --bars-dir sampledata/XAUUSD_bars/
 """
 from __future__ import annotations
 
@@ -13,15 +13,14 @@ from datetime import datetime
 from pathlib import Path
 
 from core.config import Config
-from backtest.data_loader import load_ohlc, load_ticks
+from backtest.data_loader import load_ohlc
 from backtest.runner import BacktestRunner
-from backtest.tick_runner import TickBacktestRunner
 from backtest.stats import compute_stats, print_report, print_trade_log, save_results
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="MT5 Signal-Replay Backtester",
+        description="MT5 Signal-Replay Backtester (bar-close mode)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
@@ -30,14 +29,11 @@ def parse_args() -> argparse.Namespace:
         help="Path to YAML config (e.g. config-gold.yaml)",
     )
     parser.add_argument(
-        "--data", "-d",
-        default=None,
-        help="Path to M1 OHLC CSV (bar-by-bar mode)",
-    )
-    parser.add_argument(
-        "--ticks", "-t",
-        default=None,
-        help="Path to tick CSV with bid/ask (tick-by-tick mode)",
+        "--bars-dir",
+        required=True,
+        help="Directory with native MT5 bar CSVs (M1.csv, M5.csv, etc.) "
+             "from download_bars.py.  M1.csv is used as the clock; "
+             "higher TF bars provide exact indicator values.",
     )
     parser.add_argument(
         "--from", dest="start_date",
@@ -52,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output", "-o",
         default=None,
-        help="Path to save JSON results (e.g. output/results.json)",
+        help="Path to save CSV results",
     )
     parser.add_argument(
         "--trades",
@@ -76,13 +72,6 @@ def parse_args() -> argparse.Namespace:
         "--verbose", "-v",
         action="store_true",
         help="Enable debug logging",
-    )
-    parser.add_argument(
-        "--bars-dir",
-        default=None,
-        help="Directory with native MT5 bar CSVs (M1.csv, M5.csv, etc.) "
-             "from download_bars.py.  When provided, uses these instead of "
-             "resampling from M1, ensuring exact parity with live trading.",
     )
     return parser.parse_args()
 
@@ -115,39 +104,37 @@ def main() -> None:
     start = datetime.strptime(args.start_date, "%Y-%m-%d") if args.start_date else None
     end = datetime.strptime(args.end_date, "%Y-%m-%d") if args.end_date else None
 
-    # Determine mode: tick vs bar
-    if not args.data and not args.ticks:
-        print("Error: Provide --data (bar mode) or --ticks (tick mode)")
-        sys.exit(1)
-    if args.data and args.ticks:
-        print("Error: --data and --ticks are mutually exclusive")
+    # Load native MT5 bars
+    bars_dir = Path(args.bars_dir).resolve()
+    if not bars_dir.is_dir():
+        print(f"Error: Bars directory not found: {bars_dir}")
         sys.exit(1)
 
-    tick_mode = args.ticks is not None
+    m1_path = bars_dir / "M1.csv"
+    if not m1_path.exists():
+        print(f"Error: M1.csv not found in {bars_dir}")
+        sys.exit(1)
+
+    df_m1 = load_ohlc(m1_path, start=start, end=end)
+    if len(df_m1) == 0:
+        print("Error: No M1 bars after filtering")
+        sys.exit(1)
+
     symbol = config.get("trading.symbol", "UNKNOWN")
+    print(f"Data: {len(df_m1):,} M1 bars for {symbol}")
+    print(f"Period: {df_m1['time'].iloc[0]} → {df_m1['time'].iloc[-1]}")
 
-    if tick_mode:
-        tick_path = Path(args.ticks).resolve()
-        if not tick_path.exists():
-            print(f"Error: Tick file not found: {tick_path}")
-            sys.exit(1)
-        df_ticks = load_ticks(tick_path, start=start, end=end)
-        if len(df_ticks) == 0:
-            print("Error: No tick rows after filtering")
-            sys.exit(1)
-        print(f"Data: {len(df_ticks):,} ticks for {symbol}")
-        print(f"Period: {df_ticks['time'].iloc[0]} → {df_ticks['time'].iloc[-1]}")
-    else:
-        data_path = Path(args.data).resolve()
-        if not data_path.exists():
-            print(f"Error: Data file not found: {data_path}")
-            sys.exit(1)
-        df = load_ohlc(data_path, start=start, end=end)
-        if len(df) == 0:
-            print("Error: No data rows after filtering")
-            sys.exit(1)
-        print(f"Data: {len(df)} M1 bars for {symbol}")
-        print(f"Period: {df['time'].iloc[0]} → {df['time'].iloc[-1]}")
+    # Load higher-TF native bars
+    native_bars: dict[str, "pd.DataFrame"] = {}
+    for csv_file in sorted(bars_dir.glob("*.csv")):
+        tf_name = csv_file.stem
+        if tf_name == "M1":
+            continue
+        df_tf = load_ohlc(csv_file, start=start, end=end)
+        if len(df_tf) > 0:
+            native_bars[tf_name] = df_tf
+            print(f"  Native {tf_name}: {len(df_tf):,} bars")
+    print(f"Loaded {len(native_bars)} higher timeframes from {bars_dir.name}/")
 
     # Parse trade-from
     trade_from = None
@@ -163,36 +150,12 @@ def main() -> None:
             sys.exit(1)
         print(f"Trading starts from: {trade_from}")
 
-    # Load native MT5 bars if provided
-    native_bars: dict[str, "pd.DataFrame"] | None = None
-    if args.bars_dir:
-        bars_dir = Path(args.bars_dir).resolve()
-        if not bars_dir.is_dir():
-            print(f"Error: Bars directory not found: {bars_dir}")
-            sys.exit(1)
-        native_bars = {}
-        for csv_file in sorted(bars_dir.glob("*.csv")):
-            tf_name = csv_file.stem  # e.g. "M5" from "M5.csv"
-            if tf_name == "M1":
-                continue  # M1 comes from ticks or --data
-            df_tf = load_ohlc(csv_file, start=start, end=end)
-            if len(df_tf) > 0:
-                native_bars[tf_name] = df_tf
-                print(f"  Native {tf_name}: {len(df_tf)} bars")
-        print(f"Loaded native bars for {len(native_bars)} timeframes from {bars_dir.name}/")
-
     # Run backtest
     t0 = time.time()
-    if tick_mode:
-        runner = TickBacktestRunner(
-            config, df_ticks, trade_from=trade_from, native_bars=native_bars,
-        )
-    else:
-        runner = BacktestRunner(config, df, trade_from=trade_from)
+    runner = BacktestRunner(config, df_m1, trade_from=trade_from, native_bars=native_bars)
     simulator = runner.run()
     elapsed = time.time() - t0
-    mode_label = "tick" if tick_mode else "bar"
-    print(f"Backtest completed in {elapsed:.1f}s ({mode_label} mode, {runner.total_ticks if tick_mode else runner.total_bars} {mode_label}s)")
+    print(f"Backtest completed in {elapsed:.1f}s ({runner.total_bars:,} bars)")
 
     # Compute stats and print report
     stats = compute_stats(simulator)

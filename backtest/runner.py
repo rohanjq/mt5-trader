@@ -26,22 +26,30 @@ from backtest.base_runner import BaseBacktestRunner, compute_warmup
 
 log = logging.getLogger(__name__)
 
-# Re-export for backward compat (tick_runner imports it)
+# Re-export for backward compat
 _compute_warmup = compute_warmup
 
 
 class BacktestRunner(BaseBacktestRunner):
     """Orchestrates the entire backtest: indicators → signals → strategies → fills."""
 
-    def __init__(self, config: Config, df_m1: pd.DataFrame, *, trade_from: datetime | None = None) -> None:
+    def __init__(
+        self,
+        config: Config,
+        df_m1: pd.DataFrame,
+        *,
+        trade_from: datetime | None = None,
+        native_bars: dict[str, pd.DataFrame] | None = None,
+    ) -> None:
         super().__init__(config, trade_from=trade_from)
         self.df = df_m1
+        self.native_bars = native_bars
         self.total_bars = 0
 
     def run(self) -> "Simulator":
         """Execute the backtest. Returns the simulator with all results."""
 
-        all_indicators = self._compute_indicators(self.df)
+        all_indicators = self._compute_indicators(self.df, native_bars=self.native_bars)
         if all_indicators is None:
             return self.simulator
         log.info("Indicators computed: %s", list(all_indicators.keys()))
