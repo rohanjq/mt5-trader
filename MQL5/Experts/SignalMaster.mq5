@@ -159,6 +159,9 @@ int OnInit()
    for(int i = 0; i < g_atr_count; i++)
       g_atr_handle[i] = iATR(_Symbol, MinToTF(g_atr_tf[i]), g_atr_period[i]);
 
+   // Create dumps subdirectory for diagnostic trail files
+   FolderCreate("dumps", FILE_COMMON);
+
    EventSetTimer(WriteInterval);
    Print("SignalMaster started: ", _Symbol,
          " | UTBot[", g_utbot_count, "] DC[", g_dc_count, "] LiqGrab[", g_liq_count,
@@ -283,7 +286,7 @@ void DumpFullTrailOnce()
       }
 
       // Write to file
-      string filename = _Symbol + "_utbot_trail_FULL_M" + IntegerToString(tf_min) + ".csv";
+      string filename = "dumps\\" + _Symbol + "_utbot_trail_FULL_M" + IntegerToString(tf_min) + ".csv";
       int fh = FileOpen(filename, FILE_WRITE | FILE_CSV | FILE_COMMON, ',');
       if(fh == INVALID_HANDLE) continue;
 
@@ -844,13 +847,13 @@ void WriteUTBotSignal(int idx)
 
 //+------------------------------------------------------------------+
 //| Diagnostic: write full UTBot trail history to CSV                  |
-//| File: <SYMBOL>_utbot_trail_M<tf>.csv in Common/Files              |
+//| File: dumps/<SYMBOL>_utbot_trail_M<tf>.csv in Common/Files        |
 //+------------------------------------------------------------------+
 void DumpUTBotTrail(int tf_min, datetime &time_arr[], double &close_arr[],
                     double &atr_arr[], double &trail_stop[], double &direction[],
                     int total, double atr_mul)
 {
-   string filename = _Symbol + "_utbot_trail_M" + IntegerToString(tf_min) + ".csv";
+   string filename = "dumps\\" + _Symbol + "_utbot_trail_M" + IntegerToString(tf_min) + ".csv";
    int fh = FileOpen(filename, FILE_WRITE | FILE_CSV | FILE_COMMON, ',');
    if(fh == INVALID_HANDLE) return;
 
