@@ -108,6 +108,7 @@ class BaseBacktestRunner:
         self,
         df_m1: pd.DataFrame,
         native_bars: dict[str, pd.DataFrame] | None = None,
+        ea_atr_dir: str | None = None,
     ) -> dict[str, pd.DataFrame] | None:
         """Compute all indicators.  Returns None if no sources configured."""
         sources = self.config.get("signals.sources", [])
@@ -116,7 +117,8 @@ class BaseBacktestRunner:
             return None
         log.info("Computing indicators for %d sources across %d M1 bars...",
                  len(sources), len(df_m1))
-        return compute_all_indicators(df_m1, sources, native_bars=native_bars)
+        return compute_all_indicators(df_m1, sources, native_bars=native_bars,
+                                       ea_atr_dir=ea_atr_dir)
 
     def _reset_edge_state(self, label: str) -> None:
         """Reset rising-edge state to simulate a live cold-start."""

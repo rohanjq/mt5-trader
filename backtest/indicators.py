@@ -20,61 +20,81 @@ log = logging.getLogger(__name__)
 
 # ── UT Bot ─────────────────────────────────────────────────────────────────────
 
-def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0) -> pd.DataFrame:
+def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0,
+                   lookback: int = 500,
+                   ea_atr: np.ndarray | None = None) -> pd.DataFrame:
     """Compute UT Bot Alert indicator (matches SignalMaster EA exactly).
 
-    The UT Bot uses ATR trailing stop. When close crosses above the trail stop,
-    bias flips to BULLISH and a BUY signal fires (one bar). Vice versa for SELL.
-
-    The trail stop only ratchets (holds previous level) when the previous
-    direction matches the current one.  On a direction *flip* the trail resets
-    to ``close ± nLoss`` without clamping — this matches the EA behaviour and
-    prevents excessive whipsaws near the trail boundary.
+    The EA recomputes the trail from scratch on a sliding window of the last
+    ``lookback`` bars every timer tick.  The iATR values use full broker
+    history, but the trail is initialised fresh (first ``atr_period`` bars
+    set to ``close``, direction BULL) inside the window.  This function
+    replicates that behaviour: ATR is computed over the full dataset,
+    then for each bar the trail is evaluated using the last ``lookback``
+    bars with that bar's full-history ATR values.
 
     Parameters:
         atr_period: ATR period (default 10 to match SignalMaster EA)
         key_value: ATR multiplier for trail stop distance (default 2.0)
+        lookback: Sliding window size (default 500, matching EA's LOOKBACK)
+        ea_atr: Optional pre-computed ATR values (e.g. from EA iATR dump).
+                When provided, these replace the locally-computed ATR.
     """
     close = df["close"].values
-    high = df["high"].values
-    low = df["low"].values
     n = len(close)
 
-    # Compute ATR
-    atr_series = ta.atr(df["high"], df["low"], df["close"], length=atr_period)
-    atr_vals = atr_series.fillna(0).values
+    if ea_atr is not None:
+        atr_vals = ea_atr
+    else:
+        # Compute ATR over ALL data (replicates iATR with full history)
+        atr_series = ta.atr(df["high"], df["low"], df["close"], length=atr_period)
+        atr_vals = atr_series.fillna(0).values
     nloss = key_value * atr_vals
 
-    # Trailing stop + direction (matches EA: direction[i] = +1 bull, -1 bear)
+    # Output arrays
     trail_stop = np.zeros(n)
-    direction = np.ones(n)  # default BULLISH
+    direction = np.ones(n)
 
-    # Initialise first atr_period bars to close / direction +1 (EA convention)
-    for i in range(min(atr_period, n)):
-        trail_stop[i] = close[i]
-        direction[i] = 1.0
+    # For each bar, compute trail using a sliding window of the last
+    # `lookback` bars.  Only the trail at the window's end (= current bar)
+    # is kept.  This is O(n * lookback) but n is small (≤30K HTF bars).
+    for end in range(n):
+        start = max(0, end - lookback + 1)
+        wlen = end - start + 1  # window length
 
-    for i in range(atr_period, n):
-        prev_stop = trail_stop[i - 1]
-        prev_dir = direction[i - 1]
+        # Local trail within the window
+        w_trail = np.empty(wlen)
+        w_dir = np.empty(wlen)
 
-        if close[i] > prev_stop:
-            trail_stop[i] = close[i] - nloss[i]
-            # Ratchet up ONLY if previous direction was already bullish
-            if prev_dir > 0:
-                trail_stop[i] = max(trail_stop[i], prev_stop)
-            direction[i] = 1.0
-        else:
-            trail_stop[i] = close[i] + nloss[i]
-            # Ratchet down ONLY if previous direction was already bearish
-            if prev_dir < 0:
-                trail_stop[i] = min(trail_stop[i], prev_stop)
-            direction[i] = -1.0
+        # Initialise first atr_period bars in window to close / BULL
+        init_len = min(atr_period, wlen)
+        for j in range(init_len):
+            w_trail[j] = close[start + j]
+            w_dir[j] = 1.0
 
-    # Bias: above trail = BULLISH, below = BEARISH
+        # Compute trail for remaining bars in window
+        for j in range(init_len, wlen):
+            gi = start + j  # global index
+            prev = w_trail[j - 1]
+            prev_d = w_dir[j - 1]
+
+            if close[gi] > prev:
+                w_trail[j] = close[gi] - nloss[gi]
+                if prev_d > 0:
+                    w_trail[j] = max(w_trail[j], prev)
+                w_dir[j] = 1.0
+            else:
+                w_trail[j] = close[gi] + nloss[gi]
+                if prev_d < 0:
+                    w_trail[j] = min(w_trail[j], prev)
+                w_dir[j] = -1.0
+
+        trail_stop[end] = w_trail[-1]
+        direction[end] = w_dir[-1]
+
+    # Bias / signal / streak — same as before
     bias = np.where(direction > 0, "BULLISH", "BEARISH")
 
-    # Signal: fires on bias change
     signal = np.full(n, "NONE", dtype=object)
     for i in range(1, n):
         if direction[i] > 0 and direction[i - 1] < 0:
@@ -82,7 +102,6 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
         elif direction[i] < 0 and direction[i - 1] > 0:
             signal[i] = "SELL"
 
-    # Consecutive bars — per-bar closed count
     closed_consec_bull = np.zeros(n, dtype=int)
     closed_consec_bear = np.zeros(n, dtype=int)
     for i in range(1, n):
@@ -93,10 +112,11 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
             closed_consec_bear[i] = closed_consec_bear[i - 1] + 1
             closed_consec_bull[i] = 0
 
-    # The EA counts from the running bar backward, so its count = closed_count + 1
-    # when the running bar continues the same direction.  At bar close the running
-    # bar has just opened at approximately the same price, so it will share the
-    # same direction as the closed bar in nearly all cases.  Add +1 to match.
+    # The EA counts from the running bar backward, so its count includes the
+    # running bar.  At trade time the running bar almost always continues the
+    # closed bar's direction (it just opened at ~the same price), so
+    # count = closed_count + 1.  Edge cases where the running bar flips
+    # mid-bar are inherent timing differences we accept.
     consec_bull = np.where(closed_consec_bull > 0, closed_consec_bull + 1, 0)
     consec_bear = np.where(closed_consec_bear > 0, closed_consec_bear + 1, 0)
 
@@ -107,7 +127,6 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
     result["closed_trail_stop"] = trail_stop
     result["consecutive_bull_bars"] = consec_bull
     result["consecutive_bear_bars"] = consec_bear
-    # running_* = same as closed_* in backtest (we only see closed bars)
     result["running_bias"] = bias
     result["running_signal"] = signal
     result["running_atr"] = atr_vals
@@ -1001,6 +1020,7 @@ def compute_all_indicators(
     df_m1: pd.DataFrame,
     sources: list[dict],
     native_bars: dict[str, pd.DataFrame] | None = None,
+    ea_atr_dir: str | None = None,
 ) -> dict[str, pd.DataFrame]:
     """Compute all indicators for all timeframes as specified in config.
 
@@ -1010,6 +1030,10 @@ def compute_all_indicators(
         native_bars: Optional dict mapping TF name (e.g. "M5") to native OHLC DataFrame
                      downloaded directly from MT5.  When provided, these are used instead
                      of resampling from M1, ensuring exact parity with live trading.
+        ea_atr_dir: Optional path to directory containing EA UTBot trail dumps
+                    (XAUUSD_utbot_trail_FULL_M2.csv etc.).  When provided, the ATR
+                    values from iATR (full broker history) are used for UTBot
+                    computation instead of locally-computed ATR.
 
     Returns:
         Dict mapping signal name (e.g. "utbot_M1") to DataFrame of indicator fields,
@@ -1018,6 +1042,30 @@ def compute_all_indicators(
     signals: dict[str, pd.DataFrame] = {}
     if native_bars is None:
         native_bars = {}
+
+    # Load EA ATR dump values if provided
+    ea_atr_cache: dict[str, dict] = {}  # tf → {time: atr_value}
+    if ea_atr_dir:
+        import os
+        for fname in os.listdir(ea_atr_dir):
+            if not fname.startswith("XAUUSD_utbot_trail_FULL_") or not fname.endswith(".csv"):
+                continue
+            tf_name = fname.replace("XAUUSD_utbot_trail_FULL_", "").replace(".csv", "")
+            fpath = os.path.join(ea_atr_dir, fname)
+            for enc in ("utf-8-sig", "utf-16", "latin-1"):
+                try:
+                    dump = pd.read_csv(fpath, encoding=enc)
+                    if "time" in dump.columns:
+                        break
+                except Exception:
+                    continue
+            else:
+                continue
+            dump["time_dt"] = pd.to_datetime(dump["time"], format="%Y.%m.%d %H:%M")
+            dump["atr_num"] = pd.to_numeric(dump["atr"], errors="coerce")
+            valid = dump[dump["atr_num"].notna() & (dump["atr_num"] > 0) & (dump["atr_num"] < 1e6)]
+            ea_atr_cache[tf_name] = dict(zip(valid["time_dt"], valid["atr_num"]))
+            log.info("Loaded EA ATR for %s: %d values", tf_name, len(ea_atr_cache[tf_name]))
 
     # Precompute resampled DataFrames for each unique timeframe
     timeframes_needed: set[str] = set()
@@ -1046,7 +1094,22 @@ def compute_all_indicators(
             log.info("Computing %s (%d bars)", name, len(df_tf))
 
             if indicator == "utbot":
-                ind_df = compute_utbot(df_tf)
+                # Use EA ATR values if available for this timeframe
+                ea_atr_arr = None
+                if tf in ea_atr_cache:
+                    bar_times = pd.to_datetime(df_tf["time"])
+                    ea_atr_arr = np.array([ea_atr_cache[tf].get(t, np.nan) for t in bar_times])
+                    matched = np.count_nonzero(~np.isnan(ea_atr_arr))
+                    log.info("EA ATR matched %d/%d bars for %s", matched, len(df_tf), name)
+                    if matched < len(df_tf) * 0.5:
+                        log.warning("EA ATR coverage too low for %s (%d/%d), falling back to local ATR",
+                                    name, matched, len(df_tf))
+                        ea_atr_arr = None
+                    else:
+                        # Forward-fill unmatched bars, then backfill any leading NaNs
+                        ea_atr_series = pd.Series(ea_atr_arr).ffill().bfill()
+                        ea_atr_arr = ea_atr_series.values
+                ind_df = compute_utbot(df_tf, ea_atr=ea_atr_arr)
             elif indicator == "dc":
                 ind_df = compute_dc(df_tf)
             elif indicator.startswith("ema"):

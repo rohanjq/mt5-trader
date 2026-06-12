@@ -40,16 +40,19 @@ class BacktestRunner(BaseBacktestRunner):
         *,
         trade_from: datetime | None = None,
         native_bars: dict[str, pd.DataFrame] | None = None,
+        ea_atr_dir: str | None = None,
     ) -> None:
         super().__init__(config, trade_from=trade_from)
         self.df = df_m1
         self.native_bars = native_bars
+        self.ea_atr_dir = ea_atr_dir
         self.total_bars = 0
 
     def run(self) -> "Simulator":
         """Execute the backtest. Returns the simulator with all results."""
 
-        all_indicators = self._compute_indicators(self.df, native_bars=self.native_bars)
+        all_indicators = self._compute_indicators(self.df, native_bars=self.native_bars,
+                                                   ea_atr_dir=self.ea_atr_dir)
         if all_indicators is None:
             return self.simulator
         log.info("Indicators computed: %s", list(all_indicators.keys()))

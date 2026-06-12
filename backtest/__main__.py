@@ -73,6 +73,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable debug logging",
     )
+    parser.add_argument(
+        "--ea-atr-dir",
+        default=None,
+        help="Path to EA UTBot trail dumps (XAUUSD_utbot_trail_FULL_*.csv). "
+             "When provided, iATR values from the EA are used for UTBot computation.",
+    )
     return parser.parse_args()
 
 
@@ -152,7 +158,8 @@ def main() -> None:
 
     # Run backtest
     t0 = time.time()
-    runner = BacktestRunner(config, df_m1, trade_from=trade_from, native_bars=native_bars)
+    runner = BacktestRunner(config, df_m1, trade_from=trade_from, native_bars=native_bars,
+                            ea_atr_dir=args.ea_atr_dir)
     simulator = runner.run()
     elapsed = time.time() - t0
     print(f"Backtest completed in {elapsed:.1f}s ({runner.total_bars:,} bars)")

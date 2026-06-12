@@ -57,12 +57,50 @@ def get_tf_bars(tf_str):
         return load_ohlc(native_path)
     return resample_ohlc(df_m1, tf_str)
 
+# ── Load EA ATR dumps if available ───────────────────────────────────────
+import os
+
+EA_ATR_DIR = "sampledata/ea_dumps"
+ea_atr_cache: dict[str, dict] = {}
+
+for fname in sorted(os.listdir(EA_ATR_DIR)) if os.path.isdir(EA_ATR_DIR) else []:
+    if not fname.startswith("XAUUSD_utbot_trail_FULL_") or not fname.endswith(".csv"):
+        continue
+    tf_name = fname.replace("XAUUSD_utbot_trail_FULL_", "").replace(".csv", "")
+    fpath = os.path.join(EA_ATR_DIR, fname)
+    for enc in ("utf-8-sig", "utf-16", "latin-1"):
+        try:
+            dump = pd.read_csv(fpath, encoding=enc)
+            if "time" in dump.columns:
+                break
+        except Exception:
+            continue
+    else:
+        continue
+    dump["time_dt"] = pd.to_datetime(dump["time"], format="%Y.%m.%d %H:%M")
+    dump["atr_num"] = pd.to_numeric(dump["atr"], errors="coerce")
+    valid = dump[dump["atr_num"].notna() & (dump["atr_num"] > 0) & (dump["atr_num"] < 1e6)]
+    ea_atr_cache[tf_name] = dict(zip(valid["time_dt"], valid["atr_num"]))
+    print(f"  Loaded EA ATR for {tf_name}: {len(ea_atr_cache[tf_name])} values")
+
 # Compute indicators for each TF we need
 indicators = {}
 
 for tf_str, freq in TF_MAP.items():
     df_htf = get_tf_bars(tf_str)
-    utbot = compute_utbot(df_htf)
+    # Use EA ATR if available for this timeframe
+    ea_atr_arr = None
+    if tf_str in ea_atr_cache:
+        bar_times = pd.to_datetime(df_htf["time"])
+        ea_atr_arr = np.array([ea_atr_cache[tf_str].get(t, np.nan) for t in bar_times])
+        matched = np.count_nonzero(~np.isnan(ea_atr_arr))
+        print(f"  EA ATR matched {matched}/{len(df_htf)} bars for utbot_{tf_str}")
+        if matched < len(df_htf) * 0.5:
+            print(f"  WARNING: coverage too low, falling back to local ATR")
+            ea_atr_arr = None
+        else:
+            ea_atr_arr = pd.Series(ea_atr_arr).ffill().bfill().values
+    utbot = compute_utbot(df_htf, ea_atr=ea_atr_arr)
     utbot_ff = forward_fill_to_m1(utbot, df_htf["time"].values, m1_times, freq=freq)
     for col in utbot.columns:
         indicators[f"utbot_{tf_str}.{col}"] = utbot_ff[col].values
