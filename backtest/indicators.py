@@ -93,25 +93,12 @@ def compute_utbot(df: pd.DataFrame, atr_period: int = 10, key_value: float = 2.0
             closed_consec_bear[i] = closed_consec_bear[i - 1] + 1
             closed_consec_bull[i] = 0
 
-    # EA counts from the *running* bar backward, so when bar[i] is the
-    # closed bar the consecutive count includes the running bar[i+1].
-    # Simulate: if bar[i+1] continues the streak, add 1.
-    consec_bull = closed_consec_bull.copy()
-    consec_bear = closed_consec_bear.copy()
-    for i in range(n - 1):
-        if direction[i] > 0 and direction[i + 1] > 0:
-            consec_bull[i] = closed_consec_bull[i] + 1
-        elif direction[i] < 0 and direction[i + 1] < 0:
-            consec_bear[i] = closed_consec_bear[i] + 1
-        elif direction[i + 1] > 0:
-            # running bar flipped to bull — EA count = 1 bull, 0 bear
-            consec_bull[i] = 1
-            consec_bear[i] = 0
-        else:
-            # running bar flipped to bear — EA count = 0 bull, 1 bear
-            consec_bull[i] = 0
-            consec_bear[i] = 1
-    # Last bar: no next bar, keep closed count (best we can do)
+    # The EA counts from the running bar backward, so its count = closed_count + 1
+    # when the running bar continues the same direction.  At bar close the running
+    # bar has just opened at approximately the same price, so it will share the
+    # same direction as the closed bar in nearly all cases.  Add +1 to match.
+    consec_bull = np.where(closed_consec_bull > 0, closed_consec_bull + 1, 0)
+    consec_bear = np.where(closed_consec_bear > 0, closed_consec_bear + 1, 0)
 
     result = pd.DataFrame(index=df.index)
     result["closed_bias"] = bias

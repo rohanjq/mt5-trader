@@ -41,18 +41,27 @@ with open(LOG_PATH) as f:
 print(f"Parsed {len(live_trades)} live trade triggers\n")
 
 # ── Compute indicators ──────────────────────────────────────────────────
-df_m1 = load_ohlc("sampledata/XAUUSD_M1_combined.csv")
+BARS_DIR = "sampledata/XAUUSD_bars_20260413_20260612"
+df_m1 = load_ohlc(f"{BARS_DIR}/M1.csv")
 m1_times = df_m1["time"].values
 
 # TF map for forward-fill
 TF_MAP = {"M2": "2min", "M3": "3min", "M5": "5min", "M10": "10min",
            "M15": "15min", "M30": "30min", "M45": "45min", "H1": "60min"}
 
+# Load native bars where available, else resample
+def get_tf_bars(tf_str):
+    import os
+    native_path = f"{BARS_DIR}/{tf_str}.csv"
+    if os.path.exists(native_path):
+        return load_ohlc(native_path)
+    return resample_ohlc(df_m1, tf_str)
+
 # Compute indicators for each TF we need
 indicators = {}
 
 for tf_str, freq in TF_MAP.items():
-    df_htf = resample_ohlc(df_m1, tf_str)
+    df_htf = get_tf_bars(tf_str)
     utbot = compute_utbot(df_htf)
     utbot_ff = forward_fill_to_m1(utbot, df_htf["time"].values, m1_times, freq=freq)
     for col in utbot.columns:
@@ -60,7 +69,7 @@ for tf_str, freq in TF_MAP.items():
 
 # EMA
 for tf_str in ["M5"]:
-    df_htf = resample_ohlc(df_m1, tf_str)
+    df_htf = get_tf_bars(tf_str)
     for period in [50]:
         ema = compute_ema(df_htf, period)
         freq_s = TF_MAP[tf_str]
@@ -75,7 +84,7 @@ for col in vwap.columns:
 
 # DC
 for tf_str in ["M5", "M15"]:
-    df_htf = resample_ohlc(df_m1, tf_str)
+    df_htf = get_tf_bars(tf_str)
     dc = compute_dc(df_htf)
     freq_s = TF_MAP[tf_str]
     dc_ff = forward_fill_to_m1(dc, df_htf["time"].values, m1_times, freq=freq_s)
@@ -84,7 +93,7 @@ for tf_str in ["M5", "M15"]:
 
 # Candle
 for tf_str in ["M3", "M5"]:
-    df_htf = resample_ohlc(df_m1, tf_str)
+    df_htf = get_tf_bars(tf_str)
     candle = compute_candle(df_htf)
     freq_s = TF_MAP[tf_str]
     candle_ff = forward_fill_to_m1(candle, df_htf["time"].values, m1_times, freq=freq_s)
